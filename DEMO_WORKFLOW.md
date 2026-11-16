@@ -1,6 +1,12 @@
 # Demo Workflow
 
-Status: balance lookup is the agreed initial workflow. A preferred-email update is proposed as a second capability in the same app. Implementation is still pending.
+Status: the target is a fictional credit-union staff servicing console. Balance lookup is the agreed assessment baseline; preferred-email maintenance remains planned follow-on work. INT-001 supplies app shells only; the portal screens and workflows below are not implemented yet.
+
+## Target purpose and assessment fit
+
+Build **Demo Credit Union — Staff Services**, a fictional internal back-office console used by a staff operator to find members, inspect accounts, and maintain contact details. Use coherent staff context, connected member/account records, and realistic runtime states. The automation operator console remains a separate application; SDK status and automation task cards belong there rather than in the target's normal staff workflow.
+
+Assignment sections 1, 3.1, 3.3, and 4 motivate a non-trivial live UI with stable screens, runtime exceptions, and credible legacy-surface constraints. The specific screens, labels, synthetic fields, and layout below are our chosen simulation, not additional assignment mandates or a reproduction of a real vendor product.
 
 ## Capability 1: primary savings balance lookup
 
@@ -36,39 +42,54 @@ A member has at most one designated primary savings account in the baseline fixt
 
 ## Happy path
 
-1. Start in the member-search view and enter the invocation's member ID.
+1. Start in the staff workspace, open Member Search, and enter the invocation's member ID.
 2. Submit the search and wait for a result associated with that ID.
-3. Open the matching member and verify the displayed member ID.
-4. Open the member's accounts view, which lists checking and savings accounts.
+3. Open the matching result; verify the member ID in the overview and persistent active-member context.
+4. Open Account Inquiry for the active member; identify the designated primary savings row among checking and savings accounts.
 5. Open the row designated as primary savings.
-6. On the account-detail view, verify member ID, account ID/type, and primary designation; extract the displayed current balance and currency.
+6. On Account Details, verify member ID, account ID/type, primary designation, and account status; read the explicitly labeled Current Balance and currency, without confusing it with Available Balance.
 7. Return typed outputs only after the identity checks and output validation pass.
 
 Multiple account rows can each contain an Open button. Replay must scope the control to the correct row rather than use row order. Both member and account identifiers are extracted from the UI; copying invocation inputs into the output is not proof that the correct record was opened.
 
-A fresh browser session can enter an already initialized synthetic staff workspace. Real sign-in, money movement, and account creation are outside this workflow. The separate policy demonstration can attempt a disallowed action/domain through the execution boundary; the demo app does not need a transfer feature just to prove blocking.
+A fresh browser session enters a synthetic staff session with a fictional operator identifier, branch context, and role. Session-expiry scenarios interrupt that same workspace and provide a supported manual restoration path. Real credentials, production identity management, money movement, and account creation remain outside scope. A disallowed action/domain can be tested at the execution boundary without building a transfer feature.
 
-## Small target application
+## Portal screens and transitions
 
-Use four initial conceptual areas: member search/results, member profile, account list, and account details. The proposed second capability adds a contact editor and a review/confirmation view from the same member profile. They may share layouts/routes; these are behavior boundaries rather than a requirement for separate frontend components.
+| Screen | Staff-visible content and controls | Transition / verification |
+| --- | --- | --- |
+| **Staff workspace** | Fictional institution header, operator/branch/role context, session status, navigation, and an active-member area initially empty. | Member Search is usable; member-specific inquiry/maintenance requires an active member. |
+| **Member Search** | Member ID field, Search/Clear controls, results table with member ID, synthetic name, membership status, and Open control; loading, validation, and no-match states. | Search results identify the submitted ID; Open establishes the selected member context. |
+| **Member Overview** | Persistent member ID/name/status, concise account summary, a servicing notice area, and Account Inquiry navigation. Contact Maintenance is added with the write workflow. | Overview and active-member header agree. Starting another search clears the old context before new results can be selected. |
+| **Account Inquiry** | Table of account ID, product/type, primary designation, status, Current Balance, Available Balance, currency, and repeated Open controls. | Select the primary savings row by observed identity/attributes, not by position. |
+| **Account Details** | Member ID, account ID/type/status, primary designation, separately labeled Current Balance and Available Balance, currency, and Back to Accounts. | Detail identity matches the selected member/account; only validated Current Balance feeds the baseline output. |
+| **Contact Maintenance** *(follow-on)* | Existing preferred email, editable new value, field validation, Review and Cancel; review shows member plus before/after values, followed by Save/Cancel and a change reference. | Verify member/value before human Save; reopen the record to verify the persisted change. |
 
-Build the target frontend with React + Vite and Mantine components, as recorded in STACK.md. Preserve user-visible labels and semantic controls, and avoid locators based on generated library IDs/classes.
+Use this baseline path: **Staff workspace → Member Search → Member Overview → Account Inquiry → Account Details**. Back navigation preserves the current member where appropriate. Clear/new search removes it so stale account details cannot be mistaken for a new member's results. Menu entries must lead to implemented screens; defer unrelated modules rather than populate a large inert menu.
 
-Include one framed workspace and a table-based account list to exercise legacy-style scope and repeated controls. Provide ordinary visible labels and meaningful record data, without automation-specific test IDs or dependence on generated DOM IDs. The model discovers the flow through the live UI; automation does not call the target's business endpoints or read its fixtures to obtain results.
+## Portal layout and automation surface
 
-Keep the target's synthetic member/account records separate from the automation database. Fixture seeding, reset, and scenario injection are demo/test setup operations, not actions available to discovery/replay as business-data shortcuts.
+Build with React + Vite and Mantine, using compact forms, dense account tables, consistent navigation, and persistent member/session context. The target should read as a staff work tool. Loading indicators, errors, and notices appear where staff encounter them in the workflow. Keep developer diagnostics and scenario setup outside the normal target screen.
+
+Use an outer staff shell and an actual framed member-servicing workspace. Put search/overview/account content inside the frame and make the frame boundary discoverable through observed UI structure. An iframe placed around otherwise unrelated content is not sufficient: the demonstrated flow must traverse the workspace and its repeated row controls.
+
+Keep stable layout and user-facing terminology across baseline runs. Provide visible labels, headings, table headers, and meaningful identifiers. Test IDs, Mantine-generated IDs/classes, absolute DOM positions, and the automation's fixture knowledge must not be required for targeting. The frame/table structure supplies realistic scoping problems without making the app randomly hostile or intentionally inaccessible.
+
+The portal is distinct from the automation operator UI. Claim/Resume and capability/run status live in the operator application; staff member/account controls live in the target. A human takeover operates this same target session, preserving the selected member and current screen.
+
+Keep synthetic member/account data in the target's own backend/database. The React app may call its internal application endpoints; discovery and replay operate its UI and cannot call those endpoints or read its database/fixtures to obtain business results. Fixture seeding/reset and scenario injection are separate setup operations.
 
 ## Fixtures and business outcomes
 
 | Member input | Target state | Expected caller result |
 | --- | --- | --- |
-| `M1001` | Checking plus primary savings `S2001`, current balance USD 1,250.34 | Success with `currentBalanceMinor: 125034`. Used for live discovery. |
-| `M1002` | Differently ordered accounts; primary savings `S2002`, current balance USD 87.65 | Same artifact succeeds with `currentBalanceMinor: 8765`. Used to prove reuse. |
+| `M1001` | Checking plus primary savings `S2001`, current balance USD 1,250.34, available balance USD 1,200.34 | Success with `currentBalanceMinor: 125034`. Used for live discovery. |
+| `M1002` | Differently ordered accounts; primary savings `S2002`, current balance USD 87.65, available balance USD 76.00 | Same artifact succeeds with `currentBalanceMinor: 8765`. Used to prove reuse. |
 | `M1003` | Member exists with no primary savings account | Declared `NO_PRIMARY_SAVINGS_ACCOUNT` business outcome. |
 | `M1004` | Explicit account-access denial in the UI | Declared `ACCESS_DENIED` business outcome. |
 | `M9999` | Explicit no matching member response for the submitted ID | Declared `MEMBER_NOT_FOUND` business outcome. |
 
-Use clearly synthetic names such as Test Member A; omit unnecessary addresses, dates of birth, and contact information. The proposed email-update capability adds only synthetic contact values such as member-a@example.test, with no email delivery or connection to real accounts. Outcome detection must use the explicit current UI response. Failure to find a search box or load a frame is an automation failure, not `MEMBER_NOT_FOUND`.
+Include membership/account status and fictional staff/branch identifiers as contextual data. Use clearly synthetic names such as Test Member A; omit unnecessary addresses, dates of birth, and contact information. The proposed email-update capability adds only synthetic contact values such as member-a@example.test, with no email delivery or connection to real accounts. Outcome detection must use the explicit current UI response. Failure to find a search box or load a frame is an automation failure, not `MEMBER_NOT_FOUND`.
 
 ## Reproducible exceptional scenarios
 
@@ -76,17 +97,26 @@ Apply scenario flags during test/demo setup, independently of invocation inputs.
 
 | Scenario | UI behavior | Automation behavior to prove |
 | --- | --- | --- |
-| Slow response | Search/details remain loading for a controlled interval. | Wait within the deadline; no duplicate search/click. |
-| Known interstitial | A specifically identified maintenance notice has an allowed dismissal action. | Execute its declared recovery and verify the expected next state. |
-| Unexpected modal | A previously unhandled informational dialog blocks entry to account details. | Pause, request help, and let an operator dismiss it in the same session. Verify state before resuming. |
-| Synthetic session expiry | A mock staff-session-expired screen appears. | Pause for permitted manual restoration in that session; do not store credentials. Distinguish this from a destroyed browser. |
-| Failed load | A details transition produces an explicit error or never completes. | Bounded recovery/wait followed by a clear failure and sanitized richer evidence. |
-| Invalid UI input | The target displays a validation error, exercised with a structurally valid invocation. | Recognize declared rejection or return a clear UI validation failure. Malformed invocation types are rejected before execution. |
-| Duplicate/wrong record | A duplicate target or mismatched details identity is injected. | Stop without an arbitrary click or false success. |
+| Slow response | Member Search or Account Inquiry shows a loading state; completion belongs to the submitted member ID. | Bounded wait; no duplicate search/click and no stale-result success. |
+| Known interstitial | A specifically identified servicing notice blocks navigation with a permitted acknowledgment control. | Apply only the declared dismissal/recovery rule and verify the next state. |
+| Unexpected modal | An unhandled servicing dialog blocks opening account details. | Request intervention; a human acts on the actual dialog in the same session, followed by validated hand-back. |
+| Synthetic staff-session expiry | Workspace shows an expired-session screen while the browser stays live; provide a permitted manual restoration control for the synthetic operator. | Restore through UI, preserve the run/session, and revalidate member/account context before continuing. |
+| Failed load | Account Inquiry/details shows an explicit service error or remains loading beyond the configured deadline. | Clear bounded failure/recovery with step context and safe richer evidence. |
+| UI validation | Invalid member search shows a field error; the later contact editor rejects an invalid synthetic email without saving. | Distinguish target validation from invocation-schema rejection and prevent blind resubmission. |
+| Member not found | Search explicitly reports no matching member for the submitted ID. | Return MEMBER_NOT_FOUND; do not confuse an unloaded/missing control with this business outcome. |
+| Permission denied | Member selection is valid, but Account Inquiry displays an explicit access-denied state for the staff role/member scenario. | Declared ACCESS_DENIED outcome; no credential/privilege workaround. |
+| No primary savings | Account Inquiry loads valid accounts but explicitly shows no designated primary savings account. | Declared NO_PRIMARY_SAVINGS_ACCOUNT outcome after checking the correct member. |
+| Duplicate/wrong record | Duplicate eligible account controls, inconsistent active-member identity, or mismatched detail data is injected. | No arbitrary row selection or false success; surface ambiguity/verification failure. |
 
 The unexpected modal's manual dismissal is an ordinary permitted UI action. It is not an approval granting permission to move money or override policy. Record the real manual action and resume checkpoint; a simulated run-status change alone is insufficient.
 
 The implementation can stage these scenarios, with happy path, changed-input replay, not-found, one bounded recovery/failure, and real modal takeover first. Remaining applicable conditions still need coverage before the acceptance checklist is declared complete.
+
+## Portal completion checks
+
+INT-006 supplies the staff shell, connected balance screens, baseline fixture-backed transitions, and ordinary loading/empty/validation states. INT-012 adds controlled exception injection and restoration behaviors; INT-013–INT-016 verify automation responses. Contact Maintenance belongs to INT-018 and does not gate the balance baseline.
+
+A generic single search card or a page containing expected test outputs is not a completed portal. Before calling INT-006 complete, a person must navigate the full staff workflow for both baseline members, see their consistent member/account context, distinguish current from available balances, and return/search again without stale data. INT-001 remains a completed scaffold task and supplies no proof that these portal checks pass.
 
 ## First end-to-end demonstration
 
@@ -154,7 +184,7 @@ Share application screens and executor/targeting primitives. Separate saved capa
 ## Decisions for review
 
 - Balance lookup is the initial demo; confirm preferred-email update as the second capability and human Save as its default commit treatment.
-- Confirm the proposed synthetic primary-savings convention and output contract.
+- Verify the synthetic primary-savings convention, member/account context, and Current Balance extraction against the portal screens.
 - Set concrete time limits, compatible dependency versions, and hosted-browser connectivity during implementation planning; the primary stack is recorded in STACK.md.
 
 The existing design examples remain illustrative. Implementation planning should replace them with the balance capability and then the separate write capability, while keeping their respective guarantees explicit.

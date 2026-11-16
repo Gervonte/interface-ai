@@ -1,6 +1,6 @@
 # Stack and Delegation Decisions
 
-Status: TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase-first delivery are agreed. The product mapping below is the implementation direction, subject to a small compatibility spike. No dependencies, accounts, credentials, paid sessions, or infrastructure have been created by this document.
+Status: TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase-first delivery are agreed. The product mapping below is the implementation direction, subject to a small compatibility spike. INT-001 has installed the pinned workspace dependencies and implemented local app shells. Browserbase account/credential setup, paid sessions, PostgreSQL infrastructure, and live SDK compatibility verification remain later tasks.
 
 ## Selected direction
 
@@ -93,7 +93,7 @@ The spike decides the smallest adapter we need, not whether to relax the assignm
 
 TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase delegation are selected. The following remain proposals or open choices:
 
-- Serializable capability input/output schema validation, database access/migrations, workspace tooling, and test runner.
+- Serializable capability input/output schema validation and database access/migrations. Workspace tooling is pnpm 10.32.1 with exact dependency catalogs; Vitest is the selected test runner (INT-001).
 - Specific discovery model, SDK/package versions, and deployment/connectivity for the hosted browser to reach the demo target.
 
 Settle these with the chosen runtime/SDK constraints. The primary stack is selected; exact versions, supporting libraries, and hosting remain implementation choices.
