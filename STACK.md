@@ -1,0 +1,99 @@
+# Stack and Delegation Decisions
+
+Status: TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase-first delivery are agreed. The product mapping below is the implementation direction, subject to a small compatibility spike. No dependencies, accounts, credentials, paid sessions, or infrastructure have been created by this document.
+
+## Selected direction
+
+- **Language:** TypeScript for all custom application code. Node.js for the backend/runtime. No Python component.
+- **HTTP API:** Express, with TypeScript route handlers and explicit validation/error-handling middleware.
+- **Runtime validation:** Zod for application-owned request, response, configuration, and artifact-envelope contracts.
+- **Frontend:** React + TypeScript with Vite for the demo application and operator UI.
+- **Component library:** Mantine for layouts, inputs, buttons, tables, dialogs, and status displays.
+- **Database:** PostgreSQL. Prefer the database the user already knows; retain the initial single-coordinator/single-active-run design.
+- **Browser platform:** Browserbase-hosted sessions.
+- **Browser/AI SDK:** Stagehand TypeScript, using its current v4 interface as the documentation baseline. Pin and verify exact compatible package/runtime versions during setup.
+- **Discovery inference:** Browserbase Model Gateway through Stagehand. Specific model remains to be selected and recorded for genuine discovery evidence.
+- **Custom TypeScript:** only the application contracts, coordination, checks, persistence, UI, and behavior that the delegated products do not satisfy.
+
+## Express and Zod integration
+
+Express provides the HTTP routing/middleware layer around our coordinator. Zod validates incoming bodies, parameters, and supported command/action shapes before application logic executes. Define shared contracts and derive TypeScript types from them where practical; TypeScript annotations alone do not validate runtime input.
+
+Map validation failures into the existing API error contract: malformed request shape returns `400`; well-formed invocation values that fail a capability's declared input contract return `422`. Use centralized error handling and safe response construction so raw bodies or value-bearing validation errors do not leak into logs or responses. Express route handlers invoke the coordinator; long UI workflows run outside the request lifecycle.
+
+Saved artifacts remain serializable data. Do not store Zod functions in the artifact or assume that parsing an artifact's envelope also validates values against its embedded input/output schemas. The constrained serializable schema representation and its runtime validation adapter still need to be chosen; no arbitrary evaluation of uploaded schema/code is permitted.
+
+## React, Vite, and Mantine UI
+
+Use React + Vite and Mantine in both frontends. Start with `@mantine/core` and `@mantine/hooks`; add `@mantine/form` if needed for the search/contact and run-submission forms. Follow the compatible Vite/PostCSS setup, import installed package styles, and initialize `MantineProvider` at each application root. Pin compatible versions during setup. See [Mantine's Vite guide](https://mantine.dev/guides/vite/) and [form documentation](https://mantine.dev/form/use-form/).
+
+Share a small theme where useful while keeping the target app and automation UI separate applications. The target presents member/account/contact workflows; the operator UI presents run status, evidence, and takeover controls. Component reuse must not expose target fixture state or business database access to the automation.
+
+Preserve normal user-visible labels, semantic tables, dialog names, and keyboard behavior. Do not build locators around Mantine-generated IDs/classes or internal markup. The planned framed workspace, repeated row controls, exceptional states, and identity checks still exercise the automation; library choice does not establish selector robustness or accessibility by itself.
+
+Zod remains the server-side contract validator. Frontend form validation improves feedback but does not replace server validation. UI schemas, where shared, must contain only public contract information.
+
+## PostgreSQL storage boundary
+
+Use PostgreSQL for the automation records: capabilities, runs, interventions, events, and request receipts. Keep the demo application's synthetic members, accounts, and contact changes in a separate database with a separate application role. Both databases can share one PostgreSQL instance for development.
+
+Only the demo app receives its business-data connection credentials; the automation process receives access to its own records and operates the demo through the UI. A test/setup tool can seed/reset target fixtures, but that credential/path is not exposed to discovery or replay. This preserves a realistic application boundary while keeping local setup small.
+
+Use migrations and parameterized database access. Driver/query-builder or ORM, PostgreSQL version, local versus hosted setup, and connection management remain implementation choices. Selecting PostgreSQL does not change the single-active-run scope or solve browser side-effect uncertainty.
+
+## Responsibility split
+
+| Concern | Delegate | Our TypeScript responsibility |
+| --- | --- | --- |
+| Browser provisioning/lifetime | Browserbase Sessions | Store provider reference; configure limits; reconcile session loss/cleanup. |
+| AI interpretation of the current UI | Stagehand discovery primitives | Supply the goal/context, bound the loop, inspect proposals, enforce policy before mutation. |
+| Model access | Browserbase Model Gateway | Choose/pin configuration and capture safe usage/evidence. |
+| UI action execution | Stagehand supported deterministic methods | Bind typed inputs, resolve/verify targets, check ownership, record actions/results. |
+| Live session visibility | Browserbase Live View and supported SDK observations | Authorize operator access; provide mediated control where provider interaction does not meet ownership/action-capture rules. |
+| Recordings and browser diagnostics | Browserbase where enabled and appropriate for synthetic data | Correlate, sanitize/export required evidence; retain structured application decisions/results. |
+| Saved capability | Provider action descriptors as construction inputs | Own versioned artifact, parameterization, checkpoints, outputs, outcomes, and validation. |
+| Replay and recovery | Deterministic SDK browser primitives | Interpret the artifact, bound recovery, verify success; zero inference or self-healing. |
+| Business application | None | Small synthetic member-servicing target and separate data store. |
+| Run API and durable state | None | API, coordinator, interventions, receipts, events, and result/evidence access. |
+
+This changes implementation effort, not acceptance criteria. SDK execution success is not business success, provider recordings are not executable capabilities, and our artifact must remain understandable independently of a provider transcript.
+
+## Why Stagehand is the initial integration level
+
+Stagehand supports AI-proposed actions via `observe()` and executing returned Action objects without inference. Its action replay can re-infer when self-healing is enabled, so replay must explicitly disable that behavior and verify zero model use. Recorded Action execution also skips DOM-settle waiting; our condition checks remain necessary. See [Stagehand Act](https://docs.stagehand.dev/v4/basics/act).
+
+Use supported deterministic page/locator methods or validated Action descriptors for replay. Do not count repeated natural-language calls with a warm cache as the no-model guarantee: a miss can require inference. Do not use AI extraction in replay; read and validate outputs through deterministic UI rules. Returned selectors still require scope, uniqueness, and robustness checks; accepting a descriptor is not proof it will work with different member data.
+
+Stagehand v4 exposes deterministic browser controls without a Playwright dependency. A separate production Playwright driver is not currently selected. An independent UI test tool can be chosen later. See [Stagehand introduction](https://docs.stagehand.dev/v4/first-steps/introduction).
+
+Browserbase Model Gateway supplies Stagehand model access using a Browserbase key on hosted browsers. It does not provide this path for local browsers. This supports the decision to start hosted and avoid separate provider-key integration initially. See [Model Gateway](https://docs.browserbase.com/platform/model-gateway/overview).
+
+## Fully managed Browserbase Agents: evaluate, not the initial executor
+
+Managed Agents offer a goal-driven execution loop, but current documentation says their built-in tools cannot be disabled or extended, and browser allowed domains do not govern Fetch. That makes them an unsuitable default for a design requiring our checks before every UI mutation and a constrained UI-only path. This is a fit assessment based on [Agents behavior](https://docs.browserbase.com/platform/agents/how-it-works), not a claim that managed Agents are generally unsafe.
+
+Use the more controllable Stagehand integration first. Reconsider further delegation only when equivalent policy, recording, parameterization, and handoff guarantees can be demonstrated. Agent-generated scripts remain candidates requiring inspection: generation alone does not ensure model-free execution or replace our typed artifact. See [Generate a script](https://docs.browserbase.com/platform/agents/generating-scripts).
+
+The managed Agents reply-based pause feature should not be treated as our entire human-control mechanism. Its documented pause keeps the browser alive but has lifecycle limits, including inability to stop a paused run directly. Our Sessions/Stagehand control path must independently prove cancellation and same-session takeover. See [Pausing runs](https://docs.browserbase.com/platform/agents/pausing-runs).
+
+## Compatibility spike before broad scaffolding
+
+Use a tiny UI fixture to verify the actual installed SDK; this is not the assignment's discovery evidence:
+
+1. Launch/connect a hosted session from TypeScript and record its ID; serve the fixture at an address reachable by Browserbase.
+2. Obtain a model-proposed action, inspect/check it before execution, and record its descriptor plus actual result.
+3. Apply changed synthetic inputs and execute a saved descriptor using only deterministic operations with self-healing disabled. Instrument inference attempts and test with inference forbidden; do not remove Browserbase authentication needed for session control.
+4. Verify unique scoped targeting across a frame/table, readiness checks, deterministic text extraction, and wrong-record detection. Document any missing primitive before implementing a workaround.
+5. Demonstrate one real manual action and safe hand-back on the same session. Prefer provider UI where it meets our ownership/action-history criteria; otherwise use the already designed minimal mediated controls.
+6. Verify capture/log controls, descriptor serialization, clean session termination, and the enabled model/provider configuration. Fail clearly when a required guarantee is unsupported.
+
+The spike decides the smallest adapter we need, not whether to relax the assignment. Do not prebuild local-browser parity or a second provider. Credentials and account setup occur separately before running live services.
+
+## Remaining stack decisions
+
+TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase delegation are selected. The following remain proposals or open choices:
+
+- Serializable capability input/output schema validation, database access/migrations, workspace tooling, and test runner.
+- Specific discovery model, SDK/package versions, and deployment/connectivity for the hosted browser to reach the demo target.
+
+Settle these with the chosen runtime/SDK constraints. The primary stack is selected; exact versions, supporting libraries, and hosting remain implementation choices.
