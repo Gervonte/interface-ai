@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: draft for review. All items are pending; this document does not report completed implementation or authorize publishing/submission.
+Status: INT-001 scaffold implemented and verified; all other tasks remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -12,15 +12,17 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
 ## Foundation and provider validation
 
-1. **INT-001 — Scaffold the TypeScript workspace.**
+1. **INT-001 — Scaffold the TypeScript workspace. (Complete)**
 
     Set up separate automation backend, operator frontend, and demo-target applications, with shared public contracts where useful. Select workspace/package tooling and a meaningful unit/integration test runner; pin compatible Node, SDK, UI, and TypeScript versions. Add development/build/typecheck scripts, ignored runtime storage, and secret-free configuration examples. Keep target business access out of shared automation packages.
 
     **Done when:** the minimal Express apps and React/Vite/Mantine frontends start independently, build and typecheck; a documented root command starts the local components. **Depends on:** none. **Acceptance:** DEL-01, SAFE-04.
 
+    **Verified:** pinned pnpm workspace, separate Express APIs and Mantine frontends, public contracts, safe configuration examples, six HTTP boundary tests, passing typecheck/build, and root startup with both UI/API connections. See [README verification](README.md#int-001-verification). DEL-01/SAFE-04 are only partially supported here; their complete assessment checks remain pending.
+
 2. **INT-002 — Establish Browserbase access and fixture connectivity.**
 
-    Configure runtime Browserbase credentials securely without committing them. Select and record a supported discovery model/configuration through Model Gateway. Provide one small synthetic fixture, including a frame and repeated table controls, at an address reachable by the hosted browser. Choose the minimum deployment/connectivity mechanism and document start/stop and required configuration.
+    Configure runtime Browserbase credentials securely without committing them. Select and record a supported discovery model/configuration through Model Gateway. Provide one small synthetic fixture using the planned staff-shell/frame and repeated account-table control patterns from DEMO_WORKFLOW.md, at an address reachable by the hosted browser. This is a compatibility fixture, not a substitute for the staff portal in INT-006. Choose the minimum deployment/connectivity mechanism and document start/stop and required configuration.
 
     **Done when:** TypeScript creates a real hosted session, loads the fixture, records its non-secret ID, and terminates the session; the backend stays responsive during the operation. No business-data shortcut is used. **Depends on:** INT-001. **Acceptance:** SAFE-04, DEL-02.
 

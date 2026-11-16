@@ -79,7 +79,7 @@ These apply across the three capabilities; grouping them here does not make them
 
 ### Scope boundaries
 
-- Build a small local synthetic member-servicing application. Implement primary-savings balance lookup first; a preferred-email update with human commit is proposed as a second capability in the same app. See DEMO_WORKFLOW.md for scope.
+- Build a fictional internal credit-union staff servicing portal with institution/operator/session and active-member context, connected search/overview/account inquiry/details, and realistic runtime states. Implement primary-savings balance lookup first; a preferred-email update with human commit is proposed as a second capability in the same app. See DEMO_WORKFLOW.md for scope.
 - Discovery must include a genuine model-driven run against a live UI. Deterministic replay and live-session handoff must also work.
 - The operator interface may be minimal. A full operator console is not required.
 - Desktop support and reuse across tenants require a credible design explanation, not additional working implementations in the baseline.
@@ -88,7 +88,7 @@ These apply across the three capabilities; grouping them here does not make them
 
 ### Demo target and repository setup
 
-**Decision:** build a simple local member-servicing target application in this repository. Start with balance lookup; the proposed contact-update capability reuses its member-search/profile screens and adds a review/commit path. The app exercises discovery, replay, error handling, and human intervention; details live in DEMO_WORKFLOW.md.
+**Decision:** build a fictional credit-union back-office staff portal in this repository. The baseline is a connected Staff workspace → Member Search → Member Overview → Account Inquiry → Account Details flow, with persistent staff/member context, a framed servicing workspace, and table-based controls. Show separately labeled Current and Available Balance so correct extraction is tested. INT-006 implements those screens; INT-012 adds contextual runtime exceptions. Contact Maintenance adds a later review/commit path. DEMO_WORKFLOW.md is the detailed portal specification. The generic INT-001 shell is scaffolding only and does not satisfy portal completion.
 
 Repository setup should accommodate:
 
