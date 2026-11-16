@@ -17,7 +17,9 @@
     "build": "pnpm -r run build",
     "typecheck": "pnpm --filter @interface-ai/contracts build && tsc -p tsconfig.json --noEmit && pnpm -r run typecheck",
     "test": "pnpm --filter @interface-ai/contracts build && vitest run",
-    "check": "pnpm typecheck && pnpm test && pnpm build"
+    "check": "pnpm typecheck && pnpm test && pnpm build",
+    "dev:fixture": "pnpm --filter @interface-ai/demo-api fixture",
+    "browserbase:check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:check"
   },
   "devDependencies": {
     "@types/node": "26.2.0",

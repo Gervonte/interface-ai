@@ -1,0 +1,32 @@
+{
+  "task": "INT-002",
+  "success": true,
+  "startedAt": "2026-11-16T21:15:25.383Z",
+  "finishedAt": "2026-11-16T21:15:31.737Z",
+  "sessionId": "c945c21b-f7ac-4c15-8467-7abb7be14e76",
+  "fixtureUrl": "https://redeem-projects-moment-travels.trycloudflare.com/compatibility",
+  "modelName": "openai/gpt-5",
+  "region": "us-west-2",
+  "sessionTimeoutSeconds": 180,
+  "requestTimeoutMs": 30000,
+  "navigationTimeoutMs": 20000,
+  "modelGateway": "configured; inference verification belongs to INT-003",
+  "selfHeal": false,
+  "providerRecording": false,
+  "providerLogging": false,
+  "fixture": {
+    "title": "Demo Credit Union — Staff Services",
+    "heading": "Staff workspace",
+    "frameTitle": "Member servicing workspace",
+    "workspaceHeading": "Member servicing",
+    "accountRows": 2,
+    "openControls": 2
+  },
+  "closeSucceeded": true,
+  "finalStatus": "COMPLETED",
+  "health": {
+    "checks": 27,
+    "failures": 0,
+    "maxLatencyMs": 24
+  }
+}

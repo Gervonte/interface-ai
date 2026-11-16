@@ -1,6 +1,6 @@
 # Demo Workflow
 
-Status: the target is a fictional credit-union staff servicing console. Balance lookup is the agreed assessment baseline; preferred-email maintenance remains planned follow-on work. INT-001 supplies app shells only; the portal screens and workflows below are not implemented yet.
+Status: the target is a fictional credit-union staff servicing console. Balance lookup is the agreed assessment baseline; preferred-email maintenance remains planned follow-on work. INT-001 supplies app shells. INT-002 adds a separate small staff-shell/iframe/table compatibility fixture for SDK validation; the full portal screens and workflows below are not implemented yet. See [Browserbase setup](BROWSERBASE_SETUP.md).
 
 ## Target purpose and assessment fit
 

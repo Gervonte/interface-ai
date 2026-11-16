@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: INT-001 scaffold implemented and verified; all other tasks remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
+Status: INT-001 scaffold and INT-002 hosted fixture connectivity are implemented and verified; INT-003 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -20,11 +20,13 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
     **Verified:** pinned pnpm workspace, separate Express APIs and Mantine frontends, public contracts, safe configuration examples, six HTTP boundary tests, passing typecheck/build, and root startup with both UI/API connections. See [README verification](README.md#int-001-verification). DEL-01/SAFE-04 are only partially supported here; their complete assessment checks remain pending.
 
-2. **INT-002 — Establish Browserbase access and fixture connectivity.**
+2. **INT-002 — Establish Browserbase access and fixture connectivity. (Complete)**
 
     Configure runtime Browserbase credentials securely without committing them. Select and record a supported discovery model/configuration through Model Gateway. Provide one small synthetic fixture using the planned staff-shell/frame and repeated account-table control patterns from DEMO_WORKFLOW.md, at an address reachable by the hosted browser. This is a compatibility fixture, not a substitute for the staff portal in INT-006. Choose the minimum deployment/connectivity mechanism and document start/stop and required configuration.
 
     **Done when:** TypeScript creates a real hosted session, loads the fixture, records its non-secret ID, and terminates the session; the backend stays responsive during the operation. No business-data shortcut is used. **Depends on:** INT-001. **Acceptance:** SAFE-04, DEL-02.
+
+    **Verified:** real hosted session loaded the synthetic staff shell, servicing iframe, and repeated account-row controls; 27 concurrent automation API health requests passed; explicit close was followed by provider status `COMPLETED`. Selected Gateway configuration is `openai/gpt-5` with self-healing/cache disabled; actual inference remains INT-003. Setup uses a dedicated fixture-only server and temporary Cloudflare Quick Tunnel. Typecheck, 33 tests, and builds pass. See [setup](BROWSERBASE_SETUP.md) and [live evidence](evidence/int-002/README.md). SAFE-04/DEL-02 remain broader assessment checks, not fully passed by this spike.
 
 3. **INT-003 — Prove the delegated SDK supports our execution boundaries.**
 
