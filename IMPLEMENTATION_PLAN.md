@@ -46,11 +46,13 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
     **Done when:** migrations work from an empty development database; fixtures reset predictably; automation credentials cannot read the target's business tables. Core repository transactions and receipt uniqueness have meaningful integration coverage. **Depends on:** INT-001, INT-004. **Acceptance:** DEL-01, SAFE-04.
 
-6. **INT-006 — Build the balance-lookup target UI.**
+6. **INT-006 — Build the credit-union staff portal and balance workflow.**
 
-    Implement member search/results, member profile, account list, and savings details with React/Vite/Mantine and the separate target backend/database. Include the framed workspace, repeated Open controls, visible primary-savings designation, and differing account order for M1001/M1002. Display current balance and currency unambiguously. Keep ordinary accessible labels; do not depend on generated library IDs or test IDs.
+    Implement the fictional Demo Credit Union staff console specified in DEMO_WORKFLOW.md: persistent institution/operator/branch/session context, active-member context, usable Member Search, Member Overview, Account Inquiry, and Account Details. Build connected React/Vite/Mantine screens backed by the separate target application/database. Use an outer staff shell and actual framed servicing workspace, dense account tables, and repeated Open controls. Include member/account IDs and statuses, primary-savings designation, separately labeled Current/Available Balance and currency, and the distinct balances/account ordering for M1001/M1002.
 
-    **Done when:** a person can complete the multi-step lookup for both seeded members and see the specified different balances. The same UI is reachable by Browserbase; fixture data is not exposed to the automation's execution path. **Depends on:** INT-002, INT-005. **Acceptance:** DISC-02, REP-02, SAFE-04.
+    Implement ordinary loading, empty search, and field-validation states plus Back/Clear/new-search behavior that cannot retain the wrong member's details. Keep visible labels/headers and meaningful UI identifiers; targeting must not require generated library IDs/classes, positional selectors, or test IDs. Full exception injection belongs to INT-012 and Contact Maintenance to INT-018. Keep automation controls/diagnostics in the separate operator app.
+
+    **Done when:** a person can navigate Staff workspace → Member Search → Member Overview → Account Inquiry → Account Details for both members, verify consistent member/account identity, and distinguish Current Balance from the different Available Balance. Back/new-search transitions behave coherently and do not expose stale results. The working path traverses the intended frame/table controls, is reachable by Browserbase, and uses only synthetic target data. A generic shell/search card or hard-coded answer display does not satisfy completion. **Depends on:** INT-002, INT-005. **Acceptance:** DISC-02, REP-02, SAFE-04.
 
 7. **INT-007 — Implement the shared executor and safe recording boundary.**
 
@@ -86,9 +88,9 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
 12. **INT-012 — Add repeatable target scenarios.**
 
-    Add setup-controlled missing-member/no-primary-savings/access-denied outcomes, slow/failed loading, known interstitial, unexpected modal, synthetic session expiry, validation error, and wrong/duplicate record states. Trigger them through separate fixture setup, not undocumented powers given to the automation agent. Add a way for a person to resolve the manual cases inside the live UI. The blocking-modal/restoration scenario must be triggerable independently during discovery and replay.
+    Extend the actual staff workflow with setup-controlled missing-member/no-primary-savings/access-denied outcomes, slow/failed inquiry, a known servicing notice, unexpected servicing modal, synthetic staff-session expiry/restoration, validation error, and wrong/duplicate member/account states. Render each inside its natural screen/context as specified in DEMO_WORKFLOW.md; avoid disconnected error demo pages. Trigger them through separate fixture setup, not undocumented powers given to the automation agent. Add a way for a person to resolve the manual cases inside the live UI. The blocking-modal/restoration scenario must be triggerable independently during discovery and replay.
 
-    **Done when:** each scenario resets predictably and exposes an explicit visible state; baseline fixtures still work. Browser destruction and in-page session expiry can be tested separately. **Depends on:** INT-006, INT-011. **Acceptance:** REP-05, REP-06, REP-08, HUM-01.
+    **Done when:** each scenario resets predictably at a defined portal transition, exposes explicit visible state/context, and has the required permitted manual resolution where applicable. Baseline fixtures still work; role/member denial cannot be mistaken for a missing record. Browser destruction and synthetic staff-session expiry are tested separately. **Depends on:** INT-006, INT-011. **Acceptance:** REP-05, REP-06, REP-08, HUM-01.
 
 13. **INT-013 — Implement declared business outcomes and bounded recovery.**
 
@@ -134,7 +136,7 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
 19. **INT-018 — Add the synthetic contact edit/review workflow.**
 
-    Extend the same member profile with preferred-email edit, before/after review, Save/Cancel, persisted changes, and a UI-visible change reference. Add invalid-email, already-current, and delayed-confirmation scenarios. Use synthetic addresses only; no email delivery. Keep the target backend/database separate.
+    Add Contact Maintenance from the same staff Member Overview, preserving member/operator context through preferred-email edit, before/after review, Save/Cancel, confirmation, and reopening the persisted record. Show a UI-visible change reference tied to that member and field. Add invalid-email, already-current, and delayed-confirmation scenarios. Use synthetic addresses only; no email delivery. Keep the target backend/database separate.
 
     **Done when:** a person can edit, review, save, reopen, and verify one persisted change; cancelling review makes no change. A test can assert commit count independently while automation remains UI-only. **Depends on:** INT-015, INT-022. **Acceptance:** planned second-demo scope; supports SAFE-02, REP-07, HUM-03, HUM-04.
 
