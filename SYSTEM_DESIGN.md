@@ -4,7 +4,9 @@ Working design document following our agreed sequence:
 
 Functional Requirements → Non Functional Requirements → Core Entities (Database Schema) → API Design → High Level Design → Deep Dives
 
-Current stage: **Implementation planning.** [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) defines dependency-ordered INT tasks and completion evidence. The selected stack is recorded in [STACK.md](STACK.md); workflow scope is in [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md). No implementation acceptance is implied by this plan.
+Current stage: **Implementation planning, reviewed against the assignment.** [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) preserves stable INT IDs and makes the complete balance baseline plus documentation independently ready at INT-022. Contact updates and deeper restart recovery are planned follow-on work. The selected stack is in [STACK.md](STACK.md); workflow scope is in [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md). All implementation criteria remain unverified.
+
+Scope clarification after assignment review: the detailed recovery/idempotency designs below describe the target design, not a requirement to implement every hardening mechanism before baseline readiness. Safe stopping, explicit action uncertainty, finite session lifetime, and no blind redispatch remain baseline. Follow the reviewed implementation plan for staged delivery.
 
 This document records design decisions as we work through them. [ACCEPTANCE.md](ACCEPTANCE.md) remains the detailed verification checklist. The assignment's final `REPORT.md` will be written from the agreed design using its required headings.
 

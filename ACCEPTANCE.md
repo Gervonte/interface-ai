@@ -4,7 +4,7 @@ Status: draft for review. No implementation criteria have been verified yet.
 
 Source: *Assignment A — Computer-Use Automation System*, especially sections 3–7 and 9. Section references below refer to that assignment.
 
-This checklist defines observable outcomes. It leaves the target application, language, model, framework, architecture, schema representation, and control mechanism open for the system-design process. The previously suggested member-balance workflow is a candidate, not a decision.
+This checklist defines observable outcomes independently of implementation choices. The selected stack, agreed balance workflow, and reviewed implementation order are tracked in STACK.md, DEMO_WORKFLOW.md, and IMPLEMENTATION_PLAN.md. Planning coverage is not verification; all criteria remain unchecked.
 
 ## How to use this checklist
 
@@ -113,7 +113,7 @@ Keep the following out of the baseline unless deliberately selected after the co
 
 Full operator consoles, desktop implementation, multi-tenant infrastructure, queues, and clusters are not baseline requirements.
 
-## Decisions reserved for system design
+## Design decisions tracked separately
 
 - Target application, specific workflow, input/output examples, and applicable failure cases.
 - Language, runtime, model/provider, computer-use technology, and architecture.
@@ -121,4 +121,4 @@ Full operator consoles, desktop implementation, multi-tenant infrastructure, que
 - Risk classifications, policy enforcement, redaction, and evidence retention approach.
 - Session ownership, operator interaction, action capture, and resume validation.
 
-These choices will be made through the user's system-design framework. The checklist should guide and evaluate those choices without predetermining them.
+These choices are tracked through the user's system-design framework and the linked design documents. The baseline must satisfy every required criterion; optional follow-on work can remain under Cuts. In particular, contact updates and deeper restart recovery do not gate the balance-workflow submission baseline.

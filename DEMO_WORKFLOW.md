@@ -145,9 +145,9 @@ Additional proof scenarios:
 
 ## Implementation order
 
-1. Complete the balance capability end to end, including discovery, changed-input replay, failure evidence, and the minimal handoff mechanism.
-2. Add the contact editor/review flow and explicit human commit step; discover a separate write capability and replay it with changed inputs.
-3. Demonstrate an uncertain save outcome and prove that no duplicate commit occurs.
+1. Complete the balance assessment baseline: real discovery, changed-input replay, business outcomes/recovery/failure, human takeover during discovery and replay, safe evidence, README, and report. Required criteria must pass.
+2. Add the contact editor/review flow and explicit human commit step as planned follow-on work; discover a separate write capability and replay it with changed inputs. This does not block baseline readiness.
+3. Demonstrate an uncertain save outcome and prove that no duplicate commit occurs. Deeper automatic restart-recovery machinery remains a separate follow-on; safe stopping and no blind resubmission are baseline behavior.
 
 Share application screens and executor/targeting primitives. Separate saved capabilities keep each goal, parameter contract, and success condition clear. Avoid a subworkflow/composition engine solely to reuse the short search sequence.
 
