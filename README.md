@@ -1,13 +1,13 @@
 # Interface AI — Computer-use automation
 
-A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. Discovery, replay, member workflows, PostgreSQL persistence, and Browserbase connectivity are implemented in later tasks; the UI does not simulate successful runs or balances.
+A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. Discovery, replay, the complete staff portal, and PostgreSQL persistence remain later tasks.
 
 ## Requirements
 
 - Node.js **26.2.0** (`nvm install` and `nvm use` read `.nvmrc`).
 - pnpm **10.32.1**. Use your existing pnpm installation, or install that exact version with `npm install --global pnpm@10.32.1`.
 
-The root `packageManager`, engine constraints, exact dependency catalog, and committed lockfile define the verified toolchain. Stagehand is pinned for the later compatibility spike; it is not initialized by the scaffold.
+The root `packageManager`, engine constraints, exact dependency catalog, and committed lockfile define the verified toolchain. Stagehand is pinned and initialized only by the explicit Browserbase check; normal app startup does not open hosted sessions.
 
 ## Install and run
 
@@ -31,7 +31,7 @@ Each frontend proxies `/api/*` to its own backend; run the matching API to see i
 
 The scaffold runs **without API keys, PostgreSQL, or live services**. Optional `.env.example` files live in the backend app directories. Copy one to `.env` in that same directory to override HOST/PORT; it is loaded by Node from that app's working directory. If API ports change, update the corresponding Vite proxy target as well.
 
-Browserbase placeholders are reserved for INT-002 and unused here. Do not place secrets in frontend `VITE_*` variables or shared public contracts. `.env` files, runtime storage, browser profiles, captures, and build output stay ignored. Curated sanitized evidence will live separately under `evidence/` in later tasks.
+Browserbase credentials and fixture connectivity are documented in [BROWSERBASE_SETUP.md](BROWSERBASE_SETUP.md). The explicit `pnpm browserbase:check` command opens one hosted session; `pnpm dev:fixture` serves its separate synthetic-only target on port 3003. Do not place secrets in frontend `VITE_*` variables or shared public contracts. `.env` files, runtime storage, browser profiles, captures, and build output stay ignored. Curated sanitized evidence will live separately under `evidence/` in later tasks.
 
 The demo app has its own backend. Automation imports only public transport schemas; it has no access to target fixtures or business database credentials. Later PostgreSQL setup will provision separate application databases/roles.
 
@@ -45,9 +45,9 @@ pnpm build
 pnpm check
 ```
 
-Vitest runs real HTTP integration checks for independent service identity and safe errors that do not echo URL/body markers. These scaffold tests are not discovery or replay evidence. Tests use ephemeral loopback ports and need no live service credentials. Builds run in workspace dependency order; both frontends output `dist/`, and APIs output runnable server modules.
+Vitest runs real HTTP integration checks for independent service identity, safe errors, and the synthetic fixture boundary. Injected-provider tests cover connection cleanup, termination verification, API health, and configuration validation. These tests are not discovery or replay evidence. Tests use ephemeral loopback ports and need no live service credentials. Builds run in workspace dependency order; both frontends output `dist/`, and APIs output runnable server modules.
 
-After building, start one backend with `pnpm --filter @interface-ai/automation start` or `pnpm --filter @interface-ai/demo-api start`. Built frontend deployment/proxying is not configured in INT-001; Vite development URLs are local previews, not public endpoints reachable by Browserbase.
+After building, start one backend with `pnpm --filter @interface-ai/automation start` or `pnpm --filter @interface-ai/demo-api start`. Built frontend deployment/proxying is not configured in INT-001; Vite development URLs are local previews. INT-002 uses a separate fixture-only server and temporary tunnel for Browserbase access; see [setup](BROWSERBASE_SETUP.md).
 
 ## Workspace
 
@@ -59,7 +59,7 @@ apps/
   demo-web/         React + Vite + Mantine target UI
 packages/
   contracts/        Public Zod schemas/types only
-tests/              API boundary integration tests
+tests/              Service/fixture HTTP checks and provider lifecycle tests
 ```
 
 ## Planning documents
@@ -75,3 +75,7 @@ The genuine goal → discovery → artifact → replay commands and assessment e
 ## INT-001 verification
 
 Verified with the pinned Node/pnpm versions on 2026-11-16: workspace typechecking (including test/config files), six real HTTP integration tests, and production builds of both APIs and both frontends. The root development command starts all four processes; both browser pages report their own API connected. This is scaffold verification only; remaining assessment criteria are not marked complete.
+
+## INT-002 verification
+
+Verified on 2026-11-16: a real hosted Browserbase session loaded the staff-shell/iframe/table fixture, passed 27 concurrent automation API health checks (maximum 24 ms), and terminated with confirmed `COMPLETED` status. `pnpm check` passes typechecking, 33 tests, and all builds. [Setup and start/stop commands](BROWSERBASE_SETUP.md); [sanitized live evidence](evidence/int-002/README.md). Model inference and same-session takeover remain INT-003; the complete portal remains INT-006.

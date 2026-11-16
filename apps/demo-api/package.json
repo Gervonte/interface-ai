@@ -7,7 +7,8 @@
     "dev": "node --env-file-if-exists=.env --import tsx --watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "start": "node --env-file-if-exists=.env dist/index.js"
+    "start": "node --env-file-if-exists=.env dist/index.js",
+    "fixture": "node --env-file-if-exists=.env --import tsx src/fixture-server.ts"
   },
   "dependencies": {
     "@interface-ai/contracts": "workspace:*",
