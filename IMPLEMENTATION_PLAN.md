@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: INT-001 scaffold and INT-002 hosted fixture connectivity are implemented and verified; INT-003 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
+Status: INT-001 scaffold, INT-002 hosted fixture connectivity, and INT-003 SDK execution-boundary compatibility are implemented and verified; INT-004 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -28,11 +28,13 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
     **Verified:** real hosted session loaded the synthetic staff shell, servicing iframe, and repeated account-row controls; 27 concurrent automation API health requests passed; explicit close was followed by provider status `COMPLETED`. Selected Gateway configuration is `openai/gpt-5` with self-healing/cache disabled; actual inference remains INT-003. Setup uses a dedicated fixture-only server and temporary Cloudflare Quick Tunnel. Typecheck, 33 tests, and builds pass. See [setup](BROWSERBASE_SETUP.md) and [live evidence](evidence/int-002/README.md). SAFE-04/DEL-02 remain broader assessment checks, not fully passed by this spike.
 
-3. **INT-003 — Prove the delegated SDK supports our execution boundaries.**
+3. **INT-003 — Prove the delegated SDK supports our execution boundaries. (Complete)**
 
     Obtain a real Stagehand model-proposed action; inspect it before mutation, execute and serialize it, then apply a changed synthetic value using deterministic methods with self-healing disabled. Verify targeting, readiness, text extraction, inference instrumentation, same-session manual action capture/control hand-back, and capture/cleanup behavior. Use the smallest temporary operator surface needed for this proof; do not build the full console yet.
 
     **Done when:** a short recorded result identifies what Browserbase/Stagehand supplies, proves a deterministic action path with inference forbidden, and demonstrates manual input in the same session. Unsupported details have a concrete TypeScript adapter solution or a clearly identified gap before broader implementation. This fixture proof is not the final discovery demo. **Depends on:** INT-002. **Acceptance:** REP-01, REP-03, HUM-02, HUM-03, HUM-05, DES-01.
+
+    **Verified:** real Gateway proposals were inspected before mutation, a serialized descriptor was rebound to changed input and executed with a verified rejecting inference callback, positional targeting was rejected after row reordering, and real manual actions were captured with exclusive ownership and validated same-session resumption. Screenshot/snapshot capture and provider `COMPLETED` cleanup passed. Typecheck, 51 tests, and builds pass. Use semantic frame/table/row targeting and mediated manual control; generic policy/redaction and durable coordination remain later tasks. See [SDK results and adapter decisions](SDK_COMPATIBILITY.md) and [live evidence](evidence/int-003/README.md). These fixture proofs do not fully pass the linked assessment-wide criteria.
 
 ## First balance discovery and replay slice
 

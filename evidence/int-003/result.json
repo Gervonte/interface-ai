@@ -1,0 +1,433 @@
+{
+  "task": "INT-003",
+  "success": true,
+  "startedAt": "2026-11-17T02:38:35.893Z",
+  "modelName": "openai/gpt-5",
+  "selfHeal": false,
+  "providerRecording": false,
+  "providerLogging": false,
+  "sessionId": "4a870efb-0f45-4f4e-90b8-5dba641bcad6",
+  "fillProposal": {
+    "data": [
+      {
+        "selector": "xpath=/html[1]/body[1]/main[1]/iframe[1]/html[1]/body[1]/main[1]/form[1]/input[1]",
+        "description": "Member ID textbox in the Member servicing workspace iframe",
+        "method": "fill",
+        "arguments": [
+          "M1001"
+        ]
+      }
+    ],
+    "metadata": {
+      "cache": {
+        "status": "DISABLED"
+      },
+      "usage": {
+        "inputTokens": 1122,
+        "outputTokens": 659,
+        "reasoningTokens": 0,
+        "cachedInputTokens": 0,
+        "inferenceTimeMs": 9036
+      }
+    }
+  },
+  "fillAction": {
+    "selector": "xpath=/html[1]/body[1]/main[1]/iframe[1]/html[1]/body[1]/main[1]/form[1]/input[1]",
+    "description": "Member ID textbox in the Member servicing workspace iframe",
+    "method": "fill",
+    "arguments": [
+      "M1001"
+    ]
+  },
+  "discoveryFillExecution": {
+    "cache": {
+      "status": "DISABLED"
+    },
+    "usage": {
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "reasoningTokens": 0,
+      "cachedInputTokens": 0,
+      "inferenceTimeMs": 0
+    }
+  },
+  "openProposal": {
+    "data": [
+      {
+        "selector": "xpath=/html[1]/body[1]/main[1]/iframe[1]/html[1]/body[1]/main[1]/table[1]/tbody[1]/tr[2]/td[7]/form[1]/button[1]",
+        "description": "Open button in the S2001 – Primary Savings, Primary row within the Member servicing workspace iframe",
+        "method": "click",
+        "arguments": []
+      }
+    ],
+    "metadata": {
+      "cache": {
+        "status": "DISABLED"
+      },
+      "usage": {
+        "inputTokens": 1127,
+        "outputTokens": 634,
+        "reasoningTokens": 0,
+        "cachedInputTokens": 0,
+        "inferenceTimeMs": 7207
+      }
+    }
+  },
+  "openAction": {
+    "selector": "xpath=/html[1]/body[1]/main[1]/iframe[1]/html[1]/body[1]/main[1]/table[1]/tbody[1]/tr[2]/td[7]/form[1]/button[1]",
+    "description": "Open button in the S2001 – Primary Savings, Primary row within the Member servicing workspace iframe",
+    "method": "click",
+    "arguments": []
+  },
+  "discoveryOpenExecution": {
+    "cache": {
+      "status": "DISABLED"
+    },
+    "usage": {
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "reasoningTokens": 0,
+      "cachedInputTokens": 0,
+      "inferenceTimeMs": 0
+    }
+  },
+  "discoveryBalance": {
+    "memberId": "M1001",
+    "accountId": "S2001",
+    "currency": "USD",
+    "currentBalanceMinor": 125034,
+    "availableBalanceMinor": 120034
+  },
+  "discoveryUsage": {
+    "fill": {
+      "cache": {
+        "status": "DISABLED"
+      },
+      "usage": {
+        "inputTokens": 1122,
+        "outputTokens": 659,
+        "reasoningTokens": 0,
+        "cachedInputTokens": 0,
+        "inferenceTimeMs": 9036
+      }
+    },
+    "open": {
+      "cache": {
+        "status": "DISABLED"
+      },
+      "usage": {
+        "inputTokens": 1127,
+        "outputTokens": 634,
+        "reasoningTokens": 0,
+        "cachedInputTokens": 0,
+        "inferenceTimeMs": 7207
+      }
+    },
+    "metrics": {
+      "actPromptTokens": 0,
+      "actCompletionTokens": 0,
+      "actReasoningTokens": 0,
+      "actCachedInputTokens": 0,
+      "actInferenceTimeMs": 0,
+      "extractPromptTokens": 0,
+      "extractCompletionTokens": 0,
+      "extractReasoningTokens": 0,
+      "extractCachedInputTokens": 0,
+      "extractInferenceTimeMs": 0,
+      "observePromptTokens": 2249,
+      "observeCompletionTokens": 1293,
+      "observeReasoningTokens": 0,
+      "observeCachedInputTokens": 0,
+      "observeInferenceTimeMs": 16243,
+      "totalPromptTokens": 2249,
+      "totalCompletionTokens": 1293,
+      "totalReasoningTokens": 0,
+      "totalCachedInputTokens": 0,
+      "totalInferenceTimeMs": 16243
+    }
+  },
+  "inferenceGuardProbe": {
+    "rejected": true,
+    "interceptedRequests": 1
+  },
+  "replayFillExecution": {
+    "cache": {
+      "status": "DISABLED"
+    },
+    "usage": {
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "reasoningTokens": 0,
+      "cachedInputTokens": 0,
+      "inferenceTimeMs": 0
+    }
+  },
+  "reorderedRows": [
+    "Primary Savings",
+    "Checking"
+  ],
+  "rawOpenTargetReusable": false,
+  "replayBalance": {
+    "memberId": "M1002",
+    "accountId": "S2002",
+    "currency": "USD",
+    "currentBalanceMinor": 8765,
+    "availableBalanceMinor": 7600
+  },
+  "failureCapture": {
+    "reason": "MISSING_TARGET",
+    "waitBudgetMs": 500,
+    "waitRejected": true,
+    "screenshot": "failure.png",
+    "snapshot": "failure-snapshot.json",
+    "snapshotCharacters": 1704
+  },
+  "automationBlockedDuringHumanControl": true,
+  "humanVerifiedBalance": {
+    "memberId": "M1001",
+    "accountId": "S2001",
+    "currency": "USD",
+    "currentBalanceMinor": 125034,
+    "availableBalanceMinor": 120034
+  },
+  "staleHumanInputBlocked": true,
+  "manualActions": 5,
+  "sameSessionResumed": true,
+  "finalFixtureState": {
+    "heading": "Member servicing",
+    "memberId": "M1001",
+    "input": "M1001",
+    "details": {},
+    "rows": [
+      [
+        "C3001",
+        "Checking",
+        "Secondary",
+        "Active",
+        "$540.00",
+        "$500.00",
+        "Open"
+      ],
+      [
+        "S2001",
+        "Primary Savings",
+        "Primary",
+        "Active",
+        "$1,250.34",
+        "$1,200.34",
+        "Open"
+      ]
+    ]
+  },
+  "replayMetrics": {
+    "actPromptTokens": 0,
+    "actCompletionTokens": 0,
+    "actReasoningTokens": 0,
+    "actCachedInputTokens": 0,
+    "actInferenceTimeMs": 0,
+    "extractPromptTokens": 0,
+    "extractCompletionTokens": 0,
+    "extractReasoningTokens": 0,
+    "extractCachedInputTokens": 0,
+    "extractInferenceTimeMs": 0,
+    "observePromptTokens": 0,
+    "observeCompletionTokens": 0,
+    "observeReasoningTokens": 0,
+    "observeCachedInputTokens": 0,
+    "observeInferenceTimeMs": 0,
+    "totalPromptTokens": 0,
+    "totalCompletionTokens": 0,
+    "totalReasoningTokens": 0,
+    "totalCachedInputTokens": 0,
+    "totalInferenceTimeMs": 0
+  },
+  "replayInferenceAttempts": 0,
+  "finalStatus": "COMPLETED",
+  "cleanupSucceeded": true,
+  "finishedAt": "2026-11-17T02:40:24.653Z",
+  "events": [
+    {
+      "at": "2026-11-17T02:38:39.559Z",
+      "event": "session_created",
+      "revision": 1
+    },
+    {
+      "at": "2026-11-17T02:38:39.883Z",
+      "event": "dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "fixture"
+    },
+    {
+      "at": "2026-11-17T02:38:51.776Z",
+      "event": "proposal_validated_before_dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "member"
+    },
+    {
+      "at": "2026-11-17T02:38:52.700Z",
+      "event": "dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "member"
+    },
+    {
+      "at": "2026-11-17T02:38:53.024Z",
+      "event": "dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "find"
+    },
+    {
+      "at": "2026-11-17T02:39:02.260Z",
+      "event": "proposal_validated_before_dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "savings"
+    },
+    {
+      "at": "2026-11-17T02:39:03.218Z",
+      "event": "dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "savings"
+    },
+    {
+      "at": "2026-11-17T02:39:04.301Z",
+      "event": "dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "back"
+    },
+    {
+      "at": "2026-11-17T02:39:07.128Z",
+      "event": "dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "member"
+    },
+    {
+      "at": "2026-11-17T02:39:07.463Z",
+      "event": "dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "find"
+    },
+    {
+      "at": "2026-11-17T02:39:09.460Z",
+      "event": "recorded_target_rejected_after_row_reorder",
+      "revision": 1,
+      "actor": "automation",
+      "target": "savings"
+    },
+    {
+      "at": "2026-11-17T02:39:09.460Z",
+      "event": "dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "savings"
+    },
+    {
+      "at": "2026-11-17T02:39:11.833Z",
+      "event": "dispatch",
+      "revision": 1,
+      "actor": "automation",
+      "target": "back"
+    },
+    {
+      "at": "2026-11-17T02:39:12.695Z",
+      "event": "paused_for_human",
+      "revision": 2
+    },
+    {
+      "at": "2026-11-17T02:39:50.540Z",
+      "event": "human_claimed",
+      "revision": 3,
+      "actor": "human"
+    },
+    {
+      "at": "2026-11-17T02:39:55.202Z",
+      "event": "dispatch",
+      "revision": 3,
+      "actor": "human",
+      "target": "member"
+    },
+    {
+      "at": "2026-11-17T02:39:55.434Z",
+      "event": "manual_action_completed",
+      "revision": 3,
+      "actor": "human",
+      "target": "member"
+    },
+    {
+      "at": "2026-11-17T02:39:57.812Z",
+      "event": "dispatch",
+      "revision": 3,
+      "actor": "human",
+      "target": "member"
+    },
+    {
+      "at": "2026-11-17T02:39:58.032Z",
+      "event": "manual_action_completed",
+      "revision": 3,
+      "actor": "human",
+      "target": "member"
+    },
+    {
+      "at": "2026-11-17T02:40:00.317Z",
+      "event": "dispatch",
+      "revision": 3,
+      "actor": "human",
+      "target": "find"
+    },
+    {
+      "at": "2026-11-17T02:40:01.989Z",
+      "event": "manual_action_completed",
+      "revision": 3,
+      "actor": "human",
+      "target": "find"
+    },
+    {
+      "at": "2026-11-17T02:40:08.471Z",
+      "event": "dispatch",
+      "revision": 3,
+      "actor": "human",
+      "target": "find"
+    },
+    {
+      "at": "2026-11-17T02:40:09.221Z",
+      "event": "manual_action_completed",
+      "revision": 3,
+      "actor": "human",
+      "target": "find"
+    },
+    {
+      "at": "2026-11-17T02:40:13.368Z",
+      "event": "dispatch",
+      "revision": 3,
+      "actor": "human",
+      "target": "savings"
+    },
+    {
+      "at": "2026-11-17T02:40:14.626Z",
+      "event": "manual_action_completed",
+      "revision": 3,
+      "actor": "human",
+      "target": "savings"
+    },
+    {
+      "at": "2026-11-17T02:40:22.624Z",
+      "event": "human_handed_back",
+      "revision": 4,
+      "actor": "human"
+    },
+    {
+      "at": "2026-11-17T02:40:22.625Z",
+      "event": "dispatch",
+      "revision": 4,
+      "actor": "automation",
+      "target": "back"
+    }
+  ]
+}

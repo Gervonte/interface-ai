@@ -19,7 +19,8 @@
     "test": "pnpm --filter @interface-ai/contracts build && vitest run",
     "check": "pnpm typecheck && pnpm test && pnpm build",
     "dev:fixture": "pnpm --filter @interface-ai/demo-api fixture",
-    "browserbase:check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:check"
+    "browserbase:check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:check",
+    "browserbase:spike": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:spike"
   },
   "devDependencies": {
     "@types/node": "26.2.0",
