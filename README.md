@@ -1,6 +1,6 @@
 # Interface AI — Computer-use automation
 
-A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. INT-003 qualifies model proposals, deterministic execution, and real same-session human takeover on that fixture. Discovery, replay, the complete staff portal, and PostgreSQL persistence remain later tasks.
+A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. INT-003 qualifies model proposals, deterministic execution, and real same-session human takeover on that fixture. INT-004 adds public run/control contracts and a validated, data-only capability format with embedded input/output validation. Discovery, replay, the complete staff portal, and PostgreSQL persistence remain later tasks.
 
 ## Requirements
 
@@ -58,7 +58,7 @@ apps/
   demo-api/         Independent Express target backend
   demo-web/         React + Vite + Mantine target UI
 packages/
-  contracts/        Public Zod schemas/types only
+  contracts/        Public Zod schemas/types and constrained capability/data validation
 tests/              Service/fixture HTTP checks and provider lifecycle tests
 ```
 
@@ -83,3 +83,7 @@ Verified on 2026-11-16: a real hosted Browserbase session loaded the staff-shell
 ## INT-003 verification
 
 Verified on 2026-11-16 (America/New_York): genuine Gateway action proposals, serialized action execution with changed input and inference forbidden, semantic targeting across reordered rows, actual user takeover and validated hand-back in the same session, synthetic failure captures, and confirmed session termination. `pnpm check` passes typechecking, 51 tests, and all builds. Run the temporary local operator tool with `pnpm browserbase:spike` after starting the fixture/tunnel. [Steps and adapter decisions](SDK_COMPATIBILITY.md); [curated live evidence](evidence/int-003/README.md). This is SDK compatibility verification; the final artifact executor, coordinator, and assessment workflow remain later tasks.
+
+## INT-004 verification
+
+Verified on 2026-11-17: typed public requests/results/control, versioned capability structure and semantic reference checks, actual embedded input/output validation, scoped targets/conditions/extractions, authored outcome/recovery rules, and manual-contribution representations. `pnpm check` passes typechecking, 106 tests, and all builds. [Format, usage, and finite defaults](CONTRACTS.md); [authored balance contract fixture](examples/README.md). HTTP run endpoints, real discovery artifact construction, persistence, and the interpreter are still later work.

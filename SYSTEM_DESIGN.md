@@ -578,6 +578,8 @@ The next stage should resolve these risks against concrete scenarios before expa
 
 ### 6.1 Capability artifact and discovery-to-replay conversion
 
+**INT-004 implementation:** [CONTRACTS.md](CONTRACTS.md) and `packages/contracts` define the validated format-v1 shapes, semantic reference/type checks, constrained embedded schemas, and initial finite budgets. The illustrative excerpt below remains incomplete; the [complete authored contract fixture](examples/README.md) is validation data, not a real discovery artifact. Runtime target evaluation, actual source-event verification, and interpretation remain their later implementation tasks.
+
 **Design question:** how do we turn one real model-driven execution into a typed, parameterized workflow that can run again without the model?
 
 **Proposed decision:** capture normalized actions and their observed results at execution time, then build and validate a declarative artifact from that record. The model may propose actions, target descriptions, and contracts; it does not get to invent an unverified script after the run. The saved artifact contains data interpreted by our executor, not arbitrary executable code.

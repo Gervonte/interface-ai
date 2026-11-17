@@ -1,0 +1,476 @@
+{
+  "schemaVersion": 1,
+  "capabilityId": "lookup-primary-savings-balance",
+  "version": 1,
+  "name": "Look up primary savings current balance",
+  "description": "CONTRACT FIXTURE ONLY: authored example for the planned staff portal; not emitted by a discovery run and not executable evidence.",
+  "sourceDiscoveryRunId": "11111111-1111-4111-8111-111111111111",
+  "surfaceRequirements": {
+    "kind": "browser",
+    "applicationFamily": "demo-credit-union",
+    "compatibleTargetVersions": [1],
+    "features": ["frames", "labels", "roles", "table-rows", "dom-text"]
+  },
+  "inputSchema": {
+    "type": "object",
+    "properties": {"memberId": {"type": "string", "format": "member-id", "maxLength": 5}},
+    "required": ["memberId"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "memberId": {"type": "string", "format": "member-id", "maxLength": 5},
+      "accountId": {"type": "string", "format": "account-id", "maxLength": 5},
+      "accountType": {"type": "string", "enum": ["savings"], "maxLength": 7},
+      "currentBalanceMinor": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+      "currency": {"type": "string", "enum": ["USD"], "maxLength": 3}
+    },
+    "required": ["memberId", "accountId", "accountType", "currentBalanceMinor", "currency"],
+    "additionalProperties": false
+  },
+  "variables": {"primaryAccountId": {"type": "string", "format": "account-id", "maxLength": 5}},
+  "targets": {
+    "memberSearchNav": {
+      "scope": {"kind": "document"},
+      "within": [],
+      "locator": {"kind": "role", "role": "button", "name": "Member Search", "exact": true},
+      "expectedMatches": 1
+    },
+    "staffHeading": {
+      "scope": {"kind": "document"},
+      "within": [],
+      "locator": {"kind": "role", "role": "heading", "name": "Staff workspace", "exact": true},
+      "expectedMatches": 1
+    },
+    "searchHeading": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [],
+      "locator": {"kind": "role", "role": "heading", "name": "Member Search", "exact": true},
+      "expectedMatches": 1
+    },
+    "memberInput": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Member Search", "exact": true}}],
+      "locator": {"kind": "label", "text": "Member ID", "exact": true},
+      "expectedMatches": 1
+    },
+    "searchButton": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Member Search", "exact": true}}],
+      "locator": {"kind": "role", "role": "button", "name": "Search", "exact": true},
+      "expectedMatches": 1
+    },
+    "memberOpen": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [
+        {
+          "kind": "tableRow",
+          "tableCaption": "Member search results",
+          "cells": [{"columnHeader": "Member ID", "equals": {"kind": "input", "name": "memberId"}}]
+        }
+      ],
+      "locator": {"kind": "role", "role": "button", "name": "Open", "exact": true},
+      "expectedMatches": 1
+    },
+    "overviewHeading": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [],
+      "locator": {"kind": "role", "role": "heading", "name": "Member Overview", "exact": true},
+      "expectedMatches": 1
+    },
+    "activeMemberId": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Active member", "exact": true}}],
+      "locator": {"kind": "field", "label": "Member ID"},
+      "expectedMatches": 1
+    },
+    "accountInquiryNav": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [],
+      "locator": {"kind": "role", "role": "button", "name": "Account Inquiry", "exact": true},
+      "expectedMatches": 1
+    },
+    "inquiryHeading": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [],
+      "locator": {"kind": "role", "role": "heading", "name": "Account Inquiry", "exact": true},
+      "expectedMatches": 1
+    },
+    "primaryAccountCell": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [
+        {
+          "kind": "tableRow",
+          "tableCaption": "Member accounts",
+          "cells": [
+            {"columnHeader": "Account Type", "equals": {"kind": "literal", "value": "Primary Savings"}},
+            {"columnHeader": "Designation", "equals": {"kind": "literal", "value": "Primary"}}
+          ]
+        }
+      ],
+      "locator": {"kind": "cell", "columnHeader": "Account ID"},
+      "expectedMatches": 1
+    },
+    "primarySavingsOpen": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [
+        {
+          "kind": "tableRow",
+          "tableCaption": "Member accounts",
+          "cells": [
+            {"columnHeader": "Account Type", "equals": {"kind": "literal", "value": "Primary Savings"}},
+            {"columnHeader": "Designation", "equals": {"kind": "literal", "value": "Primary"}}
+          ]
+        }
+      ],
+      "locator": {"kind": "role", "role": "button", "name": "Open", "exact": true},
+      "expectedMatches": 1
+    },
+    "detailsHeading": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [],
+      "locator": {"kind": "role", "role": "heading", "name": "Account Details", "exact": true},
+      "expectedMatches": 1
+    },
+    "detailsMemberId": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Account Details", "exact": true}}],
+      "locator": {"kind": "field", "label": "Member ID"},
+      "expectedMatches": 1
+    },
+    "detailsAccountId": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Account Details", "exact": true}}],
+      "locator": {"kind": "field", "label": "Account ID"},
+      "expectedMatches": 1
+    },
+    "detailsAccountType": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Account Details", "exact": true}}],
+      "locator": {"kind": "field", "label": "Account Type"},
+      "expectedMatches": 1
+    },
+    "detailsDesignation": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Account Details", "exact": true}}],
+      "locator": {"kind": "field", "label": "Designation"},
+      "expectedMatches": 1
+    },
+    "detailsStatus": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Account Details", "exact": true}}],
+      "locator": {"kind": "field", "label": "Status"},
+      "expectedMatches": 1
+    },
+    "currentBalance": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Account Details", "exact": true}}],
+      "locator": {"kind": "field", "label": "Current Balance"},
+      "expectedMatches": 1
+    },
+    "currency": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "region", "name": "Account Details", "exact": true}}],
+      "locator": {"kind": "field", "label": "Currency"},
+      "expectedMatches": 1
+    },
+    "notFound": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [],
+      "locator": {"kind": "text", "text": "No matching member", "element": "text", "exact": true},
+      "expectedMatches": 1
+    },
+    "searchedMemberId": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [
+        {
+          "kind": "container",
+          "locator": {"kind": "role", "role": "region", "name": "Member Search Results", "exact": true}
+        }
+      ],
+      "locator": {"kind": "field", "label": "Searched Member ID"},
+      "expectedMatches": 1
+    },
+    "noPrimary": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [],
+      "locator": {"kind": "text", "text": "No primary savings account", "element": "text", "exact": true},
+      "expectedMatches": 1
+    },
+    "accessDenied": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [],
+      "locator": {"kind": "text", "text": "Access denied", "element": "text", "exact": true},
+      "expectedMatches": 1
+    },
+    "servicingNotice": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [],
+      "locator": {"kind": "role", "role": "dialog", "name": "Servicing notice", "exact": true},
+      "expectedMatches": 1
+    },
+    "acknowledgeNotice": {
+      "scope": {"kind": "frame", "frames": [{"attribute": "title", "value": "Member servicing workspace"}]},
+      "within": [{"kind": "container", "locator": {"kind": "role", "role": "dialog", "name": "Servicing notice", "exact": true}}],
+      "locator": {"kind": "role", "role": "button", "name": "Acknowledge", "exact": true},
+      "expectedMatches": 1
+    }
+  },
+  "preconditions": {"staff-workspace": {"kind": "visible", "target": "staffHeading"}},
+  "steps": [
+    {
+      "id": "open-search",
+      "type": "click",
+      "before": {"kind": "visible", "target": "memberSearchNav"},
+      "after": {"kind": "visible", "target": "searchHeading"},
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [],
+      "recoveryRuleIds": [],
+      "source": {"kind": "discovery", "runId": "11111111-1111-4111-8111-111111111111", "eventSequence": 1},
+      "target": "memberSearchNav"
+    },
+    {
+      "id": "enter-member",
+      "type": "fill",
+      "before": {"kind": "editable", "target": "memberInput"},
+      "after": {
+        "kind": "equals",
+        "source": {"target": "memberInput", "read": "value", "transform": "identity"},
+        "value": {"kind": "input", "name": "memberId"}
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [],
+      "recoveryRuleIds": [],
+      "source": {"kind": "discovery", "runId": "11111111-1111-4111-8111-111111111111", "eventSequence": 2},
+      "target": "memberInput",
+      "value": {"kind": "input", "name": "memberId"}
+    },
+    {
+      "id": "search-member",
+      "type": "click",
+      "before": {"kind": "visible", "target": "searchButton"},
+      "after": {"kind": "visible", "target": "memberOpen"},
+      "timeoutMs": 10000,
+      "outcomeRuleIds": ["member-not-found"],
+      "recoveryRuleIds": [],
+      "source": {"kind": "discovery", "runId": "11111111-1111-4111-8111-111111111111", "eventSequence": 3},
+      "target": "searchButton"
+    },
+    {
+      "id": "open-member",
+      "type": "click",
+      "before": {"kind": "visible", "target": "memberOpen"},
+      "after": {
+        "kind": "all",
+        "conditions": [
+          {"kind": "visible", "target": "overviewHeading"},
+          {
+            "kind": "equals",
+            "source": {"target": "activeMemberId", "read": "text", "transform": "trim"},
+            "value": {"kind": "input", "name": "memberId"}
+          }
+        ]
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [],
+      "recoveryRuleIds": [],
+      "source": {"kind": "discovery", "runId": "11111111-1111-4111-8111-111111111111", "eventSequence": 4},
+      "target": "memberOpen"
+    },
+    {
+      "id": "open-inquiry",
+      "type": "click",
+      "before": {
+        "kind": "all",
+        "conditions": [
+          {"kind": "visible", "target": "accountInquiryNav"},
+          {
+            "kind": "equals",
+            "source": {"target": "activeMemberId", "read": "text", "transform": "trim"},
+            "value": {"kind": "input", "name": "memberId"}
+          }
+        ]
+      },
+      "after": {"kind": "visible", "target": "inquiryHeading"},
+      "timeoutMs": 10000,
+      "outcomeRuleIds": ["access-denied"],
+      "recoveryRuleIds": ["acknowledge-servicing-notice"],
+      "source": {"kind": "discovery", "runId": "11111111-1111-4111-8111-111111111111", "eventSequence": 5},
+      "target": "accountInquiryNav"
+    },
+    {
+      "id": "read-primary-account",
+      "type": "capture",
+      "before": {
+        "kind": "all",
+        "conditions": [
+          {"kind": "visible", "target": "inquiryHeading"},
+          {
+            "kind": "equals",
+            "source": {"target": "activeMemberId", "read": "text", "transform": "trim"},
+            "value": {"kind": "input", "name": "memberId"}
+          }
+        ]
+      },
+      "after": {
+        "kind": "equals",
+        "source": {"target": "primaryAccountCell", "read": "text", "transform": "trim"},
+        "value": {"kind": "variable", "name": "primaryAccountId"}
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": ["no-primary-savings", "access-denied"],
+      "recoveryRuleIds": [],
+      "source": {"kind": "discovery", "runId": "11111111-1111-4111-8111-111111111111", "eventSequence": 6},
+      "variable": "primaryAccountId",
+      "sourceValue": {"target": "primaryAccountCell", "read": "text", "transform": "trim"}
+    },
+    {
+      "id": "open-primary-savings",
+      "type": "click",
+      "before": {
+        "kind": "all",
+        "conditions": [
+          {"kind": "visible", "target": "primarySavingsOpen"},
+          {
+            "kind": "equals",
+            "source": {"target": "activeMemberId", "read": "text", "transform": "trim"},
+            "value": {"kind": "input", "name": "memberId"}
+          }
+        ]
+      },
+      "after": {
+        "kind": "all",
+        "conditions": [
+          {"kind": "visible", "target": "detailsHeading"},
+          {
+            "kind": "equals",
+            "source": {"target": "detailsMemberId", "read": "text", "transform": "trim"},
+            "value": {"kind": "input", "name": "memberId"}
+          },
+          {
+            "kind": "equals",
+            "source": {"target": "detailsAccountId", "read": "text", "transform": "trim"},
+            "value": {"kind": "variable", "name": "primaryAccountId"}
+          }
+        ]
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [],
+      "recoveryRuleIds": [],
+      "source": {"kind": "discovery", "runId": "11111111-1111-4111-8111-111111111111", "eventSequence": 7},
+      "target": "primarySavingsOpen"
+    }
+  ],
+  "outputs": {
+    "memberId": {"target": "detailsMemberId", "read": "text", "transform": "trim"},
+    "accountId": {"target": "detailsAccountId", "read": "text", "transform": "trim"},
+    "accountType": {"target": "detailsAccountType", "read": "text", "transform": "savings-type"},
+    "currentBalanceMinor": {"target": "currentBalance", "read": "text", "transform": "usd-minor"},
+    "currency": {"target": "currency", "read": "text", "transform": "trim"}
+  },
+  "successCondition": {
+    "conditions": [
+      {"kind": "visible", "target": "detailsHeading"},
+      {
+        "kind": "equals",
+        "source": {"target": "detailsAccountId", "read": "text", "transform": "trim"},
+        "value": {"kind": "variable", "name": "primaryAccountId"}
+      },
+      {
+        "kind": "equals",
+        "source": {"target": "detailsAccountType", "read": "text", "transform": "trim"},
+        "value": {"kind": "literal", "value": "Primary Savings"}
+      },
+      {
+        "kind": "equals",
+        "source": {"target": "detailsDesignation", "read": "text", "transform": "trim"},
+        "value": {"kind": "literal", "value": "Primary"}
+      },
+      {
+        "kind": "equals",
+        "source": {"target": "detailsStatus", "read": "text", "transform": "trim"},
+        "value": {"kind": "literal", "value": "Active"}
+      },
+      {
+        "kind": "equals",
+        "source": {"target": "currency", "read": "text", "transform": "trim"},
+        "value": {"kind": "literal", "value": "USD"}
+      }
+    ],
+    "identity": [{"target": "detailsMemberId", "input": "memberId"}]
+  },
+  "outcomeRules": [
+    {
+      "id": "member-not-found",
+      "code": "MEMBER_NOT_FOUND",
+      "when": {
+        "kind": "all",
+        "conditions": [
+          {"kind": "visible", "target": "notFound"},
+          {
+            "kind": "equals",
+            "source": {"target": "searchedMemberId", "read": "text", "transform": "trim"},
+            "value": {"kind": "input", "name": "memberId"}
+          }
+        ]
+      },
+      "appliesToStepIds": ["search-member"],
+      "source": {"kind": "authored", "reason": "Planned synthetic portal business condition; runtime proof is later work."}
+    },
+    {
+      "id": "no-primary-savings",
+      "code": "NO_PRIMARY_SAVINGS_ACCOUNT",
+      "when": {
+        "kind": "all",
+        "conditions": [
+          {"kind": "visible", "target": "noPrimary"},
+          {
+            "kind": "equals",
+            "source": {"target": "activeMemberId", "read": "text", "transform": "trim"},
+            "value": {"kind": "input", "name": "memberId"}
+          }
+        ]
+      },
+      "appliesToStepIds": ["read-primary-account"],
+      "source": {"kind": "authored", "reason": "Planned synthetic portal business condition; runtime proof is later work."}
+    },
+    {
+      "id": "access-denied",
+      "code": "ACCESS_DENIED",
+      "when": {
+        "kind": "all",
+        "conditions": [
+          {"kind": "visible", "target": "accessDenied"},
+          {
+            "kind": "equals",
+            "source": {"target": "activeMemberId", "read": "text", "transform": "trim"},
+            "value": {"kind": "input", "name": "memberId"}
+          }
+        ]
+      },
+      "appliesToStepIds": ["open-inquiry", "read-primary-account"],
+      "source": {"kind": "authored", "reason": "Planned synthetic portal business condition; runtime proof is later work."}
+    }
+  ],
+  "recoveryRules": [
+    {
+      "id": "acknowledge-servicing-notice",
+      "when": {"kind": "visible", "target": "servicingNotice"},
+      "appliesToStepIds": ["open-inquiry"],
+      "dispatchState": "not_sent",
+      "maxAttempts": 1,
+      "timeoutMs": 10000,
+      "actions": [{"type": "click", "target": "acknowledgeNotice"}],
+      "after": {
+        "kind": "all",
+        "conditions": [{"kind": "absent", "target": "servicingNotice"}, {"kind": "visible", "target": "overviewHeading"}]
+      },
+      "source": {
+        "kind": "authored",
+        "reason": "Illustrative known notice dismissal before inquiry dispatch; requires later scenario verification."
+      }
+    }
+  ],
+  "manualContributions": []
+}

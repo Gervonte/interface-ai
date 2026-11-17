@@ -11,6 +11,11 @@ export const HealthResponseSchema = z.strictObject({
 export type HealthResponse = z.infer<typeof HealthResponseSchema>;
 
 export const ApiErrorSchema = z.strictObject({
-  error: z.strictObject({ code: z.string(), message: z.string() }),
+  error: z.strictObject({ code: z.string(), message: z.string(), runId: z.uuid().optional() }),
 });
 export type ApiError = z.infer<typeof ApiErrorSchema>;
+
+export * from './data.js';
+export * from './budgets.js';
+export * from './capability.js';
+export * from './runs.js';

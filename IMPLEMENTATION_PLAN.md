@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: INT-001 scaffold, INT-002 hosted fixture connectivity, and INT-003 SDK execution-boundary compatibility are implemented and verified; INT-004 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
+Status: INT-001 through INT-004 are implemented and verified at their stated scope; INT-005 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -38,11 +38,13 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
 ## First balance discovery and replay slice
 
-4. **INT-004 — Implement the public contracts and capability schema.**
+4. **INT-004 — Implement the public contracts and capability schema. (Complete)**
 
     Define Zod request/result/action/envelope contracts and the constrained serializable input/output schema representation with its runtime validator. Define versioned steps, scoped targets, parameter references, pre/postconditions, output extraction, and business-outcome/recovery representations. Resolve the balance contract against the workflow document; include blocked-run context and a representation for supported manual contributions/intervention requirements; add write-specific commit semantics with the second capability. Choose finite initial budgets and document them as adjustable configuration.
 
     **Done when:** valid contracts round-trip; unknown versions/operations, missing references, invalid bindings, and executable content are rejected. Embedded invocation/output schemas actually validate values; parsing the envelope alone is insufficient. **Depends on:** INT-003. **Acceptance:** ART-02, ART-03, ART-04, ART-05.
+
+    **Verified:** public Zod request/result/control contracts, a bounded data-only capability format, semantic frame/table/row targets, typed references/captures, independent terminal identity checks, UI output extraction, scoped outcomes/recovery, and explicit manual contribution/intervention representations. Capability-aware validators check actual input/output values, not just envelopes. The complete authored balance contract round-trips; unsupported versions/code/operations, unresolved/forward references, invalid bindings, and inconsistent run state are rejected. Initial finite server budgets are documented. Typecheck, 106 tests, and all builds pass. See [contract specification and limits](CONTRACTS.md) and [authored example](examples/README.md). This is format/validation support for ART-02–ART-05; real discovery-derived artifacts and UI evaluation remain later tasks.
 
 5. **INT-005 — Set up PostgreSQL persistence and isolated target data.**
 
