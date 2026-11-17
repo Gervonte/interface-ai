@@ -93,7 +93,7 @@ The spike decides the smallest adapter we need, not whether to relax the assignm
 
 TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase delegation are selected. The following remain proposals or open choices:
 
-- Serializable capability input/output schema validation and database access/migrations. Workspace tooling is pnpm 10.32.1 with exact dependency catalogs; Vitest is the selected test runner (INT-001).
+- Database access/migrations remain INT-005. INT-004 selects a constrained flat scalar-object schema, validated through Zod with fixed formats and no executable schema hooks; see [CONTRACTS.md](CONTRACTS.md). Workspace tooling is pnpm 10.32.1 with exact dependency catalogs; Vitest is the selected test runner (INT-001).
 - Stagehand is pinned to 4.4.0 and the selected Gateway model is `openai/gpt-5`. The compatibility fixture uses a temporary Cloudflare Quick Tunnel. Model-driven operations are verified in INT-003; settle the full portal deployment/connectivity in INT-006.
 
 Settle these with the chosen runtime/SDK constraints. The primary stack is selected; exact versions, supporting libraries, and hosting remain implementation choices.
