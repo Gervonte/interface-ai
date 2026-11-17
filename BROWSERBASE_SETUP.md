@@ -1,6 +1,6 @@
 # Browserbase connectivity (INT-002)
 
-INT-002 is verified. This provides a hosted connection and a small synthetic compatibility fixture. The complete staff portal is INT-006; model-driven discovery, deterministic replay, and human takeover still need their implementation and evidence.
+INT-002 is verified. This provides a hosted connection and a small synthetic compatibility fixture. The complete staff portal is INT-006. The separate [INT-003 check](SDK_COMPATIBILITY.md) verifies model proposals, inference-forbidden execution, and human takeover on this fixture; the final assessment workflows still need their implementation and evidence.
 
 ## Credentials
 
@@ -76,7 +76,7 @@ Provider errors are reduced to a failure phase rather than printed with authenti
 | Provider recording / logging / CAPTCHA solving | Disabled / disabled / disabled |
 | Navigation domain | Current fixture hostname |
 
-Model Gateway uses Browserbase authentication on hosted browsers. No separate model-provider API key is configured. This model is explicitly selected from the provider's [documented models](https://docs.browserbase.com/platform/model-gateway/overview). INT-002 initializes that configuration but deliberately makes no `observe`, `act`, or AI `extract` request; **actual inference support and accounting are verified in INT-003**.
+Model Gateway uses Browserbase authentication on hosted browsers. No separate model-provider API key is configured. This model is explicitly selected from the provider's [documented models](https://docs.browserbase.com/platform/model-gateway/overview). INT-002 initializes that configuration but deliberately makes no `observe`, `act`, or AI `extract` request; **actual inference support and accounting are verified in the separate [INT-003 check](SDK_COMPATIBILITY.md)**.
 
 Browserbase's domain restriction covers top-frame navigation, allows subdomains, and does not govern iframe/resources. The fixture adds a same-origin content security policy and has no scripts/external resources. This is useful containment for the compatibility check; the full application-owned action/target policy remains INT-007. See [Allowed Domains](https://docs.browserbase.com/platform/browser/security/allowed-domains.md).
 

@@ -1,6 +1,6 @@
 # Stack and Delegation Decisions
 
-Status: TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase-first delivery are agreed. The product mapping below is the implementation direction, subject to a small compatibility spike. INT-001 supplies the pinned workspace and local app shells. INT-002 verifies hosted Browserbase connectivity to a temporary synthetic fixture; see [setup and selected configuration](BROWSERBASE_SETUP.md). Actual model inference, execution boundaries, and handoff compatibility remain INT-003; PostgreSQL remains INT-005.
+Status: TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase-first delivery are agreed. The product mapping below is the implementation direction, subject to a small compatibility spike. INT-001 supplies the pinned workspace and local app shells. INT-002 verifies hosted Browserbase connectivity to a temporary synthetic fixture; see [setup and selected configuration](BROWSERBASE_SETUP.md). INT-003 verifies real model proposals, inference-forbidden deterministic execution, and mediated same-session handoff on that fixture; see [SDK compatibility results](SDK_COMPATIBILITY.md). PostgreSQL remains INT-005.
 
 ## Selected direction
 
@@ -12,7 +12,7 @@ Status: TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browser
 - **Database:** PostgreSQL. Prefer the database the user already knows; retain the initial single-coordinator/single-active-run design.
 - **Browser platform:** Browserbase-hosted sessions.
 - **Browser/AI SDK:** Stagehand TypeScript, using its current v4 interface as the documentation baseline. Pin and verify exact compatible package/runtime versions during setup.
-- **Discovery inference:** Browserbase Model Gateway through Stagehand. INT-002 selects `openai/gpt-5`; actual inference support and usage must be verified in INT-003 and recorded for genuine discovery evidence.
+- **Discovery inference:** Browserbase Model Gateway through Stagehand. INT-002 selects `openai/gpt-5`; INT-003 verifies actual Gateway inference and usage on the synthetic compatibility fixture. Genuine end-to-end discovery evidence remains later work.
 - **Custom TypeScript:** only the application contracts, coordination, checks, persistence, UI, and behavior that the delegated products do not satisfy.
 
 ## Express and Zod integration
@@ -76,9 +76,9 @@ Use the more controllable Stagehand integration first. Reconsider further delega
 
 The managed Agents reply-based pause feature should not be treated as our entire human-control mechanism. Its documented pause keeps the browser alive but has lifecycle limits, including inability to stop a paused run directly. Our Sessions/Stagehand control path must independently prove cancellation and same-session takeover. See [Pausing runs](https://docs.browserbase.com/platform/agents/pausing-runs).
 
-## Compatibility spike before broad scaffolding
+## Verified compatibility spike before broader implementation
 
-Use a tiny UI fixture to verify the actual installed SDK; this is not the assignment's discovery evidence:
+INT-003 verifies the actual pinned SDK on the tiny UI fixture; see [observed results, limitations, and adapter choices](SDK_COMPATIBILITY.md). These checks are not the assignment's final discovery evidence:
 
 1. Launch/connect a hosted session from TypeScript and record its ID; serve the fixture at an address reachable by Browserbase.
 2. Obtain a model-proposed action, inspect/check it before execution, and record its descriptor plus actual result.
@@ -94,6 +94,6 @@ The spike decides the smallest adapter we need, not whether to relax the assignm
 TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase delegation are selected. The following remain proposals or open choices:
 
 - Serializable capability input/output schema validation and database access/migrations. Workspace tooling is pnpm 10.32.1 with exact dependency catalogs; Vitest is the selected test runner (INT-001).
-- Stagehand is pinned to 4.4.0 and the selected Gateway model is `openai/gpt-5`. The compatibility fixture uses a temporary Cloudflare Quick Tunnel. Verify model-driven operations in INT-003 and settle the full portal deployment/connectivity in INT-006.
+- Stagehand is pinned to 4.4.0 and the selected Gateway model is `openai/gpt-5`. The compatibility fixture uses a temporary Cloudflare Quick Tunnel. Model-driven operations are verified in INT-003; settle the full portal deployment/connectivity in INT-006.
 
 Settle these with the chosen runtime/SDK constraints. The primary stack is selected; exact versions, supporting libraries, and hosting remain implementation choices.

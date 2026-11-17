@@ -1,13 +1,13 @@
 # Interface AI — Computer-use automation
 
-A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. Discovery, replay, the complete staff portal, and PostgreSQL persistence remain later tasks.
+A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. INT-003 qualifies model proposals, deterministic execution, and real same-session human takeover on that fixture. Discovery, replay, the complete staff portal, and PostgreSQL persistence remain later tasks.
 
 ## Requirements
 
 - Node.js **26.2.0** (`nvm install` and `nvm use` read `.nvmrc`).
 - pnpm **10.32.1**. Use your existing pnpm installation, or install that exact version with `npm install --global pnpm@10.32.1`.
 
-The root `packageManager`, engine constraints, exact dependency catalog, and committed lockfile define the verified toolchain. Stagehand is pinned and initialized only by the explicit Browserbase check; normal app startup does not open hosted sessions.
+The root `packageManager`, engine constraints, exact dependency catalog, and committed lockfile define the verified toolchain. Stagehand is pinned and initialized only by the explicit Browserbase tools; normal app startup does not open hosted sessions.
 
 ## Install and run
 
@@ -78,4 +78,8 @@ Verified with the pinned Node/pnpm versions on 2026-11-16: workspace typecheckin
 
 ## INT-002 verification
 
-Verified on 2026-11-16: a real hosted Browserbase session loaded the staff-shell/iframe/table fixture, passed 27 concurrent automation API health checks (maximum 24 ms), and terminated with confirmed `COMPLETED` status. `pnpm check` passes typechecking, 33 tests, and all builds. [Setup and start/stop commands](BROWSERBASE_SETUP.md); [sanitized live evidence](evidence/int-002/README.md). Model inference and same-session takeover remain INT-003; the complete portal remains INT-006.
+Verified on 2026-11-16: a real hosted Browserbase session loaded the staff-shell/iframe/table fixture, passed 27 concurrent automation API health checks (maximum 24 ms), and terminated with confirmed `COMPLETED` status. `pnpm check` passes typechecking, 33 tests, and all builds. [Setup and start/stop commands](BROWSERBASE_SETUP.md); [sanitized live evidence](evidence/int-002/README.md). Model inference and same-session takeover on this fixture are verified separately in INT-003; the complete portal remains INT-006.
+
+## INT-003 verification
+
+Verified on 2026-11-16 (America/New_York): genuine Gateway action proposals, serialized action execution with changed input and inference forbidden, semantic targeting across reordered rows, actual user takeover and validated hand-back in the same session, synthetic failure captures, and confirmed session termination. `pnpm check` passes typechecking, 51 tests, and all builds. Run the temporary local operator tool with `pnpm browserbase:spike` after starting the fixture/tunnel. [Steps and adapter decisions](SDK_COMPATIBILITY.md); [curated live evidence](evidence/int-003/README.md). This is SDK compatibility verification; the final artifact executor, coordinator, and assessment workflow remain later tasks.
