@@ -1,6 +1,6 @@
 # Interface AI — Computer-use automation
 
-A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. INT-003 qualifies model proposals, deterministic execution, and real same-session human takeover on that fixture. INT-004 adds public run/control contracts and a validated, data-only capability format with embedded input/output validation. INT-005 adds PostgreSQL persistence, isolated runtime roles, and synthetic database fixtures. Discovery, replay, and the complete staff portal remain later tasks.
+A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. INT-003 qualifies model proposals, deterministic execution, and real same-session human takeover on that fixture. INT-004 adds public run/control contracts and a validated, data-only capability format with embedded input/output validation. INT-005 adds PostgreSQL persistence, isolated runtime roles, and synthetic database fixtures. INT-006 implements the connected credit-union staff portal and verifies its balance workflow through Browserbase. Discovery and saved-capability replay remain later tasks.
 
 ## Requirements
 
@@ -26,15 +26,15 @@ pnpm dev
 | Demo API | http://127.0.0.1:3002/healthz | `pnpm dev:demo-api` |
 | Demo UI | http://127.0.0.1:5174 | `pnpm dev:demo-web` |
 
-Each frontend proxies `/api/*` to its own backend; run the matching API to see its connected status. Ports are strict so the frontends do not silently move when a port is occupied. An individual command builds public contracts first. Restart it after changing the shared contracts; continuous rebuilding of shared packages is not configured yet.
+Each frontend proxies `/api/*` to its own backend; run the matching API to use the UI. The staff portal also needs the demo database setup below. Ports are strict so the frontends do not silently move when a port is occupied. An individual command builds public contracts first. Restart it after changing the shared contracts; continuous rebuilding of shared packages is not configured yet.
 
 ## Configuration and data boundaries
 
-The scaffold runs **without API keys, PostgreSQL, or live services**. Optional `.env.example` files live in the backend app directories. Copy one to `.env` in that same directory to override HOST/PORT; it is loaded by Node from that app's working directory. If API ports change, update the corresponding Vite proxy target as well.
+Health endpoints, the operator shell, and default tests run **without API keys or PostgreSQL**. The connected staff portal requires its separate PostgreSQL database. Optional `.env.example` files live in the backend app directories. Copy one to `.env` in that same directory to override HOST/PORT; it is loaded by Node from that app's working directory. If API ports change, update the corresponding Vite proxy target as well.
 
-Browserbase credentials and fixture connectivity are documented in [BROWSERBASE_SETUP.md](BROWSERBASE_SETUP.md). The explicit `pnpm browserbase:check` command opens one hosted session; `pnpm dev:fixture` serves its separate synthetic-only target on port 3003. Do not place secrets in frontend `VITE_*` variables or shared public contracts. `.env` files, runtime storage, browser profiles, captures, and build output stay ignored. Curated sanitized evidence will live separately under `evidence/` in later tasks.
+Browserbase credentials and fixture connectivity are documented in [BROWSERBASE_SETUP.md](BROWSERBASE_SETUP.md). The explicit `pnpm browserbase:check` command opens one hosted session; `pnpm dev:fixture` serves its separate synthetic-only target on port 3003. Do not place secrets in frontend `VITE_*` variables or shared public contracts. `.env` files, runtime storage, browser profiles, captures, and build output stay ignored. Curated synthetic verification evidence lives under `evidence/`; private runtime output remains ignored.
 
-The demo app has its own backend. Automation imports only public transport schemas; it has no access to target fixtures or business database credentials. INT-005 provisions separate application databases and least-privilege roles. See [DATABASE.md](DATABASE.md) for setup, migration, seed/reset, and shutdown commands. The current HTTP shells do not yet invoke the repositories for run/member workflows.
+The demo app has its own backend. Automation imports only public transport schemas; it has no access to target fixtures or business database credentials. INT-005 provisions separate application databases and least-privilege roles. See [DATABASE.md](DATABASE.md) for setup, migration, seed/reset, and shutdown commands. The staff portal uses the demo repository through its own target API. Automation run HTTP orchestration remains INT-008.
 
 ## Local PostgreSQL
 
@@ -60,7 +60,7 @@ pnpm check
 
 Vitest runs real HTTP integration checks for independent service identity, safe errors, and the synthetic fixture boundary. Injected-provider tests cover connection cleanup, termination verification, API health, and configuration validation. These tests are not discovery or replay evidence. Tests use ephemeral loopback ports and need no live service credentials. Builds run in workspace dependency order; both frontends output `dist/`, and APIs output runnable server modules.
 
-After building, start one backend with `pnpm --filter @interface-ai/automation start` or `pnpm --filter @interface-ai/demo-api start`. Built frontend deployment/proxying is not configured in INT-001; Vite development URLs are local previews. INT-002 uses a separate fixture-only server and temporary tunnel for Browserbase access; see [setup](BROWSERBASE_SETUP.md).
+After building, start one backend with `pnpm --filter @interface-ai/automation start` or `pnpm --filter @interface-ai/demo-api start`. Use `pnpm demo:serve` to build and serve the complete target UI/API at http://127.0.0.1:3002. The operator UI still uses its Vite development preview. INT-002 uses a separate fixture-only server and temporary tunnel for Browserbase access; see [setup](BROWSERBASE_SETUP.md).
 
 ## Workspace
 
@@ -85,7 +85,7 @@ tests/              HTTP/provider/contracts tests; separate real PostgreSQL suit
 - [Stack decisions](STACK.md)
 - [Demo workflows](DEMO_WORKFLOW.md)
 
-The genuine goal → discovery → artifact → replay commands and assessment evidence will be added when those features exist (INT-009–INT-011). No paid session is opened by these setup commands.
+The genuine goal → discovery → artifact → replay commands and assessment evidence will be added when those features exist (INT-009–INT-011). Normal app/database setup does not open a paid session; explicit Browserbase check commands do.
 
 ## INT-001 verification
 
@@ -106,3 +106,15 @@ Verified on 2026-11-17: typed public requests/results/control, versioned capabil
 ## INT-005 verification
 
 Verified on 2026-11-17: both PostgreSQL databases migrated from empty state, synthetic baseline seeds reset predictably, and a repeated migration applied zero changes. `pnpm check:db` passes typechecking, 106 default tests, 12 real PostgreSQL integration tests, and all builds. The database suite verifies isolation, SQL constraints, concurrent receipts/events, transaction rollback, immutable exact versions/configuration, and retained source provenance. [Setup and schema details](DATABASE.md). This is persistence verification; the connected staff portal is INT-006 and run orchestration remains later work.
+
+## INT-006 verification
+
+The PostgreSQL-backed staff shell and servicing iframe implement Member Search, Member Overview, Account Inquiry, and Account Details. Member/account identities, statuses, designation, currency, and distinct balance fields remain visible. Back/new-search/Clear and late-response handling prevent stale member data. `pnpm check:db` passes typechecking, 113 default tests, 13 real database tests, and all builds. A real Browserbase UI check verified M1001/M1002, reordered repeated Open controls, negative states, zero inference, and confirmed session termination. [Portal walkthrough/setup](PORTAL.md); [curated evidence](evidence/int-006/README.md). Full discovery/executor/coordinator behavior remains later work.
+
+To use only the target after database setup:
+
+```sh
+pnpm demo:serve
+```
+
+Open http://127.0.0.1:3002. To verify hosted reachability, follow the target-only tunnel and `pnpm browserbase:portal-check` instructions in [PORTAL.md](PORTAL.md#browserbase-verification).

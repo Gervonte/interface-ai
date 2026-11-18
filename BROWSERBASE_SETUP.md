@@ -1,6 +1,6 @@
 # Browserbase connectivity (INT-002)
 
-INT-002 is verified. This provides a hosted connection and a small synthetic compatibility fixture. The complete staff portal is INT-006. The separate [INT-003 check](SDK_COMPATIBILITY.md) verifies model proposals, inference-forbidden execution, and human takeover on this fixture; the final assessment workflows still need their implementation and evidence.
+INT-002 is verified. This provides a hosted connection and a small synthetic compatibility fixture. The connected INT-006 staff portal has a separate [target-only tunnel and UI check](PORTAL.md#browserbase-verification). The separate [INT-003 check](SDK_COMPATIBILITY.md) verifies model proposals, inference-forbidden execution, and human takeover on this fixture; the final assessment workflows still need their implementation and evidence.
 
 ## Credentials
 
@@ -89,3 +89,7 @@ After the check, use Ctrl+C in terminal 2 to stop the tunnel and in terminal 1 t
 The fixture uses ordinary HTML forms and semantic table headings inside a real iframe. M1001 and M1002 have different primary-savings values and reordered account rows. “Open” navigates to the selected account's details. This provides SDK control patterns for INT-003, not the complete member-search/overview/inquiry workflow required in INT-006.
 
 See [the recorded live result](evidence/int-002/README.md). Automated tests use fake provider dependencies to check cleanup, health, termination confirmation, and safe configuration failures; HTTP tests check the public fixture boundary. Those tests do not replace the live Browserbase result and are not discovery/replay assessment evidence.
+
+## Connected staff portal (INT-006)
+
+The compatibility fixture above remains isolated on port 3003. To test the full PostgreSQL-backed portal, use `pnpm demo:serve`, tunnel only port 3002, and run `BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm browserbase:portal-check`. Use the HTTPS root, without `/compatibility`. This separate authored UI check verifies both members, repeated controls and negative states without inference; it does not discover/save a capability. Its provider session timeout is 300 seconds. [Full start/stop instructions](PORTAL.md); [verified evidence](evidence/int-006/README.md).

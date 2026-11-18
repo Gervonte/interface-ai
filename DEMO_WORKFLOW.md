@@ -1,6 +1,6 @@
 # Demo Workflow
 
-Status: the target is a fictional credit-union staff servicing console. Balance lookup is the agreed assessment baseline; preferred-email maintenance remains planned follow-on work. INT-001 supplies app shells. INT-002 adds a separate small staff-shell/iframe/table compatibility fixture for SDK validation; the full portal screens and workflows below are not implemented yet. See [Browserbase setup](BROWSERBASE_SETUP.md).
+Status: the target is a fictional credit-union staff servicing console. Balance lookup is the agreed assessment baseline; preferred-email maintenance remains planned follow-on work. INT-006 implements the connected staff shell, framed search/overview/inquiry/details, baseline records, and ordinary loading/validation/negative states. Full controlled exception injection is INT-012 and contact maintenance is INT-018. The separate INT-002/INT-003 compatibility fixture remains for SDK validation. See [portal setup and verification](PORTAL.md).
 
 ## Target purpose and assessment fit
 
