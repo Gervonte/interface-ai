@@ -10,6 +10,7 @@ import { DispatchGate } from '../apps/automation/src/execution/gate.js';
 import { Executor, transform } from '../apps/automation/src/execution/executor.js';
 import { EvidenceStore } from '../apps/automation/src/execution/evidence.js';
 import { ExecutionError } from '../apps/automation/src/execution/errors.js';
+import { parseRequestJson } from '../apps/automation/src/execution/json.js';
 
 const target: Target = { scope: { kind: 'document' }, within: [], locator: { kind: 'label', text: 'Member ID', exact: true }, expectedMatches: 1 };
 const validState: TargetState = { count: 1, visible: true, enabled: true, editable: true, text: 'M1001', value: '', checked: false, tag: 'input', name: 'Member ID', inputType: 'text' };
@@ -102,9 +103,11 @@ describe('control gate', () => {
     await expect(gate.dispatch(4, async () => { calls++; })).rejects.toMatchObject({ code: 'ACTION_IN_FLIGHT' }); release(); await first; expect(calls).toBe(1);
   });
 });
-describe('strict extracted values', () => {
+describe('strict values and JSON transport', () => {
   it.each([['$1,250.34', 125034], ['$0.01', 1], ['$87.65', 8765]])('parses %s using integer minor units', (value, expected) => expect(transform(value as string, 'usd-minor')).toBe(expected));
   it.each(['1250.34', '$1,25.34', '$-1.00', '$1.2', '$90071992547409.92'])('rejects invalid/unsafe USD %s', value => expect(() => transform(value, 'usd-minor')).toThrow());
   it.each(['01', '1.2', ' 1', '9007199254740992'])('rejects noncanonical/unsafe integer %s', value => expect(() => transform(value, 'integer')).toThrow());
   it('checks exact savings types and booleans', () => { expect(transform('Primary Savings', 'savings-type')).toBe('savings'); expect(transform(true, 'identity')).toBe(true); expect(() => transform('Checking', 'savings-type')).toThrow(); });
+  it.each(['{"a":1,"a":2}', '{"a":1,"\\u0061":2}', '{"inputs":{"memberId":"x","memberId":"y"}}', '{"__proto__":{}}'])('rejects ambiguous JSON', text => expect(() => parseRequestJson(text)).toThrow());
+  it('accepts ordinary nested JSON with escaped quotes and independent object keys', () => expect(parseRequestJson('{"a":[{"x":"a\\\"b"},{"x":2}],"b":true}')).toEqual({ a: [{ x: 'a"b' }, { x: 2 }], b: true }));
 });

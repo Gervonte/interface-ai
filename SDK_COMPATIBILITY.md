@@ -76,3 +76,7 @@ These fixture proofs inform REP-01, REP-03, HUM-02, HUM-03, HUM-05, and DES-01. 
 - [Browserbase Live View](https://docs.browserbase.com/platform/browser/observability/session-live-view)
 
 Actual runtime results, where verified, are recorded separately from these provider claims.
+
+## Shared runtime integration (INT-007/008)
+
+The compatibility spike remains historical evidence. The shared executor now supplies an atomic semantic DOM adapter over the hosted Stagehand page, with policy/actionability checks, deterministic extraction, safe failure snapshots and application-owned lifecycle/dispatch fencing. This avoids reliance on positional descriptors or first-match dispatch behavior. [Runtime guide](RUNTIME.md); [real shared-executor evidence](evidence/int-007-008/README.md). Its same-origin/native-DOM limitations are explicit; model proposal integration and saved-capability replay remain INT-009/010.

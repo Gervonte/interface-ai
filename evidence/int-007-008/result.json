@@ -1,0 +1,86 @@
+{
+  "tasks": [
+    "INT-007",
+    "INT-008"
+  ],
+  "kind": "authored-shared-executor-check",
+  "runId": "cb571aa3-3f43-40c7-9d85-61cdc49bd17b",
+  "configuration": {
+    "targetVersion": 1795043097,
+    "policyVersion": 1795043097
+  },
+  "verified": [
+    {
+      "memberId": "M1001",
+      "accountId": "S2001",
+      "type": "savings",
+      "currency": "USD",
+      "currentBalanceMinor": 125034,
+      "availableBalanceMinor": 120034
+    },
+    {
+      "memberId": "M1002",
+      "accountId": "S2002",
+      "type": "savings",
+      "currency": "USD",
+      "currentBalanceMinor": 8765,
+      "availableBalanceMinor": 7600
+    }
+  ],
+  "expectedFailure": {
+    "kind": "failure",
+    "code": "AMBIGUOUS_TARGET",
+    "blocked": {
+      "stepId": "check-47",
+      "actionIndex": null,
+      "reason": "AMBIGUOUS_TARGET",
+      "dispatchState": "not_sent",
+      "effectState": "not_checked",
+      "checkpointId": null,
+      "expected": {
+        "code": "UNIQUE_READY_TARGET",
+        "description": "One permitted actionable target and a satisfied UI condition."
+      },
+      "observed": {
+        "code": "AMBIGUOUS_TARGET",
+        "description": "The required UI condition was not confirmed."
+      },
+      "evidenceIds": [
+        "e385b4a9-4f5e-4c0c-81df-8522ff5317f1"
+      ]
+    },
+    "summary": "Execution stopped. Inspect the sanitized run events for context.",
+    "evidenceIds": [
+      "e385b4a9-4f5e-4c0c-81df-8522ff5317f1"
+    ]
+  },
+  "ambiguousDispatchCount": 0,
+  "evidenceId": "e385b4a9-4f5e-4c0c-81df-8522ff5317f1",
+  "sessionState": "closed",
+  "finalProviderStatus": "COMPLETED",
+  "inferenceAttempts": 0,
+  "modelMetrics": {
+    "actPromptTokens": 0,
+    "actCompletionTokens": 0,
+    "actReasoningTokens": 0,
+    "actCachedInputTokens": 0,
+    "actInferenceTimeMs": 0,
+    "extractPromptTokens": 0,
+    "extractCompletionTokens": 0,
+    "extractReasoningTokens": 0,
+    "extractCachedInputTokens": 0,
+    "extractInferenceTimeMs": 0,
+    "observePromptTokens": 0,
+    "observeCompletionTokens": 0,
+    "observeReasoningTokens": 0,
+    "observeCachedInputTokens": 0,
+    "observeInferenceTimeMs": 0,
+    "totalPromptTokens": 0,
+    "totalCompletionTokens": 0,
+    "totalReasoningTokens": 0,
+    "totalCachedInputTokens": 0,
+    "totalInferenceTimeMs": 0
+  },
+  "finishedAt": "2026-11-18T23:05:26.519Z",
+  "success": true
+}

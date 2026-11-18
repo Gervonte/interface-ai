@@ -12,8 +12,8 @@ export const RunRequestSchema = BoundedJsonSchema.pipe(z.discriminatedUnion('mod
   z.strictObject({ mode: z.literal('replay'), targetId: Id, capability: VersionReferenceSchema, inputs: ValuesSchema }),
 ]));
 export type RunRequest = z.infer<typeof RunRequestSchema>;
-export const RunAcceptedSchema = z.strictObject({ runId: z.uuid(), status: z.literal('pending'), statusUrl: z.string() })
-  .refine((value) => value.statusUrl === `/v1/runs/${value.runId}`, 'Status URL must refer to the accepted run.');
+export const RunAcceptedSchema = z.strictObject({ runId: z.uuid(), status: z.literal('pending'), statusUrl: z.string(), operationUrl: z.string().optional() })
+  .refine((value) => value.statusUrl === `/v1/runs/${value.runId}` && (!value.operationUrl || (value.operationUrl.startsWith(`/v1/runs/${value.runId}/operations/`) && z.uuid().safeParse(value.operationUrl.split('/').at(-1)).success)), 'URLs must refer to the accepted run.');
 export const ControlSchema = z.discriminatedUnion('owner', [
   z.strictObject({ owner: z.literal('none'), revision }),
   z.strictObject({ owner: z.literal('automation'), revision }),

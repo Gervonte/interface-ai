@@ -1,0 +1,193 @@
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { randomBytes, randomUUID } from 'node:crypto';
+import { once } from 'node:events';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { fork } from 'node:child_process';
+import { setTimeout as delay } from 'node:timers/promises';
+import type { Server } from 'node:http';
+import { createPool } from '@interface-ai/postgres';
+import type { Pool } from '@interface-ai/postgres';
+import { RunAcceptedSchema, RunViewSchema } from '@interface-ai/contracts';
+import { createApp } from '../../apps/automation/src/app.js';
+import { AutomationRepository, loadConfigurations, migrateAutomation } from '../../apps/automation/src/db/repository.js';
+import { RuntimeRepository } from '../../apps/automation/src/db/runtime-repository.js';
+import { Coordinator } from '../../apps/automation/src/execution/coordinator.js';
+import type { Worker, SessionFactory } from '../../apps/automation/src/execution/coordinator.js';
+import { EvidenceStore } from '../../apps/automation/src/execution/evidence.js';
+import { databaseSettings, disposeTestDatabases, grantRuntime, provision, readSecrets } from '../../scripts/database-support.js';
+
+const secrets = readSecrets(process.env);
+const settings = databaseSettings({ ...secrets, DB_AUTOMATION_MIGRATOR_PASSWORD: randomBytes(32).toString('hex'), DB_AUTOMATION_APP_PASSWORD: randomBytes(32).toString('hex'),
+  DB_DEMO_MIGRATOR_PASSWORD: randomBytes(32).toString('hex'), DB_DEMO_APP_PASSWORD: randomBytes(32).toString('hex') }, 'interface_test_' + randomBytes(6).toString('hex'));
+let owner: Pool; let pool: Pool; let repository: AutomationRepository; let configuration: Awaited<ReturnType<typeof loadConfigurations>>; let folder: string;
+const cleanups: Array<() => Promise<void>> = [];
+const request = { mode: 'discovery', targetId: 'demo-credit-union', goal: 'synthetic-private-goal-marker', inputs: { memberId: 'synthetic-private-input-marker' } };
+async function service(worker?: Worker, sessions?: SessionFactory) {
+  const coordinator = new Coordinator(repository, secrets.REQUEST_FINGERPRINT_KEY, configuration, new EvidenceStore(folder), sessions, worker);
+  await coordinator.start();
+  const server: Server = createApp({ coordinator, identities: [{ token: 'a'.repeat(64), principal: 'test-operator', access: 'operator' },
+    { token: 'b'.repeat(64), principal: 'another-operator', access: 'operator' }, { token: 'c'.repeat(64), principal: 'test-operator', access: 'read' }] }).listen(0, '127.0.0.1');
+  await once(server, 'listening'); const address = server.address(); if (!address || typeof address === 'string') throw new Error('No HTTP address');
+  cleanups.push(async () => { server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve())); await coordinator.stop(); });
+  const call = (path: string, body?: unknown, key = randomUUID(), token = 'a'.repeat(64)) => fetch(`http://127.0.0.1:${address.port}${path}`, {
+    headers: { Authorization: 'Bearer ' + token, 'Idempotency-Key': key, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
+    ...(body === undefined ? {} : { method: 'POST', body: JSON.stringify(body) }),
+  });
+  return { coordinator, call, base: `http://127.0.0.1:${address.port}` };
+}
+async function until(check: () => Promise<boolean>) { for (let i = 0; i < 100; i++) { if (await check()) return; await delay(20); } throw new Error('Timed out waiting for test state'); }
+describe('authenticated run API and durable coordinator', () => {
+  beforeAll(async () => {
+    await provision(settings); owner = createPool(settings.automation.migratorUrl); expect(await migrateAutomation(owner)).toBe(2);
+    await grantRuntime(owner, 'automation', settings.automation.app); pool = createPool(settings.automation.appUrl);
+    repository = new AutomationRepository(pool, secrets.REQUEST_FINGERPRINT_KEY); configuration = await loadConfigurations();
+    folder = await mkdtemp(tmpdir() + '/runtime-evidence-');
+  });
+  afterEach(async () => {
+    for (const close of cleanups.splice(0).reverse()) await close();
+    await owner.query("UPDATE automation.runs SET session_state='closed' WHERE session_state NOT IN ('none','closed')");
+    await owner.query("UPDATE automation.runs SET status='cancelled',controller='none',operator_ref=NULL,active_intervention_id=NULL,result=$1 WHERE status NOT IN ('completed','failed','cancelled')", [JSON.stringify({ kind: 'cancelled', reason: 'INTERRUPTED', dispatchState: 'unknown', effectState: 'unknown' })]);
+  });
+  afterAll(async () => { await Promise.allSettled([pool?.end(), owner?.end()]); await disposeTestDatabases(settings); });
+  it('returns accepted references promptly and reports an explicit unavailable mode asynchronously', async () => {
+    const f = await service(); const response = await f.call('/v1/runs', request); expect(response.status).toBe(202);
+    const accepted = RunAcceptedSchema.parse(await response.json()); await f.coordinator.idle();
+    const result = await f.call(accepted.statusUrl); expect(result.status).toBe(200); expect(result.headers.get('cache-control')).toBe('no-store');
+    expect(RunViewSchema.parse(await result.json()).result).toMatchObject({ kind: 'failure', code: 'DISCOVERY_NOT_IMPLEMENTED' });
+    const rows = await pool.query('SELECT row_to_json(r) AS row FROM automation.runs r WHERE run_id=$1', [accepted.runId]);
+    const events = await f.call(`/v1/runs/${accepted.runId}/events?afterSequence=0&limit=2`); const text = await events.text();
+    expect(text).toContain('RUN_ACCEPTED'); expect(text).not.toContain('synthetic-private'); expect(JSON.stringify(rows.rows)).not.toContain('synthetic-private');
+    expect((await f.call(`/v1/runs/${accepted.runId}/events?limit=201`)).status).toBe(400);
+  });
+  it('deduplicates concurrent HTTP requests and reserves one active run before background execution', async () => {
+    let workers = 0;
+    const f = await service(async (_request, context) => { workers++; await new Promise<void>(resolve => context.signal.addEventListener('abort', () => resolve(), { once: true })); });
+    const key = randomUUID(); const responses = await Promise.all(Array.from({ length: 8 }, () => f.call('/v1/runs', request, key)));
+    const accepted = await Promise.all(responses.map(async response => { expect(response.status).toBe(202); return RunAcceptedSchema.parse(await response.json()); }));
+    expect(new Set(accepted.map(value => value.runId)).size).toBe(1); await until(async () => workers === 1); expect(workers).toBe(1);
+    expect((await f.call('/healthz')).status).toBe(200);
+    expect((await f.call('/v1/runs', request)).status).toBe(409);
+    expect((await f.call('/v1/runs', { ...request, inputs: { memberId: 'changed' } }, key)).status).toBe(409);
+    expect((await f.call('/v1/runs', { ...request, targetId: 'unknown-target' }, key)).status).toBe(409);
+    const id = accepted[0]!.runId; const cancelKey = randomUUID(); const stopped = await f.call(`/v1/runs/${id}/cancel`, { reason: 'USER_REQUESTED' }, cancelKey); expect([200, 202]).toContain(stopped.status);
+    await f.coordinator.idle(); expect(RunViewSchema.parse(await (await f.call(`/v1/runs/${id}`)).json()).status).toBe('cancelled');
+    expect((await f.call(`/v1/runs/${id}/cancel`, { reason: 'USER_REQUESTED' }, cancelKey)).status).toBe(200);
+    expect((await f.call('/v1/runs', request, key)).status).toBe(202); expect(workers).toBe(1);
+  });
+  it('authenticates and authorizes reads, writes, evidence, and capability access without exposing values', async () => {
+    const f = await service();
+    expect((await f.call('/v1/runs', request, randomUUID(), 'wrong')).status).toBe(401);
+    expect((await f.call('/v1/runs', request, randomUUID(), 'c'.repeat(64))).status).toBe(403);
+    const accepted = RunAcceptedSchema.parse(await (await f.call('/v1/runs', request)).json()); await f.coordinator.idle();
+    expect((await f.call(accepted.statusUrl, undefined, randomUUID(), 'b'.repeat(64))).status).toBe(404);
+    expect((await f.call(accepted.statusUrl + '/events', undefined, randomUUID(), 'b'.repeat(64))).status).toBe(404);
+    expect((await f.call(accepted.statusUrl + '/evidence/' + randomUUID(), undefined, randomUUID(), 'b'.repeat(64))).status).toBe(404);
+    expect((await f.call('/v1/capabilities/unknown/versions/1')).status).toBe(404);
+    expect((await f.call('/v1/runs', { ...request, targetId: 'unknown-target' })).status).toBe(404);
+  });
+  it('rejects duplicate keys, malformed JSON, unsafe shapes and missing mutation keys', async () => {
+    const f = await service();
+    for (const raw of ['{"mode":"replay","mode":"discovery"}', '{"inputs":{"memberId":"x","\\u006demberId":"y"}}', '{"private-marker":']) {
+      const response = await fetch(f.base + '/v1/runs', { method: 'POST', headers: { Authorization: 'Bearer ' + 'a'.repeat(64), 'Content-Type': 'application/json', 'Idempotency-Key': randomUUID() }, body: raw });
+      expect(response.status).toBe(400); expect(await response.text()).not.toContain('private-marker');
+    }
+    expect((await fetch(f.base + '/v1/runs', { method: 'POST', headers: { Authorization: 'Bearer ' + 'a'.repeat(64), 'Content-Type': 'application/json' }, body: JSON.stringify(request) })).status).toBe(400);
+  });
+  it('enforces a single coordinator lease across independent connections', async () => {
+    const f = await service(); const second = new Coordinator(repository, secrets.REQUEST_FINGERPRINT_KEY, configuration, new EvidenceStore(folder));
+    await expect(second.start()).rejects.toMatchObject({ code: 'COORDINATOR_ALREADY_RUNNING' }); expect(f.coordinator.status().ready).toBe(true);
+  });
+  it('keeps capacity blocked when a provider launch/session cannot be reconciled', async () => {
+    const accepted = await repository.acceptRun(request, { principal: 'test-operator', idempotencyKey: randomUUID() }, configuration); await repository.markRunning(accepted.runId);
+    const runtime = new RuntimeRepository(repository, secrets.REQUEST_FINGERPRINT_KEY); await runtime.sessionIntent(accepted.runId, new Date(Date.now() + 60_000));
+    const f = await service();
+    expect((await f.call('/v1/runs', request)).status).toBe(409);
+    expect(RunViewSchema.parse(await (await f.call(`/v1/runs/${accepted.runId}`)).json()).result).toMatchObject({ kind: 'cancelled', reason: 'INTERRUPTED' });
+    expect((await runtime.state(accepted.runId)).session_state).toBe('uncertain');
+  });
+  it('reconciles expired sessions without redispatching interrupted actions', async () => {
+    const accepted = await repository.acceptRun(request, { principal: 'test-operator', idempotencyKey: randomUUID() }, configuration); await repository.markRunning(accepted.runId);
+    const runtime = new RuntimeRepository(repository, secrets.REQUEST_FINGERPRINT_KEY); await runtime.sessionIntent(accepted.runId, new Date(Date.now() - 1000));
+    await runtime.sessionCreated(accepted.runId, randomUUID());
+    await runtime.record(accepted.runId, 2, { type: 'ACTION_DISPATCHED', actor: 'automation', stepId: 'test-action', details: { code: 'dispatching' } });
+    let workers = 0; const f = await service(async () => { workers++; });
+    const run = RunViewSchema.parse(await (await f.call(`/v1/runs/${accepted.runId}`)).json());
+    expect(run.result).toMatchObject({ kind: 'cancelled', reason: 'INTERRUPTED', dispatchState: 'unknown', effectState: 'unknown' }); expect(workers).toBe(0);
+    expect((await runtime.state(accepted.runId)).session_state).toBe('closed');
+  });
+  it('returns cancellation promptly while a real admitted dispatch is still unresolved', async () => {
+    let entered!: () => void; let release!: () => void; let dispatches = 0; let closes = 0;
+    const started = new Promise<void>(resolve => { entered = resolve; }); const pending = new Promise<void>(resolve => { release = resolve; });
+    const prior = configuration;
+    configuration = { ...configuration, policy: { ...configuration.policy, allowedFillNames: ['Member ID'], budgets: { ...configuration.policy.budgets, stepTimeoutMs: 500, pollIntervalMs: 50 } } };
+    const factory: SessionFactory = { async reconcile() { return true; }, async open(_config, created) {
+      const id = randomUUID(); await created(id);
+      return { id, surface: { async location() { return 'http://127.0.0.1:5174/'; }, async inspect() { return { count: 1, visible: true, enabled: true, editable: true, text: '', value: '', checked: false, tag: 'input', name: 'Member ID', inputType: 'text' }; },
+        async dispatch() { dispatches++; entered(); await pending; }, async navigate() {}, async snapshot() { return { schemaVersion: 1, kind: 'structural-snapshot', redactedValues: true, documents: [], omittedFrames: 0 }; } },
+        async close() { closes++; return true; } };
+    } };
+    try {
+      const f = await service(async (_request, context) => {
+        const executor = await context.executor({ member: { scope: { kind: 'document' }, within: [], locator: { kind: 'label', text: 'Member ID', exact: true }, expectedMatches: 1 } });
+        await executor.execute({ type: 'fill', target: 'member', value: { kind: 'input', name: 'memberId' } }, 'fill-member');
+      }, factory);
+      const accepted = RunAcceptedSchema.parse(await (await f.call('/v1/runs', request)).json()); await started;
+      const time = Date.now(); const response = await f.call(accepted.statusUrl + '/cancel', { reason: 'USER_REQUESTED' });
+      expect(response.status).toBe(202); expect(Date.now() - time).toBeLessThan(1000);
+      expect((await f.call('/v1/runs', request)).status).toBe(409);
+      await f.coordinator.idle(); release();
+      expect(RunViewSchema.parse(await (await f.call(accepted.statusUrl)).json()).result).toMatchObject({ kind: 'cancelled', reason: 'USER_REQUESTED', dispatchState: 'unknown', effectState: 'unknown' });
+      expect(dispatches).toBe(1); expect(closes).toBe(1);
+      const operation = await f.call(accepted.operationUrl!); expect(operation.status).toBe(200);
+    } finally { release(); configuration = prior; }
+  });
+
+  it('survives actual process death during session creation and blocks new runs until expiry/reconciliation', async () => {
+    const child = fork(fileURLToPath(new URL('../helpers/runtime-child.ts', import.meta.url)), [], { execArgv: ['--import', 'tsx'],
+      env: { ...process.env, AUTOMATION_TEST_DB: settings.automation.appUrl, AUTOMATION_TEST_EVIDENCE: folder }, stdio: ['ignore', 'ignore', 'ignore', 'ipc'] });
+    try {
+      const [message] = await once(child, 'message') as [{ port: number }];
+      const response = await fetch(`http://127.0.0.1:${message.port}/v1/runs`, { method: 'POST', headers: { Authorization: 'Bearer ' + 'a'.repeat(64), 'Content-Type': 'application/json', 'Idempotency-Key': randomUUID() }, body: JSON.stringify(request) });
+      const accepted = RunAcceptedSchema.parse(await response.json());
+      await until(async () => (await pool.query('SELECT session_state FROM automation.runs WHERE run_id=$1', [accepted.runId])).rows[0]?.session_state === 'creating');
+      child.kill('SIGKILL'); await once(child, 'exit');
+      const f = await service();
+      expect(RunViewSchema.parse(await (await f.call(accepted.statusUrl)).json()).result).toMatchObject({ reason: 'INTERRUPTED' });
+      expect((await f.call('/v1/runs', request)).status).toBe(409);
+      const row = (await pool.query('SELECT * FROM automation.runs WHERE run_id=$1', [accepted.runId])).rows[0];
+      expect(row.session_state).toBe('uncertain'); expect(JSON.stringify(row)).not.toContain('synthetic-private');
+    } finally { if (!child.killed) { child.kill('SIGKILL'); await once(child, 'exit'); } }
+  });
+  it('keeps validated outputs transient and reports non-retention after expiry', async () => {
+    const source = await repository.acceptRun({ ...request, inputs: { memberId: 'M1001' } }, { principal: 'test-operator', idempotencyKey: randomUUID() }, configuration); await repository.markRunning(source.runId);
+    const artifact = JSON.parse(await readFile(new URL('../../examples/primary-savings.contract.json', import.meta.url), 'utf8'));
+    artifact.sourceDiscoveryRunId = source.runId; artifact.capabilityId = 'transient-output-test';
+    for (const step of artifact.steps) step.source = { kind: 'discovery', runId: source.runId, eventSequence: await repository.appendEvent(source.runId, { type: 'ACTION_COMPLETED', actor: 'automation', stepId: step.id, details: { code: 'confirmed' } }) };
+    const values = { memberId: 'M1001', accountId: 'S2001', accountType: 'savings', currentBalanceMinor: 125034, currency: 'USD' };
+    await repository.publishCapability(source.runId, artifact, values);
+    const f = await service(async () => ({ kind: 'success', capability: { id: artifact.capabilityId, version: 1 }, output: { availability: 'available', values } }));
+    const accepted = RunAcceptedSchema.parse(await (await f.call('/v1/runs', { mode: 'replay', targetId: 'demo-credit-union', capability: { id: artifact.capabilityId, version: 1 }, inputs: { memberId: 'M1001' } })).json());
+    await f.coordinator.idle();
+    expect((await f.coordinator.read(accepted.runId, 'test-operator')).result).toMatchObject({ kind: 'success', output: { availability: 'available', values } });
+    expect((await repository.getRun(accepted.runId)).result).toMatchObject({ kind: 'success', output: { availability: 'not_retained' } });
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 300_001);
+    try { expect((await f.coordinator.read(accepted.runId, 'test-operator')).result).toMatchObject({ kind: 'success', output: { availability: 'not_retained' } }); }
+    finally { clock.mockRestore(); }
+  });
+
+  it('maps well-formed invalid capability inputs to 422 and retrieves exact owned versions', async () => {
+    const accepted = await repository.acceptRun({ ...request, inputs: { memberId: 'M1001' } }, { principal: 'test-operator', idempotencyKey: randomUUID() }, configuration); await repository.markRunning(accepted.runId);
+    const artifact = JSON.parse(await readFile(new URL('../../examples/primary-savings.contract.json', import.meta.url), 'utf8'));
+    artifact.sourceDiscoveryRunId = accepted.runId; artifact.capabilityId = 'runtime-owned-test';
+    for (const step of artifact.steps) step.source = { kind: 'discovery', runId: accepted.runId, eventSequence: await repository.appendEvent(accepted.runId, { type: 'ACTION_COMPLETED', actor: 'automation', stepId: step.id, details: { code: 'confirmed' } }) };
+    await repository.publishCapability(accepted.runId, artifact, { memberId: 'M1001', accountId: 'S2001', accountType: 'savings', currentBalanceMinor: 125034, currency: 'USD' });
+    const f = await service(); const replay = { mode: 'replay', targetId: 'demo-credit-union', capability: { id: artifact.capabilityId, version: 1 }, inputs: { memberId: 'invalid' } };
+    expect((await f.call('/v1/runs', replay)).status).toBe(422);
+    expect((await f.call('/v1/runs', replay, randomUUID(), 'b'.repeat(64))).status).toBe(404);
+    expect((await f.call('/v1/capabilities/runtime-owned-test/versions/1')).status).toBe(200);
+    expect((await f.call('/v1/capabilities/runtime-owned-test/versions/2')).status).toBe(404);
+    expect((await f.call('/v1/capabilities/runtime-owned-test/versions/1', undefined, randomUUID(), 'b'.repeat(64))).status).toBe(404);
+  });
+});

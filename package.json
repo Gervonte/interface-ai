@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && concurrently --kill-others --names automation,operator,demo-api,demo-web \"pnpm --filter @interface-ai/automation dev\" \"pnpm --filter @interface-ai/operator dev\" \"pnpm --filter @interface-ai/demo-api dev\" \"pnpm --filter @interface-ai/demo-web dev\"",
-    "dev:automation": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation dev",
+    "dev:automation": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && pnpm --filter @interface-ai/automation dev",
     "dev:operator": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/operator dev",
     "dev:demo-api": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && pnpm --filter @interface-ai/demo-api dev",
     "dev:demo-web": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/demo-web dev",
@@ -29,7 +29,11 @@
     "test:db": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=.env.database ./node_modules/vitest/vitest.mjs run --config vitest.database.config.ts",
     "check:db": "pnpm check && pnpm test:db",
     "demo:serve": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && pnpm --filter @interface-ai/demo-web build && pnpm --filter @interface-ai/demo-api build && pnpm --filter @interface-ai/demo-api start",
-    "browserbase:portal-check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:portal-check"
+    "browserbase:portal-check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:portal-check",
+    "automation:configure": "node --import tsx scripts/configure-automation.ts",
+    "executor:check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && pnpm --filter @interface-ai/automation executor:check",
+    "automation:reconcile": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/reconcile-automation.ts",
+    "automation:smoke": "node --env-file=apps/automation/.env --import tsx scripts/smoke-automation.ts"
   },
   "devDependencies": {
     "@types/node": "26.2.0",

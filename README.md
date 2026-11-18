@@ -1,6 +1,9 @@
 # Interface AI — Computer-use automation
 
-A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. INT-003 qualifies model proposals, deterministic execution, and real same-session human takeover on that fixture. INT-004 adds public run/control contracts and a validated, data-only capability format with embedded input/output validation. INT-005 adds PostgreSQL persistence, isolated runtime roles, and synthetic database fixtures. INT-006 implements the connected credit-union staff portal and verifies its balance workflow through Browserbase. Discovery and saved-capability replay remain later tasks.
+A TypeScript workspace for the computer-use automation assessment, with a PostgreSQL-backed synthetic credit-union staff portal and separate automation/operator applications.
+
+Implemented through INT-008: public capability/run contracts, isolated persistence, Browserbase SDK qualification, the connected staff portal, a policy-checked deterministic executor, sanitized structural failure evidence, and authenticated asynchronous run coordination/APIs. Model-driven discovery and saved-capability replay remain INT-009/010. The normal API currently reports explicit unavailable-mode results; authored browser checks verify the underlying surface/executor without claiming discovery. [Portal setup](PORTAL.md) · [Executor/API setup and limits](RUNTIME.md).
+
 
 ## Requirements
 
@@ -8,7 +11,7 @@ A TypeScript workspace for the computer-use automation assessment. INT-001 provi
 - pnpm **10.32.1**. Use your existing pnpm installation, or install that exact version with `npm install --global pnpm@10.32.1`.
 - Docker Desktop with Compose for the local PostgreSQL setup and database integration tests; the shell apps/default tests still run independently.
 
-The root `packageManager`, engine constraints, exact dependency catalog, and committed lockfile define the verified toolchain. Stagehand is pinned and initialized only by the explicit Browserbase tools; normal app startup does not open hosted sessions.
+The root `packageManager`, engine constraints, exact dependency catalog, and committed lockfile define the verified toolchain. Stagehand is pinned. Normal startup does not open a hosted session; explicit Browserbase checks or an installed browser worker do. The current unavailable-mode workers open none.
 
 ## Install and run
 
@@ -34,7 +37,7 @@ Health endpoints, the operator shell, and default tests run **without API keys o
 
 Browserbase credentials and fixture connectivity are documented in [BROWSERBASE_SETUP.md](BROWSERBASE_SETUP.md). The explicit `pnpm browserbase:check` command opens one hosted session; `pnpm dev:fixture` serves its separate synthetic-only target on port 3003. Do not place secrets in frontend `VITE_*` variables or shared public contracts. `.env` files, runtime storage, browser profiles, captures, and build output stay ignored. Curated synthetic verification evidence lives under `evidence/`; private runtime output remains ignored.
 
-The demo app has its own backend. Automation imports only public transport schemas; it has no access to target fixtures or business database credentials. INT-005 provisions separate application databases and least-privilege roles. See [DATABASE.md](DATABASE.md) for setup, migration, seed/reset, and shutdown commands. The staff portal uses the demo repository through its own target API. Automation run HTTP orchestration remains INT-008.
+The demo app has its own backend. Automation imports only public transport schemas; it has no access to target fixtures or business database credentials. INT-005 provisions separate application databases and least-privilege roles. See [DATABASE.md](DATABASE.md) for setup, migration, seed/reset, and shutdown commands. The staff portal uses the demo repository through its own target API. INT-008 provides the authenticated initial automation run API; its discovery/replay workers remain later tasks.
 
 ## Local PostgreSQL
 
@@ -58,7 +61,7 @@ pnpm build
 pnpm check
 ```
 
-Vitest runs real HTTP integration checks for independent service identity, safe errors, and the synthetic fixture boundary. Injected-provider tests cover connection cleanup, termination verification, API health, and configuration validation. These tests are not discovery or replay evidence. Tests use ephemeral loopback ports and need no live service credentials. Builds run in workspace dependency order; both frontends output `dist/`, and APIs output runnable server modules.
+Vitest runs HTTP, executor, transport and contract checks. The explicit database suite also verifies authenticated run coordination and actual process-death recovery. Injected-provider tests cover connection cleanup, termination verification, API health, and configuration validation. These tests are not discovery or replay evidence. Tests use ephemeral loopback ports and need no live service credentials. Builds run in workspace dependency order; both frontends output `dist/`, and APIs output runnable server modules.
 
 After building, start one backend with `pnpm --filter @interface-ai/automation start` or `pnpm --filter @interface-ai/demo-api start`. Use `pnpm demo:serve` to build and serve the complete target UI/API at http://127.0.0.1:3002. The operator UI still uses its Vite development preview. INT-002 uses a separate fixture-only server and temporary tunnel for Browserbase access; see [setup](BROWSERBASE_SETUP.md).
 
@@ -119,8 +122,8 @@ pnpm demo:serve
 
 Open http://127.0.0.1:3002. To verify hosted reachability, follow the target-only tunnel and `pnpm browserbase:portal-check` instructions in [PORTAL.md](PORTAL.md#browserbase-verification).
 
-## INT-007 executor core
+## INT-007/008 verification
 
-Adds the policy-checked deterministic executor, serialized control/revision gate, semantic same-origin frame/table/field adapter, checked extraction, and allowlisted structural failure evidence. The atomic DOM guard rejects ambiguous or disallowed targets before mutation; unknown command outcomes close admission without retry.
+`pnpm check:db` passes typechecking, 147 default tests, 24 real PostgreSQL tests and all builds. The real shared executor traversed both members through Browserbase, verified identity/current/available balances, then deliberately failed on ambiguous Open controls with no dispatch and a sanitized structural snapshot. Inference counters stayed zero and provider termination was confirmed. API tests cover authorization, asynchronous acceptance/deduplication, cancellation, exact versions, transient outputs, singleton ownership and real process death with blocked session reconciliation. [Commands/API/limits](RUNTIME.md); [curated hosted evidence](evidence/int-007-008/README.md).
 
-The core is independently verified with `pnpm check:db`: typechecking, 142 default tests, the existing 13 PostgreSQL integration tests, and all builds. Runtime API/coordinator/provider integration and hosted verification follow in INT-008. See [executor implementation](apps/automation/src/execution/executor.ts) and [safety tests](tests/executor.test.ts).
+After `pnpm db:migrate`, run `pnpm automation:configure` once, then `pnpm dev:automation`. In a second terminal, `pnpm automation:smoke` checks the initial API without displaying its token. `DISCOVERY_NOT_IMPLEMENTED` is the expected current worker result. Stop the API before using `pnpm executor:check` or `pnpm automation:reconcile`, since they acquire the same coordinator lock.
