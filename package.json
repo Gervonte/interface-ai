@@ -15,18 +15,27 @@
     "dev:demo-api": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/demo-api dev",
     "dev:demo-web": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/demo-web dev",
     "build": "pnpm -r run build",
-    "typecheck": "pnpm --filter @interface-ai/contracts build && tsc -p tsconfig.json --noEmit && pnpm -r run typecheck",
-    "test": "pnpm --filter @interface-ai/contracts build && vitest run",
+    "typecheck": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && tsc -p tsconfig.json --noEmit && pnpm -r run typecheck",
+    "test": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && vitest run",
     "check": "pnpm typecheck && pnpm test && pnpm build",
     "dev:fixture": "pnpm --filter @interface-ai/demo-api fixture",
     "browserbase:check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:check",
-    "browserbase:spike": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:spike"
+    "browserbase:spike": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:spike",
+    "db:up": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --import tsx scripts/database.ts up",
+    "db:down": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --import tsx scripts/database.ts down",
+    "db:setup": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --import tsx scripts/database.ts setup",
+    "db:migrate": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --import tsx scripts/database.ts migrate",
+    "db:reset-demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --import tsx scripts/database.ts reset-demo",
+    "test:db": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=.env.database ./node_modules/vitest/vitest.mjs run --config vitest.database.config.ts",
+    "check:db": "pnpm check && pnpm test:db"
   },
   "devDependencies": {
     "@types/node": "26.2.0",
     "concurrently": "10.0.7",
     "typescript": "7.0.2",
     "vitest": "5.1.0",
-    "@interface-ai/contracts": "workspace:*"
+    "@interface-ai/contracts": "workspace:*",
+    "@interface-ai/postgres": "workspace:*",
+    "tsx": "catalog:"
   }
 }

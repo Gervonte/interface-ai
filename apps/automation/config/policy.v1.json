@@ -1,0 +1,26 @@
+{
+  "id": "demo-policy",
+  "version": 1,
+  "allowedOrigins": [
+    "http://127.0.0.1:5174"
+  ],
+  "allowedActions": [
+    "navigate",
+    "fill",
+    "click",
+    "wait",
+    "capture",
+    "intervene"
+  ],
+  "allowRiskyActions": false,
+  "budgets": {
+    "maxActions": 100,
+    "maxModelCalls": 30,
+    "activeTimeoutMs": 300000,
+    "stepTimeoutMs": 10000,
+    "pollIntervalMs": 250,
+    "maxRecoveryAttempts": 3,
+    "interventionTimeoutMs": 600000,
+    "overallTimeoutMs": 900000
+  }
+}

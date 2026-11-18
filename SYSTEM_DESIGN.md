@@ -196,16 +196,16 @@ A production uptime SLA, distributed consistency model, requests-per-second targ
 
 ## 3. Core Entities (Database Schema)
 
-Our current candidate has four domain tables: `capabilities`, `runs`, `interventions`, and `run_events`, plus a supporting `request_receipts` table introduced in section 6.5 for API idempotency. Target applications and execution policies remain explicit concepts represented by versioned configuration; session references and control state live on the run under a one-session-per-run assumption.
+The INT-005 persistence foundation has four domain tables: `capabilities`, `runs`, `interventions`, and `run_events`, plus a supporting `request_receipts` table introduced in section 6.5 for API idempotency. Target applications and execution policies remain explicit concepts represented by versioned configuration; session references and control state live on the run under a one-session-per-run assumption.
 
-Browserbase is the selected hosted-browser platform, with Stagehand TypeScript as the initial SDK direction. STACK.md defines the delegation boundary and checks still to verify. We retain provider references rather than duplicate browser infrastructure. PostgreSQL is selected; exact column types, indexes, and constraints remain open.
+Browserbase is the selected hosted-browser platform, with Stagehand TypeScript as the initial SDK direction. STACK.md defines the delegation boundary and checks still to verify. We retain provider references rather than duplicate browser infrastructure. INT-005 implements the PostgreSQL tables, checks, indexes, immutable records, and configuration snapshots described in [DATABASE.md](DATABASE.md); committed migrations are the authoritative DDL. HTTP orchestration and browser control remain later tasks.
 
-### Core entities and proposed tables
+### Core entities and tables
 
 | Entity / table | Represents | Important fields / state |
 | --- | --- | --- |
 | **Capability** / `capabilities` | One immutable version of a reusable workflow. | Composite key (`capability_id`, `version`), `schema_version`, name/description, target compatibility, input/output schemas, ordered steps, success condition, known outcomes/recovery rules, `source_discovery_run_id` |
-| **Run** / `runs` | One discovery or replay attempt, including its session association, execution progress, and eventual result. | `run_id`, mode, target/config version reference, policy/config version reference, replay capability reference, browser provider, session reference, controller, operator reference, control revision, lifecycle state, current step, sanitized goal/input/result summaries, timestamps |
+| **Run** / `runs` | One discovery or replay attempt, including its session association, execution progress, and eventual result. | `run_id`, mode, target/config version reference, policy/config version reference, replay capability reference, browser provider, session reference, controller, operator reference, control revision, lifecycle state, current step, input binding names, safe result summaries, timestamps; raw goals/inputs remain transient |
 | **Intervention** / `interventions` | A request for human help and its resolution. | `intervention_id`, `run_id`, triggering step, reason, sanitized state/evidence references, status, operator reference, resolution summary, timestamps |
 | **RunEvent** / `run_events` | An ordered application-level record of observations, attempted actions, results, recovery, policy decisions, and control transfers. | `event_id`, `run_id`, sequence, timestamp, step reference, actor, event type, sanitized details, optional `intervention_id`, evidence references |
 

@@ -15,7 +15,8 @@
     "@interface-ai/contracts": "workspace:*",
     "express": "catalog:",
     "zod": "catalog:",
-    "@browserbasehq/stagehand": "catalog:"
+    "@browserbasehq/stagehand": "catalog:",
+    "@interface-ai/postgres": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "catalog:",

@@ -1,11 +1,12 @@
 # Interface AI — Computer-use automation
 
-A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. INT-003 qualifies model proposals, deterministic execution, and real same-session human takeover on that fixture. INT-004 adds public run/control contracts and a validated, data-only capability format with embedded input/output validation. Discovery, replay, the complete staff portal, and PostgreSQL persistence remain later tasks.
+A TypeScript workspace for the computer-use automation assessment. INT-001 provides independent app shells and public health/error contracts. INT-002 adds a synthetic compatibility fixture and a verified Browserbase connection check. INT-003 qualifies model proposals, deterministic execution, and real same-session human takeover on that fixture. INT-004 adds public run/control contracts and a validated, data-only capability format with embedded input/output validation. INT-005 adds PostgreSQL persistence, isolated runtime roles, and synthetic database fixtures. Discovery, replay, and the complete staff portal remain later tasks.
 
 ## Requirements
 
 - Node.js **26.2.0** (`nvm install` and `nvm use` read `.nvmrc`).
 - pnpm **10.32.1**. Use your existing pnpm installation, or install that exact version with `npm install --global pnpm@10.32.1`.
+- Docker Desktop with Compose for the local PostgreSQL setup and database integration tests; the shell apps/default tests still run independently.
 
 The root `packageManager`, engine constraints, exact dependency catalog, and committed lockfile define the verified toolchain. Stagehand is pinned and initialized only by the explicit Browserbase tools; normal app startup does not open hosted sessions.
 
@@ -33,7 +34,19 @@ The scaffold runs **without API keys, PostgreSQL, or live services**. Optional `
 
 Browserbase credentials and fixture connectivity are documented in [BROWSERBASE_SETUP.md](BROWSERBASE_SETUP.md). The explicit `pnpm browserbase:check` command opens one hosted session; `pnpm dev:fixture` serves its separate synthetic-only target on port 3003. Do not place secrets in frontend `VITE_*` variables or shared public contracts. `.env` files, runtime storage, browser profiles, captures, and build output stay ignored. Curated sanitized evidence will live separately under `evidence/` in later tasks.
 
-The demo app has its own backend. Automation imports only public transport schemas; it has no access to target fixtures or business database credentials. Later PostgreSQL setup will provision separate application databases/roles.
+The demo app has its own backend. Automation imports only public transport schemas; it has no access to target fixtures or business database credentials. INT-005 provisions separate application databases and least-privilege roles. See [DATABASE.md](DATABASE.md) for setup, migration, seed/reset, and shutdown commands. The current HTTP shells do not yet invoke the repositories for run/member workflows.
+
+## Local PostgreSQL
+
+With Docker Desktop running:
+
+```sh
+pnpm db:up
+pnpm db:setup
+pnpm check:db
+```
+
+PostgreSQL binds only to `127.0.0.1:55432`. Setup creates private ignored configuration and separate automation/demo databases. `pnpm db:down` stops the project container while retaining its volume. [Full database guide](DATABASE.md).
 
 ## Checks
 
@@ -59,7 +72,9 @@ apps/
   demo-web/         React + Vite + Mantine target UI
 packages/
   contracts/        Public Zod schemas/types and constrained capability/data validation
-tests/              Service/fixture HTTP checks and provider lifecycle tests
+  postgres/         Shared connection/transaction/migration helpers; no business fixtures
+scripts/            Local database provisioning/migration/seed tooling
+tests/              HTTP/provider/contracts tests; separate real PostgreSQL suite
 ```
 
 ## Planning documents
@@ -86,4 +101,8 @@ Verified on 2026-11-16 (America/New_York): genuine Gateway action proposals, ser
 
 ## INT-004 verification
 
-Verified on 2026-11-17: typed public requests/results/control, versioned capability structure and semantic reference checks, actual embedded input/output validation, scoped targets/conditions/extractions, authored outcome/recovery rules, and manual-contribution representations. `pnpm check` passes typechecking, 106 tests, and all builds. [Format, usage, and finite defaults](CONTRACTS.md); [authored balance contract fixture](examples/README.md). HTTP run endpoints, real discovery artifact construction, persistence, and the interpreter are still later work.
+Verified on 2026-11-17: typed public requests/results/control, versioned capability structure and semantic reference checks, actual embedded input/output validation, scoped targets/conditions/extractions, authored outcome/recovery rules, and manual-contribution representations. `pnpm check` passes typechecking, 106 tests, and all builds. [Format, usage, and finite defaults](CONTRACTS.md); [authored balance contract fixture](examples/README.md). Persistence is implemented separately in INT-005; HTTP run endpoints, real discovery artifact construction, and the interpreter remain later work.
+
+## INT-005 verification
+
+Verified on 2026-11-17: both PostgreSQL databases migrated from empty state, synthetic baseline seeds reset predictably, and a repeated migration applied zero changes. `pnpm check:db` passes typechecking, 106 default tests, 12 real PostgreSQL integration tests, and all builds. The database suite verifies isolation, SQL constraints, concurrent receipts/events, transaction rollback, immutable exact versions/configuration, and retained source provenance. [Setup and schema details](DATABASE.md). This is persistence verification; the connected staff portal is INT-006 and run orchestration remains later work.

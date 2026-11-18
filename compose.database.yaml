@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:18.7-bookworm@sha256:ece55f7868da684e400f82f1030a050718adbdd65c23aa500c486f6e2950dc0f
+    environment:
+      POSTGRES_USER: interface_admin
+      POSTGRES_PASSWORD: ${DB_ADMIN_PASSWORD:?Run pnpm db:up to initialize local secrets}
+      POSTGRES_DB: postgres
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U interface_admin -d postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+    command: ["postgres", "-c", "log_statement=none", "-c", "password_encryption=scram-sha-256"]
+volumes:
+  postgres-data:
