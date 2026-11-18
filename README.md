@@ -118,3 +118,9 @@ pnpm demo:serve
 ```
 
 Open http://127.0.0.1:3002. To verify hosted reachability, follow the target-only tunnel and `pnpm browserbase:portal-check` instructions in [PORTAL.md](PORTAL.md#browserbase-verification).
+
+## INT-007 executor core
+
+Adds the policy-checked deterministic executor, serialized control/revision gate, semantic same-origin frame/table/field adapter, checked extraction, and allowlisted structural failure evidence. The atomic DOM guard rejects ambiguous or disallowed targets before mutation; unknown command outcomes close admission without retry.
+
+The core is independently verified with `pnpm check:db`: typechecking, 142 default tests, the existing 13 PostgreSQL integration tests, and all builds. Runtime API/coordinator/provider integration and hosted verification follow in INT-008. See [executor implementation](apps/automation/src/execution/executor.ts) and [safety tests](tests/executor.test.ts).

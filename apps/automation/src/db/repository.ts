@@ -19,7 +19,7 @@ const targetSchema = z.strictObject({ id: IdentifierSchema, version: z.number().
 const policySchema = z.strictObject({ id: IdentifierSchema, version: z.number().int().positive(),
   allowedOrigins: z.array(z.url().refine((value) => new URL(value).origin === value)).min(1).max(16),
   allowedActions: z.array(z.enum(['navigate', 'fill', 'click', 'wait', 'capture', 'intervene'])).min(1),
-  allowRiskyActions: z.literal(false), budgets: RuntimeBudgetsSchema });
+  allowRiskyActions: z.literal(false), allowedClickNames: z.array(z.string().min(1).max(500)).max(64).optional(), allowedFillNames: z.array(z.string().min(1).max(500)).max(32).optional(), budgets: RuntimeBudgetsSchema });
 export async function loadConfigurations() {
   const target = targetSchema.parse(JSON.parse(await readFile(new URL('../../config/target.v1.json', import.meta.url), 'utf8')));
   const policy = policySchema.parse(JSON.parse(await readFile(new URL('../../config/policy.v1.json', import.meta.url), 'utf8')));
@@ -35,9 +35,9 @@ export class RepositoryError extends Error {
   constructor(readonly code: string) { super(code); }
 }
 const eventSchema = z.strictObject({
-  type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'INTERVENTION_OPENED']),
+  type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_DISPATCHED', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'INTERVENTION_OPENED']),
   actor: z.enum(['system', 'caller', 'automation', 'human']), stepId: IdentifierSchema.nullable(), interventionId: z.uuid().optional(),
-  details: z.strictObject({ code: IdentifierSchema, targetRef: IdentifierSchema.optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
+  details: z.strictObject({ code: IdentifierSchema, targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
 }).superRefine((event, ctx) => {
   if (event.actor === 'human' && !event.interventionId) ctx.addIssue({ code: 'custom', message: 'Human events require their intervention reference.' });
 });
