@@ -56,7 +56,7 @@ The automation schema contains the four domain tables and one supporting table:
 
 There is a partial unique index for one nonterminal run. It reserves database admission, not browser ownership: later coordinator logic must still account for in-flight UI actions, provider cleanup, and restart reconciliation before releasing admission. Session references cannot be silently replaced once assigned. Run identity/configuration and terminal outcomes are protected against rewriting.
 
-Target/policy definitions are versioned, non-secret JSON files in `apps/automation/config`. Every accepted run retains the validated content and checksum alongside its ID/version references; edits to a file cannot change a past run's interpretation. No target/policy catalog table is introduced. The initial target points at the local portal shell; INT-006/INT-007 must configure hosted-browser reachability and enforce the policy before real execution.
+Target/policy definitions are versioned, non-secret JSON files in `apps/automation/config`. Every accepted run retains the validated content and checksum alongside its ID/version references; edits to a file cannot change a past run's interpretation. No target/policy catalog table is introduced. The retained initial target points at the local Vite portal URL. INT-006 verifies the built portal through a temporary target-only tunnel; INT-007 onward must bind an appropriate reachable target and enforce policy before real automation execution. Do not overwrite retained configuration versions with expired tunnel URLs.
 
 ## Repository transaction boundaries
 
@@ -68,13 +68,13 @@ Receipt keys and validated canonical payloads use separate HMAC domains with a p
 
 Transactions use a single checked-out pg client with BEGIN/COMMIT/ROLLBACK and unconditional release. Browser/model/filesystem operations do not occur inside repository transactions. Connection/statement/query waits are finite. See [node-postgres transaction guidance](https://node-postgres.com/features/transactions).
 
-These are callable persistence methods, not new HTTP routes. Authentication, raw JSON duplicate-key rejection, HTTP error mapping, and API idempotency enforcement are INT-008 work. The current shell APIs still start independently; their health endpoints do not claim database readiness.
+These are callable persistence methods, not new HTTP routes. Authentication, raw JSON duplicate-key rejection, HTTP error mapping, and API idempotency enforcement are INT-008 work. The APIs start independently; their health endpoints do not claim database readiness. INT-006 target workflow routes use the demo repository and return safe service errors when unavailable.
 
 ## Synthetic seed and target repository
 
 Fixture version 1 creates M1001–M1004, with coherent account foreign keys and at most one primary savings account per member. M1001's savings has current balance 125034 and available balance 120034 minor units; M1002's reordered savings row has current 8765 and available 7600. M1003 has only checking; M1004 exists with account access denied; M9999 is absent. Names are explicitly synthetic.
 
-`DemoRepository` uses parameterized member/account queries, preserves deterministic account ordering, distinguishes member existence/access, and converts PostgreSQL bigint balances into checked safe integer minor units. Seeding/reset uses the demo migrator role and one transaction. Automation never imports the seed or receives its database credentials. Test/setup code may provision/reset fixtures independently of the UI-only execution path. The connected staff portal remains INT-006.
+`DemoRepository` uses parameterized member/account queries, preserves deterministic account ordering, distinguishes member existence/access, and converts PostgreSQL bigint balances into checked safe integer minor units. Seeding/reset uses the demo migrator role and one transaction. Automation never imports the seed or receives its database credentials. Test/setup code may provision/reset fixtures independently of the UI-only execution path. INT-006 connects this repository to the staff portal through its independent target API; see [PORTAL.md](PORTAL.md).
 
 ## Verification
 

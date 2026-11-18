@@ -1,3 +1,4 @@
+import { DemoAccountsSchema, DemoDetailsSchema } from '@interface-ai/contracts';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { readFile, mkdtemp, writeFile } from 'node:fs/promises';
@@ -9,6 +10,8 @@ import type { Capability } from '@interface-ai/contracts';
 import { AutomationRepository, loadConfigurations, migrateAutomation } from '../../apps/automation/src/db/repository.js';
 import { DemoRepository, migrateDemo, resetDemoFixtures } from '../../apps/demo-api/src/db/repository.js';
 import { databaseSettings, disposeTestDatabases, grantRuntime, provision, readSecrets } from '../../scripts/database-support.js';
+
+import { staffServer, selectMember } from '../helpers/staff-http.js';
 
 const secrets = readSecrets(process.env); // Explicit suite fails when unconfigured; never silently skipped.
 const settings = databaseSettings({ ...secrets,
@@ -169,6 +172,24 @@ describe('real PostgreSQL persistence and isolation', () => {
     await demoOwner.query("UPDATE demo.accounts SET current_balance_minor=1 WHERE account_id='S2001'");
     await resetDemoFixtures(demoOwner); expect((await target.listAccounts('M1001'))?.[1]?.current_balance_minor).toBe(125034);
     await resetDemoFixtures(demoOwner); expect(await target.listAccounts('M1001')).toEqual(first);
+  });
+  it('serves actual PostgreSQL member/account values through the staff session API', async () => {
+    const service = await staffServer(target); const client = service.client();
+    try {
+      await client('/session');
+      for (const [memberId, accountId, current, available] of [['M1001', 'S2001', 125034, 120034], ['M1002', 'S2002', 8765, 7600]] as const) {
+        expect((await selectMember(client, memberId)).status).toBe(200);
+        const details = await client(`/members/${memberId}/accounts/${accountId}`);
+        expect(details.status).toBe(200);
+        expect(await details.json()).toMatchObject({ member: { id: memberId }, account: { id: accountId, currentBalanceMinor: current, availableBalanceMinor: available } });
+      }
+      await selectMember(client, 'M1002'); expect((await client('/members/M1002/accounts/S2001')).status).toBe(404);
+      await selectMember(client, 'M1003'); expect(DemoAccountsSchema.parse(await (await client('/members/M1003/accounts')).json()).accounts.some((row: { isPrimary: boolean }) => row.isPrimary)).toBe(false);
+      await selectMember(client, 'M1004'); expect((await client('/members/M1004/accounts')).status).toBe(403);
+      await demoOwner.query("UPDATE demo.accounts SET current_balance_minor=31999 WHERE account_id='S2001'");
+      await selectMember(client, 'M1001');
+      expect(DemoDetailsSchema.parse(await (await client('/members/M1001/accounts/S2001')).json()).account.currentBalanceMinor).toBe(31999);
+    } finally { await service.close(); await resetDemoFixtures(demoOwner); }
   });
   it('denies cross-database access, role escalation, runtime DDL, and direct target writes', async () => {
     const stolen = new URL(settings.automation.appUrl); stolen.pathname = '/' + settings.demo.database;

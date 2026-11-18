@@ -19,3 +19,4 @@ export * from './data.js';
 export * from './budgets.js';
 export * from './capability.js';
 export * from './runs.js';
+export * from './demo.js';

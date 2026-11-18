@@ -9,7 +9,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "node --env-file-if-exists=.env dist/index.js",
     "browserbase:check": "node --env-file-if-exists=.env --import tsx src/browserbase/cli.ts",
-    "browserbase:spike": "node --env-file-if-exists=.env --import tsx src/browserbase/spike-cli.ts"
+    "browserbase:spike": "node --env-file-if-exists=.env --import tsx src/browserbase/spike-cli.ts",
+    "browserbase:portal-check": "node --env-file-if-exists=.env --import tsx src/browserbase/portal-check.ts"
   },
   "dependencies": {
     "@interface-ai/contracts": "workspace:*",

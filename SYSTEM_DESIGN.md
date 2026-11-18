@@ -88,7 +88,7 @@ These apply across the three capabilities; grouping them here does not make them
 
 ### Demo target and repository setup
 
-**Decision:** build a fictional credit-union back-office staff portal in this repository. The baseline is a connected Staff workspace → Member Search → Member Overview → Account Inquiry → Account Details flow, with persistent staff/member context, a framed servicing workspace, and table-based controls. Show separately labeled Current and Available Balance so correct extraction is tested. INT-006 implements those screens; INT-012 adds contextual runtime exceptions. Contact Maintenance adds a later review/commit path. DEMO_WORKFLOW.md is the detailed portal specification. The generic INT-001 shell is scaffolding only and does not satisfy portal completion.
+**Decision:** build a fictional credit-union back-office staff portal in this repository. The baseline is a connected Staff workspace → Member Search → Member Overview → Account Inquiry → Account Details flow, with persistent staff/member context, a framed servicing workspace, and table-based controls. Show separately labeled Current and Available Balance so correct extraction is tested. INT-006 now implements and verifies those screens with PostgreSQL-backed data; see [PORTAL.md](PORTAL.md). INT-012 adds controlled contextual runtime exceptions. Contact Maintenance adds a later review/commit path. DEMO_WORKFLOW.md is the detailed portal specification. The generic INT-001 shell is scaffolding only and does not satisfy portal completion.
 
 Repository setup should accommodate:
 

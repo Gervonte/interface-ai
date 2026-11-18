@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: INT-001 through INT-005 are implemented and verified at their stated scope; INT-006 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
+Status: INT-001 through INT-006 are implemented and verified at their stated scope; INT-007 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -54,13 +54,15 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
     **Verified:** PostgreSQL 18.7 is pinned by Docker image digest; pg 8.23.1 and checksummed transactional SQL migrations create the five automation tables plus a separate synthetic demo database. Separate runtime/migration roles enforce cross-database isolation. Development setup and no-op migration rerun passed. Real PostgreSQL tests cover atomic acceptance/publication rollback, scoped receipts and key/expiry behavior, concurrent event ordering, exact immutable capabilities/configuration/session references, confirmed source provenance, deterministic seeds, and access denial. Configuration versions are retained as immutable per-run snapshots. `pnpm check:db` passes typechecking, 106 default tests, 12 database integration tests, and all builds. See [database setup, schema, and verification](DATABASE.md). This supports DEL-01/SAFE-04; HTTP orchestration and full assessment verification remain later work.
 
-6. **INT-006 — Build the credit-union staff portal and balance workflow.**
+6. **INT-006 — Build the credit-union staff portal and balance workflow. (Complete)**
 
     Implement the fictional Demo Credit Union staff console specified in DEMO_WORKFLOW.md: persistent institution/operator/branch/session context, active-member context, usable Member Search, Member Overview, Account Inquiry, and Account Details. Build connected React/Vite/Mantine screens backed by the separate target application/database. Use an outer staff shell and actual framed servicing workspace, dense account tables, and repeated Open controls. Include member/account IDs and statuses, primary-savings designation, separately labeled Current/Available Balance and currency, and the distinct balances/account ordering for M1001/M1002.
 
     Implement ordinary loading, empty search, and field-validation states plus Back/Clear/new-search behavior that cannot retain the wrong member's details. Keep visible labels/headers and meaningful UI identifiers; targeting must not require generated library IDs/classes, positional selectors, or test IDs. Full exception injection belongs to INT-012 and Contact Maintenance to INT-018. Keep automation controls/diagnostics in the separate operator app.
 
     **Done when:** a person can navigate Staff workspace → Member Search → Member Overview → Account Inquiry → Account Details for both members, verify consistent member/account identity, and distinguish Current Balance from the different Available Balance. Back/new-search transitions behave coherently and do not expose stale results. The working path traverses the intended frame/table controls, is reachable by Browserbase, and uses only synthetic target data. A generic shell/search card or hard-coded answer display does not satisfy completion. **Depends on:** INT-002, INT-005. **Acceptance:** DISC-02, REP-02, SAFE-04.
+
+    **Verified:** connected PostgreSQL-backed React/Mantine staff shell and same-origin servicing iframe, search/overview/inquiry/details, persistent staff/member identity, repeated row-scoped Open controls, distinct current/available balances and reordered M1001/M1002 accounts. Server context revisions and client cancellation reject stale searches/account reads; Back/Clear/new search behave coherently. A real Browserbase session verified both accounts and four negative states, used zero inference, and terminated with provider status `COMPLETED`. `pnpm check:db` passes typechecking, 113 default tests, 13 real PostgreSQL tests, and all builds. See [portal setup/limits](PORTAL.md) and [curated UI evidence](evidence/int-006/README.md). This implements the target surface; discovery, artifact replay, full exception injection, and assessment-wide acceptance remain later tasks.
 
 7. **INT-007 — Implement the shared executor and safe recording boundary.**
 

@@ -9,10 +9,10 @@
     "pnpm": "10.32.1"
   },
   "scripts": {
-    "dev": "pnpm --filter @interface-ai/contracts build && concurrently --kill-others --names automation,operator,demo-api,demo-web \"pnpm --filter @interface-ai/automation dev\" \"pnpm --filter @interface-ai/operator dev\" \"pnpm --filter @interface-ai/demo-api dev\" \"pnpm --filter @interface-ai/demo-web dev\"",
+    "dev": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && concurrently --kill-others --names automation,operator,demo-api,demo-web \"pnpm --filter @interface-ai/automation dev\" \"pnpm --filter @interface-ai/operator dev\" \"pnpm --filter @interface-ai/demo-api dev\" \"pnpm --filter @interface-ai/demo-web dev\"",
     "dev:automation": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation dev",
     "dev:operator": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/operator dev",
-    "dev:demo-api": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/demo-api dev",
+    "dev:demo-api": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && pnpm --filter @interface-ai/demo-api dev",
     "dev:demo-web": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/demo-web dev",
     "build": "pnpm -r run build",
     "typecheck": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && tsc -p tsconfig.json --noEmit && pnpm -r run typecheck",
@@ -27,7 +27,9 @@
     "db:migrate": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --import tsx scripts/database.ts migrate",
     "db:reset-demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --import tsx scripts/database.ts reset-demo",
     "test:db": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=.env.database ./node_modules/vitest/vitest.mjs run --config vitest.database.config.ts",
-    "check:db": "pnpm check && pnpm test:db"
+    "check:db": "pnpm check && pnpm test:db",
+    "demo:serve": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && pnpm --filter @interface-ai/demo-web build && pnpm --filter @interface-ai/demo-api build && pnpm --filter @interface-ai/demo-api start",
+    "browserbase:portal-check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/automation browserbase:portal-check"
   },
   "devDependencies": {
     "@types/node": "26.2.0",
