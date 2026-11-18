@@ -1,6 +1,6 @@
 # Stack and Delegation Decisions
 
-Status: TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase-first delivery are agreed. The product mapping below is the implementation direction, subject to a small compatibility spike. INT-001 supplies the pinned workspace and local app shells. INT-002 verifies hosted Browserbase connectivity to a temporary synthetic fixture; see [setup and selected configuration](BROWSERBASE_SETUP.md). INT-003 verifies real model proposals, inference-forbidden deterministic execution, and mediated same-session handoff on that fixture; see [SDK compatibility results](SDK_COMPATIBILITY.md). PostgreSQL remains INT-005.
+Status: TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase-first delivery are agreed. The product mapping below is the implementation direction, subject to a small compatibility spike. INT-001 supplies the pinned workspace and local app shells. INT-002 verifies hosted Browserbase connectivity to a temporary synthetic fixture; see [setup and selected configuration](BROWSERBASE_SETUP.md). INT-003 verifies real model proposals, inference-forbidden deterministic execution, and mediated same-session handoff on that fixture; see [SDK compatibility results](SDK_COMPATIBILITY.md). INT-005 implements PostgreSQL persistence and real isolation/transaction tests; see [DATABASE.md](DATABASE.md).
 
 ## Selected direction
 
@@ -21,7 +21,7 @@ Express provides the HTTP routing/middleware layer around our coordinator. Zod v
 
 Map validation failures into the existing API error contract: malformed request shape returns `400`; well-formed invocation values that fail a capability's declared input contract return `422`. Use centralized error handling and safe response construction so raw bodies or value-bearing validation errors do not leak into logs or responses. Express route handlers invoke the coordinator; long UI workflows run outside the request lifecycle.
 
-Saved artifacts remain serializable data. Do not store Zod functions in the artifact or assume that parsing an artifact's envelope also validates values against its embedded input/output schemas. The constrained serializable schema representation and its runtime validation adapter still need to be chosen; no arbitrary evaluation of uploaded schema/code is permitted.
+Saved artifacts remain serializable data. Do not store Zod functions in the artifact or assume that parsing an artifact's envelope also validates values against its embedded input/output schemas. INT-004 implements the constrained serializable schema and runtime value validation; see [CONTRACTS.md](CONTRACTS.md). Arbitrary evaluation of uploaded schema/code is prohibited.
 
 ## React, Vite, and Mantine UI
 
@@ -39,7 +39,7 @@ Use PostgreSQL for the automation records: capabilities, runs, interventions, ev
 
 Only the demo app receives its business-data connection credentials; the automation process receives access to its own records and operates the demo through the UI. A test/setup tool can seed/reset target fixtures, but that credential/path is not exposed to discovery or replay. This preserves a realistic application boundary while keeping local setup small.
 
-Use migrations and parameterized database access. Driver/query-builder or ORM, PostgreSQL version, local versus hosted setup, and connection management remain implementation choices. Selecting PostgreSQL does not change the single-active-run scope or solve browser side-effect uncertainty.
+INT-005 uses pg 8.23.1, explicit checksummed SQL migrations, bounded pools, and single-client transactions on the pinned PostgreSQL 18.7 Docker image. Runtime roles cannot cross databases; migrator/admin credentials stay in local tooling. Per-run immutable configuration snapshots retain the selected target/policy versions. See [DATABASE.md](DATABASE.md). These database guarantees do not establish browser ownership or exactly-once UI effects.
 
 ## Responsibility split
 
@@ -93,7 +93,7 @@ The spike decides the smallest adapter we need, not whether to relax the assignm
 
 TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase delegation are selected. The following remain proposals or open choices:
 
-- Database access/migrations remain INT-005. INT-004 selects a constrained flat scalar-object schema, validated through Zod with fixed formats and no executable schema hooks; see [CONTRACTS.md](CONTRACTS.md). Workspace tooling is pnpm 10.32.1 with exact dependency catalogs; Vitest is the selected test runner (INT-001).
+- INT-005 selects pg and explicit SQL migrations with separate runtime/migrator roles. INT-004 selects a constrained flat scalar-object schema, validated through Zod with fixed formats and no executable schema hooks; see [CONTRACTS.md](CONTRACTS.md). Workspace tooling is pnpm 10.32.1 with exact dependency catalogs; Vitest is the selected test runner (INT-001).
 - Stagehand is pinned to 4.4.0 and the selected Gateway model is `openai/gpt-5`. The compatibility fixture uses a temporary Cloudflare Quick Tunnel. Model-driven operations are verified in INT-003; settle the full portal deployment/connectivity in INT-006.
 
 Settle these with the chosen runtime/SDK constraints. The primary stack is selected; exact versions, supporting libraries, and hosting remain implementation choices.

@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: INT-001 through INT-004 are implemented and verified at their stated scope; INT-005 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
+Status: INT-001 through INT-005 are implemented and verified at their stated scope; INT-006 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -46,11 +46,13 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
     **Verified:** public Zod request/result/control contracts, a bounded data-only capability format, semantic frame/table/row targets, typed references/captures, independent terminal identity checks, UI output extraction, scoped outcomes/recovery, and explicit manual contribution/intervention representations. Capability-aware validators check actual input/output values, not just envelopes. The complete authored balance contract round-trips; unsupported versions/code/operations, unresolved/forward references, invalid bindings, and inconsistent run state are rejected. Initial finite server budgets are documented. Typecheck, 106 tests, and all builds pass. See [contract specification and limits](CONTRACTS.md) and [authored example](examples/README.md). This is format/validation support for ART-02–ART-05; real discovery-derived artifacts and UI evaluation remain later tasks.
 
-5. **INT-005 — Set up PostgreSQL persistence and isolated target data.**
+5. **INT-005 — Set up PostgreSQL persistence and isolated target data. (Complete)**
 
     Select database access/migration tooling. Create automation migrations for capabilities, runs, interventions, events, and request receipts with version/sequence/receipt uniqueness and consistent references. Create a separate demo database/application role. Add deterministic seed/reset commands for synthetic members/accounts and retained non-secret configuration versions.
 
     **Done when:** migrations work from an empty development database; fixtures reset predictably; automation credentials cannot read the target's business tables. Core repository transactions and receipt uniqueness have meaningful integration coverage. **Depends on:** INT-001, INT-004. **Acceptance:** DEL-01, SAFE-04.
+
+    **Verified:** PostgreSQL 18.7 is pinned by Docker image digest; pg 8.23.1 and checksummed transactional SQL migrations create the five automation tables plus a separate synthetic demo database. Separate runtime/migration roles enforce cross-database isolation. Development setup and no-op migration rerun passed. Real PostgreSQL tests cover atomic acceptance/publication rollback, scoped receipts and key/expiry behavior, concurrent event ordering, exact immutable capabilities/configuration/session references, confirmed source provenance, deterministic seeds, and access denial. Configuration versions are retained as immutable per-run snapshots. `pnpm check:db` passes typechecking, 106 default tests, 12 database integration tests, and all builds. See [database setup, schema, and verification](DATABASE.md). This supports DEL-01/SAFE-04; HTTP orchestration and full assessment verification remain later work.
 
 6. **INT-006 — Build the credit-union staff portal and balance workflow.**
 
