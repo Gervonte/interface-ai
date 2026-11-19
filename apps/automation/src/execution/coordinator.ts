@@ -1,3 +1,5 @@
+import type { StoredEventInput } from '../db/repository.js';
+import type { Planner, SessionStatistics } from '../workflows/contracts.js';
 import { RunRequestSchema, validateCapabilityResult, validateOutput } from '@interface-ai/contracts';
 import type { Capability, RunRequest, RunResult, Target, Values } from '@interface-ai/contracts';
 import type { AutomationRepository, loadConfigurations } from '../db/repository.js';
@@ -7,22 +9,26 @@ import { DispatchGate } from './gate.js';
 import { Executor } from './executor.js';
 import type { BrowserSurface } from './surface.js';
 import { EvidenceStore } from './evidence.js';
-import { ExecutionError, failureCodes } from './errors.js';
+import { ExecutionError, NeedsIntervention, failureCodes } from './errors.js';
 
 export type Configuration = Awaited<ReturnType<typeof loadConfigurations>>;
-export interface SessionResource { id: string; surface: BrowserSurface; close(): Promise<boolean> }
+export interface SessionResource { id: string; surface: BrowserSurface; close(): Promise<boolean>; planner?: Planner; statistics?(): SessionStatistics }
 export interface SessionFactory {
-  open(configuration: Configuration, onCreated: (id: string) => Promise<void>, signal: AbortSignal): Promise<SessionResource>;
+  validate?(configuration: Configuration, mode: 'discovery' | 'replay'): void;
+  open(configuration: Configuration, onCreated: (id: string) => Promise<void>, signal: AbortSignal, mode?: 'discovery' | 'replay'): Promise<SessionResource>;
   reconcile(id: string): Promise<boolean>;
 }
 export interface WorkerContext {
-  runId: string; signal: AbortSignal;
-  executor(targets: Record<string, Target>): Promise<Executor>;
+  runId: string; signal: AbortSignal; configuration: Configuration;
+  plan(context: Parameters<Planner['decide']>[0]): Promise<Awaited<ReturnType<Planner['decide']>>['decision']>;
+  capability(): Promise<Capability>;
+  record(event: StoredEventInput): Promise<number>;
+  executor(targets: Record<string, Target>, variables?: Values): Promise<Executor>;
   publish(capability: Capability, outputs: Values): Promise<void>;
 }
 export type Worker = (request: RunRequest, context: WorkerContext) => Promise<RunResult | void>;
 const terminal = (status: string) => ['completed', 'failed', 'cancelled'].includes(status);
-const failure = (code: string): RunResult => ({ kind: 'failure', code, summary: 'Execution stopped. Inspect the sanitized run events for context.', blocked: null, evidenceIds: [] });
+const failure = (code: string): Extract<RunResult, { kind: 'failure' }> => ({ kind: 'failure', code, summary: 'Execution stopped. Inspect the sanitized run events for context.', blocked: null, evidenceIds: [] });
 const unavailableWorker: Worker = async request => failure(request.mode === 'discovery' ? 'DISCOVERY_NOT_IMPLEMENTED' : 'REPLAY_NOT_IMPLEMENTED');
 interface Job { runId: string; gate: DispatchGate; abort: AbortController; task: Promise<void>; executor?: Executor }
 export class Coordinator {
@@ -85,24 +91,42 @@ export class Coordinator {
     const getSession = async () => {
       if (!this.sessions) throw new ExecutionError('SESSION_LOST');
       job.gate.check(2); if (job.abort.signal.aborted) throw new ExecutionError('CANCELLED');
-      if (!opening) opening = (async () => {
+      if (!opening) { this.sessions.validate?.(this.configuration, request.mode); opening = (async () => {
         // Covers provider request timeout, admitted lifetime, and a conservative expiry margin.
         await this.repository.sessionIntent(job.runId, new Date(Date.now() + budgets.overallTimeoutMs + 120_000));
-        const session = await this.sessions!.open(this.configuration, id => this.repository.sessionCreated(job.runId, id), job.abort.signal);
+        const session = await this.sessions!.open(this.configuration, id => this.repository.sessionCreated(job.runId, id), job.abort.signal, request.mode);
         resource = session;
         if (job.abort.signal.aborted || job.gate.snapshot().closed) { await session.close().catch(() => false); throw new ExecutionError('CANCELLED'); }
         return session;
-      })();
+      })(); }
       return opening;
     };
-    const context: WorkerContext = { runId: job.runId, signal: job.abort.signal,
-      executor: async targets => {
+    let modelCalls = 0;
+    const context: WorkerContext = { runId: job.runId, signal: job.abort.signal, configuration: this.configuration,
+      record: event => this.repository.record(job.runId, 2, event),
+      capability: async () => { if (request.mode !== 'replay') throw new RepositoryError('RUN_STATE_CONFLICT'); return this.base.getCapability(request.capability.id, request.capability.version); },
+      plan: async prepared => {
+        if (request.mode !== 'discovery') throw new ExecutionError('INFERENCE_FORBIDDEN');
+        if (++modelCalls > budgets.maxModelCalls) throw new ExecutionError('MODEL_BUDGET_EXHAUSTED');
+        const session = await getSession(); if (!session.planner) throw new ExecutionError('MODEL_UNAVAILABLE');
+        return job.gate.dispatch(2, async () => {
+          await this.repository.assertRunning(job.runId, 2);
+          await this.repository.record(job.runId, 2, { type: 'MODEL_REQUESTED', actor: 'automation', stepId: null, details: { code: 'requesting', modelCalls, modelName: 'openai/gpt-5' } });
+          const remaining = Math.min(budgets.activeTimeoutMs, budgets.overallTimeoutMs) - (Date.now() - time);
+          if (remaining <= 0 || job.abort.signal.aborted) throw new ExecutionError('BUDGET_EXHAUSTED');
+          let proposed; try { proposed = await session.planner!.decide(prepared, Math.min(120_000, remaining)); } catch { throw new ExecutionError('MODEL_UNAVAILABLE'); }
+          job.gate.check(2);
+          await this.repository.record(job.runId, 2, { type: 'MODEL_COMPLETED', actor: 'automation', stepId: null, details: { code: 'proposed', modelCalls, modelName: 'openai/gpt-5', inputTokens: proposed.usage.inputTokens, outputTokens: proposed.usage.outputTokens } });
+          return proposed.decision;
+        });
+      },
+      executor: async (targets, variables = {}) => {
         if (job.executor) throw new ExecutionError('CONTROL_CHANGED');
         const session = await getSession();
         const policy = this.configuration.policy;
         job.executor = new Executor({ runId: job.runId, entryPoint: this.configuration.target.entryPoint,
           policy: { ...policy, allowedClickNames: policy.allowedClickNames ?? [], allowedFillNames: policy.allowedFillNames ?? [] },
-          surface: session.surface, gate: job.gate, signal: job.abort.signal, revision: 2, startedAt: time, targets, inputs: request.inputs,
+          surface: session.surface, gate: job.gate, signal: job.abort.signal, revision: 2, startedAt: time, targets, inputs: request.inputs, variables, routes: { 'fresh-session': 'about:blank', 'target-entry': this.configuration.target.entryPoint },
           authorize: () => this.repository.assertRunning(job.runId, 2), record: event => this.repository.record(job.runId, 2, event), evidence: this.evidence });
         return job.executor;
       },
@@ -110,7 +134,7 @@ export class Coordinator {
         job.gate.check(2); if (job.abort.signal.aborted) throw new ExecutionError('CANCELLED');
         if (request.mode !== 'discovery') throw new RepositoryError('RUN_STATE_CONFLICT');
         const safe = validateOutput(capability, outputs);
-        await this.base.publishCapability(job.runId, capability, safe);
+        await this.base.publishCapability(job.runId, capability, safe, 'transient', 'model-driven');
         this.storeOutputs(job.runId, safe);
       },
     };
@@ -138,7 +162,22 @@ export class Coordinator {
       } else if (output?.kind === 'cancelled') result = { ...output, reason: 'INTERRUPTED' };
       else if (!terminal((await this.repository.state(job.runId)).status)) result = failure('WORKER_FAILED');
     } catch (error) {
-      result = failure(error instanceof ExecutionError ? error.code : 'WORKER_FAILED');
+      if (error instanceof NeedsIntervention) {
+        job.gate.close();
+        const safe = error.blocked;
+        const previous = job.executor?.lastFailure;
+        if (previous) { safe.stepId = previous.stepId; safe.dispatchState = previous.dispatchState; safe.effectState = previous.effectState; safe.evidenceIds = previous.evidenceIds; }
+        if (resource && !safe.evidenceIds.length) {
+          try { const id = await this.evidence.capture(job.runId, safe.stepId, resource.surface, { ...this.configuration.policy, allowedClickNames: this.configuration.policy.allowedClickNames ?? [], allowedFillNames: this.configuration.policy.allowedFillNames ?? [] }); safe.evidenceIds.push(id); } catch { /* Suppress unsafe captures. */ }
+        }
+        result = { ...failure('HUMAN_HELP_REQUIRED'), kind: 'failure', blocked: safe, evidenceIds: safe.evidenceIds };
+        if (resource && await job.gate.drain(budgets.stepTimeoutMs)) {
+          const lifetime = Math.max(1, Math.min(budgets.interventionTimeoutMs, budgets.overallTimeoutMs - (Date.now() - time)));
+          await this.repository.openIntervention(job.runId, safe, new Date(Date.now() + lifetime));
+          await new Promise<void>(resolve => { const done = () => { clearTimeout(timer); job.abort.signal.removeEventListener('abort', done); resolve(); }; const timer = setTimeout(done, lifetime); if (job.abort.signal.aborted) done(); else job.abort.signal.addEventListener('abort', done, { once: true }); });
+          if (!job.abort.signal.aborted) result = { ...result, code: 'INTERVENTION_TIMEOUT' };
+        }
+      } else result = failure(error instanceof ExecutionError ? error.code : 'WORKER_FAILED');
       const context = job.executor?.lastFailure;
       if (context && result.kind === 'failure') {
         const reasons = ['AMBIGUOUS_TARGET','TARGET_NOT_FOUND','STATE_TIMEOUT','ACTION_OUTCOME_UNKNOWN','POLICY_BLOCKED','SESSION_LOST'] as const;
@@ -157,6 +196,8 @@ export class Coordinator {
         const row = await this.repository.state(job.runId);
         if (!closed && row.provider_session_id && this.sessions) { try { closed = await this.sessions.reconcile(row.provider_session_id); } catch { closed = false; } }
         await this.repository.sessionState(job.runId, closed ? 'closed' : 'uncertain');
+        const statistics = resource?.statistics?.();
+        await this.base.appendEvent(job.runId, { type: 'SESSION_FINISHED', actor: 'system', stepId: null, details: { code: closed ? 'closed' : 'uncertain', ...(statistics ? { modelCalls: statistics.modelCalls, inferenceAttempts: statistics.inferenceAttempts, inputTokens: statistics.inputTokens, outputTokens: statistics.outputTokens, ...(statistics.mode === 'discovery' ? { modelName: 'openai/gpt-5' as const } : {}) } : {}) } });
       }
       const row = await this.repository.state(job.runId);
       if (!terminal(row.status)) {

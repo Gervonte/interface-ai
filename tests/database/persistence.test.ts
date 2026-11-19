@@ -206,4 +206,17 @@ describe('real PostgreSQL persistence and isolation', () => {
     await expect(demo.query("UPDATE demo.accounts SET current_balance_minor=1 WHERE account_id='S2001'")).rejects.toMatchObject({ code: '42501' });
     await expect(automation.query('SELECT * FROM demo.members')).rejects.toMatchObject({ code: '42P01' });
   });
+  it('requires a real model event and complete confirmed mutation history for production discovery', async () => {
+    const {runId}=await accept();await repository.markRunning(runId);const artifact=await validArtifact(runId);
+    await expect(repository.publishCapability(runId,artifact,outputs,'transient','model-driven')).rejects.toMatchObject({code:'UNCONFIRMED_MODEL_SOURCE'});
+    await repository.appendEvent(runId,{type:'MODEL_COMPLETED',actor:'automation',stepId:null,details:{code:'proposed',modelCalls:1,modelName:'openai/gpt-5',inputTokens:100,outputTokens:20}});
+    // Existing fixtures intentionally omit operation metadata; production publication must not accept those as the history.
+    await expect(repository.publishCapability(runId,artifact,outputs,'transient','model-driven')).rejects.toMatchObject({code:'INCOMPLETE_DISCOVERY_HISTORY'});
+    for(const step of artifact.steps) if(step.source.kind==='discovery') await automationOwner.query('UPDATE automation.run_events SET details=details || $3::jsonb WHERE run_id=$1 AND sequence=$2',[runId,step.source.eventSequence,JSON.stringify({operation:step.type})]);
+    const extra=await repository.appendEvent(runId,{type:'ACTION_COMPLETED',actor:'automation',stepId:'omitted-mutation',details:{code:'confirmed',operation:'click'}});
+    await expect(repository.publishCapability(runId,artifact,outputs,'transient','model-driven')).rejects.toMatchObject({code:'INCOMPLETE_DISCOVERY_HISTORY'});
+    await automationOwner.query('DELETE FROM automation.run_events WHERE run_id=$1 AND sequence=$2',[runId,extra]);
+    await repository.publishCapability(runId,artifact,outputs,'transient','model-driven');expect((await repository.getRun(runId)).status).toBe('completed');
+  });
+
 });

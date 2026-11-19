@@ -21,3 +21,7 @@ catalog:
 
 onlyBuiltDependencies:
   - esbuild
+
+# Keep the planner's Zod schema compatible with Stagehand's extract signature.
+overrides:
+  zod: 4.6.7

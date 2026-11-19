@@ -6,6 +6,7 @@ import { createApp } from './app.js';
 import { AutomationRepository, loadConfigurations } from './db/repository.js';
 import { Coordinator } from './execution/coordinator.js';
 import { EvidenceStore } from './execution/evidence.js';
+import { workflowWorker } from './workflows/worker.js';
 import { BrowserbaseSessions } from './execution/provider.js';
 
 async function main() {
@@ -27,7 +28,7 @@ async function main() {
         : { target: new URL('../config/target.v2.json', import.meta.url), policy: new URL('../config/policy.v2.json', import.meta.url) });
       const sessions = config.BROWSERBASE_API_KEY && config.BROWSERBASE_PROJECT_ID ? new BrowserbaseSessions(config.BROWSERBASE_API_KEY, config.BROWSERBASE_PROJECT_ID) : undefined;
       coordinator = new Coordinator(new AutomationRepository(pool, config.REQUEST_FINGERPRINT_KEY!), config.REQUEST_FINGERPRINT_KEY!, configuration,
-        new EvidenceStore(resolve(import.meta.dirname, '../runtime/evidence')), sessions);
+        new EvidenceStore(resolve(import.meta.dirname, '../runtime/evidence')), sessions, workflowWorker);
       await coordinator.start();
     }
     const server = createApp(coordinator ? { coordinator, identities: [{ token: config.AUTOMATION_API_TOKEN!, principal: 'demo-operator', access: 'operator' }] } : {})

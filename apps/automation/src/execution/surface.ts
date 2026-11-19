@@ -1,4 +1,5 @@
 import type { Target, Values } from '@interface-ai/contracts';
+import type { Observation } from '../workflows/contracts.js';
 import { z } from 'zod';
 
 export interface ResolvedTarget extends Omit<Target, 'within'> {
@@ -10,6 +11,7 @@ export type TargetState = z.infer<typeof TargetStateSchema>;
 export interface SurfacePolicy { allowedOrigins: readonly string[]; allowedClickNames: readonly string[]; allowedFillNames: readonly string[] }
 export interface BrowserSurface {
   location(): Promise<string>;
+  observe?(inputs: Values, policy: SurfacePolicy): Promise<Observation>;
   inspect(target: ResolvedTarget, policy: SurfacePolicy): Promise<TargetState>;
   dispatch(type: 'click' | 'fill', target: ResolvedTarget, policy: SurfacePolicy, value?: string): Promise<void>;
   navigate(url: string, timeoutMs: number): Promise<void>;

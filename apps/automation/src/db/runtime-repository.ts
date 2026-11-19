@@ -2,7 +2,7 @@ import { randomUUID, createHmac } from 'node:crypto';
 import { z } from 'zod';
 import { transaction } from '@interface-ai/postgres';
 import type { PoolClient } from '@interface-ai/postgres';
-import { CancelRequestSchema, MutationMetadataSchema, RunResultSchema } from '@interface-ai/contracts';
+import { BlockedContextSchema, InterventionSchema, CancelRequestSchema, MutationMetadataSchema, RunResultSchema } from '@interface-ai/contracts';
 import type { RunResult } from '@interface-ai/contracts';
 import { AutomationRepository, RepositoryError, append, canonical } from './repository.js';
 import type { StoredEventInput } from './repository.js';
@@ -48,10 +48,28 @@ export class RuntimeRepository {
       return sequence;
     });
   }
+  async openIntervention(runId: string, context: unknown, expiresAt: Date) {
+    const blocked = BlockedContextSchema.parse(context);
+    return transaction(this.base.pool, async client => {
+      const row = (await client.query("SELECT session_ref,control_revision FROM automation.runs WHERE run_id=$1 AND status='running' FOR UPDATE", [runId])).rows[0];
+      if (!row?.session_ref) throw new RepositoryError('RUN_STATE_CONFLICT');
+      const id = randomUUID(); const revision = row.control_revision + 1;
+      await client.query("INSERT INTO automation.interventions(intervention_id,run_id,status,blocked,control_revision,session_ref,expires_at) VALUES($1,$2,'open',$3,$4,$5,$6)", [id,runId,JSON.stringify(blocked),revision,row.session_ref,expiresAt]);
+      await client.query("UPDATE automation.runs SET status='waiting_for_human',controller='none',control_revision=$2,active_intervention_id=$3,updated_at=now() WHERE run_id=$1", [runId,revision,id]);
+      await append(client,runId,{type:'INTERVENTION_OPENED',actor:'system',stepId:blocked.stepId,details:{code:blocked.reason,...(blocked.evidenceIds[0]?{evidenceId:blocked.evidenceIds[0]}:{})}});
+      return id;
+    });
+  }
+  async intervention(id: string, principal: string) {
+    const row = (await this.base.pool.query('SELECT i.* FROM automation.interventions i JOIN automation.runs r USING(run_id) WHERE i.intervention_id=$1 AND r.principal_ref=$2',[id,principal])).rows[0];
+    if (!row) throw new RepositoryError('INTERVENTION_NOT_FOUND');
+    return InterventionSchema.parse({interventionId:row.intervention_id,runId:row.run_id,status:row.status,controlRevision:row.control_revision,sessionRef:row.session_ref,blocked:row.blocked,createdAt:row.created_at.toISOString(),expiresAt:row.expires_at.toISOString()});
+  }
   async finish(runId: string, result: RunResult) {
     const safe = RunResultSchema.parse(result);
     const status = safe.kind === 'failure' ? 'failed' : safe.kind === 'cancelled' ? 'cancelled' : 'completed';
     await transaction(this.base.pool, async client => {
+      await client.query("UPDATE automation.interventions SET status='closed' WHERE run_id=$1 AND status IN ('open','claimed','validating')", [runId]);
       const updated = await client.query("UPDATE automation.runs SET status=$2,result=$3,controller='none',operator_ref=NULL,active_intervention_id=NULL,control_revision=control_revision+1,updated_at=now() WHERE run_id=$1 AND status NOT IN ('completed','failed','cancelled') RETURNING run_id", [runId, status, JSON.stringify(safe)]);
       if (!updated.rowCount) throw new RepositoryError('RUN_STATE_CONFLICT');
       await append(client, runId, { type: status === 'cancelled' ? 'RUN_CANCELLED' : status === 'failed' ? 'RUN_FAILED' : 'RUN_COMPLETED', actor: 'system', stepId: null, details: { code: status } });

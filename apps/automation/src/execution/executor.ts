@@ -38,6 +38,7 @@ export function transform(value: string | boolean, name: Extraction['transform']
 export class Executor {
   private readonly startedAt: number;
   private admissions = 0;
+  lastEventSequence: number | undefined;
   lastFailure: { stepId: string; code: string; evidenceIds: string[]; dispatchState: 'not_sent' | 'sent' | 'settled' | 'unknown'; effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' } | undefined;
   lastState: { dispatchState: 'not_sent' | 'sent' | 'settled' | 'unknown'; effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' } = { dispatchState: 'not_sent', effectState: 'not_checked' };
   constructor(private readonly options: ExecutorOptions) { this.startedAt = options.startedAt ?? Date.now(); }
@@ -46,6 +47,23 @@ export class Executor {
     if (this.options.signal.aborted) throw new ExecutionError('CANCELLED');
     const budgets = this.options.policy.budgets;
     if (Date.now() - this.startedAt >= Math.min(budgets.activeTimeoutMs, budgets.overallTimeoutMs)) throw new ExecutionError('BUDGET_EXHAUSTED');
+  }
+  private locationsOnly(condition: Predicate): boolean { return condition.kind === 'location' || ((condition.kind === 'all' || condition.kind === 'any') && condition.conditions.every(child => this.locationsOnly(child))); }
+  async assert(condition: Predicate, stepId: string, timeoutMs?: number) { await this.execute({ type: 'wait', condition }, stepId, timeoutMs); }
+  async observe() {
+    if (!this.options.surface.observe) throw new ExecutionError('UNSUPPORTED_SURFACE');
+    if (++this.admissions > this.options.policy.budgets.maxActions) throw new ExecutionError('BUDGET_EXHAUSTED');
+    return this.options.gate.dispatch(this.options.revision, async () => {
+      const deadline = Date.now() + this.options.policy.budgets.stepTimeoutMs; let previous: string | undefined;
+      while (true) {
+        this.check(); await this.options.authorize(); await this.origin();
+        const observation = await this.options.surface.observe!(this.options.inputs, this.options.policy);
+        if (observation.ready && observation.fingerprint === previous) return observation;
+        previous = observation.ready ? observation.fingerprint : undefined;
+        if (Date.now() >= deadline) throw new ExecutionError('STATE_TIMEOUT');
+        await delay(this.options.policy.budgets.pollIntervalMs, undefined, { signal: this.options.signal });
+      }
+    });
   }
   private async origin(navigation = false) {
     const location = await this.options.surface.location();
@@ -104,8 +122,8 @@ export class Executor {
     let sent = false; let timer: ReturnType<typeof setTimeout> | undefined;
     this.lastState = { dispatchState: 'not_sent', effectState: 'not_checked' };
     const work = this.options.gate.dispatch(this.options.revision, async () => {
-      this.check(); await this.options.authorize(); this.check(); await this.origin(operation.type === 'navigate');
-      await this.options.record({ type: 'ACTION_INTENT', actor: 'automation', stepId, details: { code: 'admitted', ...('target' in operation ? { targetRef: operation.target } : {}) } });
+      this.check(); await this.options.authorize(); this.check(); await this.origin(operation.type === 'navigate' || (operation.type === 'wait' && this.locationsOnly(operation.condition)));
+      await this.options.record({ type: 'ACTION_INTENT', actor: 'automation', stepId, details: { code: 'admitted', operation: operation.type, ...('target' in operation ? { targetRef: operation.target } : {}) } });
       this.check();
       let output: string | number | boolean | undefined;
       if (operation.type === 'click' || operation.type === 'fill') {
@@ -137,7 +155,8 @@ export class Executor {
         }
       }
       this.check();
-      await this.options.record({ type: operation.type === 'capture' ? 'READ_COMPLETED' : 'ACTION_COMPLETED', actor: 'automation', stepId, details: { code: 'confirmed', ...('target' in operation ? { targetRef: operation.target } : {}) } });
+      const sequence = await this.options.record({ type: operation.type === 'capture' ? 'READ_COMPLETED' : 'ACTION_COMPLETED', actor: 'automation', stepId, details: { code: 'confirmed', operation: operation.type, ...('target' in operation ? { targetRef: operation.target } : {}) } });
+      this.lastEventSequence = typeof sequence === 'number' && Number.isInteger(sequence) && sequence > 0 ? sequence : undefined;
       return output;
     });
     const aborted = new Promise<never>((_resolve, reject) => {
