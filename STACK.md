@@ -97,3 +97,7 @@ TypeScript, Express, Zod, PostgreSQL, React + Vite, Mantine, and Browserbase del
 - Stagehand is pinned to 4.4.0 and the selected Gateway model is `openai/gpt-5`. The compatibility fixture uses a temporary Cloudflare Quick Tunnel. Model-driven operations are verified in INT-003; settle the full portal deployment/connectivity in INT-006.
 
 Settle these with the chosen runtime/SDK constraints. The primary stack is selected; exact versions, supporting libraries, and hosting remain implementation choices.
+
+## Executor/API implementation boundary (INT-007/008)
+
+Browserbase/Stagehand own hosted sessions and browser transport. The TypeScript adapter resolves constrained semantic descriptors and performs uniqueness/policy/actionability checks together with native DOM UI dispatch. It supports the known same-origin React portal; unsupported browser structures fail closed. Express/Zod and PostgreSQL implement authenticated asynchronous run coordination, receipt idempotency, ownership, cancellation and restart reconciliation. The deterministic provider client forbids inference. Discovery proposals and the saved-capability interpreter remain separate upcoming workers. [Runtime guide and verified limits](RUNTIME.md).

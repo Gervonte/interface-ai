@@ -93,3 +93,7 @@ See [the recorded live result](evidence/int-002/README.md). Automated tests use 
 ## Connected staff portal (INT-006)
 
 The compatibility fixture above remains isolated on port 3003. To test the full PostgreSQL-backed portal, use `pnpm demo:serve`, tunnel only port 3002, and run `BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm browserbase:portal-check`. Use the HTTPS root, without `/compatibility`. This separate authored UI check verifies both members, repeated controls and negative states without inference; it does not discover/save a capability. Its provider session timeout is 300 seconds. [Full start/stop instructions](PORTAL.md); [verified evidence](evidence/int-006/README.md).
+
+## Shared executor verification (INT-007/008)
+
+The full runtime check is now `BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm executor:check`, after database migration and with only the built target on port 3002 tunneled. Stop the automation API first: this verifier uses the same database-backed single-coordinator lock. It verifies both accounts through the actual executor, deliberately rejects ambiguous Open controls with no mutation, captures sanitized structural evidence and confirms provider cleanup. [Setup and limits](RUNTIME.md#hosted-executor-verification). This remains authored QA, not discovery/replay evidence.

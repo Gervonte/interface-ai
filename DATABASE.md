@@ -68,7 +68,7 @@ Receipt keys and validated canonical payloads use separate HMAC domains with a p
 
 Transactions use a single checked-out pg client with BEGIN/COMMIT/ROLLBACK and unconditional release. Browser/model/filesystem operations do not occur inside repository transactions. Connection/statement/query waits are finite. See [node-postgres transaction guidance](https://node-postgres.com/features/transactions).
 
-These are callable persistence methods, not new HTTP routes. Authentication, raw JSON duplicate-key rejection, HTTP error mapping, and API idempotency enforcement are INT-008 work. The APIs start independently; their health endpoints do not claim database readiness. INT-006 target workflow routes use the demo repository and return safe service errors when unavailable.
+These are callable persistence methods, not new HTTP routes. INT-008 now implements authentication, raw JSON duplicate-key rejection, HTTP error mapping, and scoped API idempotency; the discovery/replay workers remain later work. The APIs start independently; their health endpoints do not claim database readiness. INT-006 target workflow routes use the demo repository and return safe service errors when unavailable.
 
 ## Synthetic seed and target repository
 
@@ -86,3 +86,11 @@ Verified on 2026-11-17 against the pinned PostgreSQL 18.7 container:
 - PostgreSQL reported `fsync=on` and `synchronous_commit=on`. Runtime privileges were tested with actual separate connections, not mocked authorization checks.
 
 Database tests and synthetic records are persistence evidence only. They are not live model discovery or deterministic UI replay evidence, and do not mark the broader assessment criteria complete.
+
+## Runtime lifecycle and API additions (INT-007/008)
+
+Migration `002_runtime.sql` adds the immutable run principal, explicit session state/expiry, and dispatch/effect state. Existing run principals are backfilled from their create receipts. A separate occupied-session index prevents a new session while another is creating/live/closing/uncertain, including after its run becomes terminal. The existing active-run constraint remains. No new domain table is introduced.
+
+`RuntimeRepository` provides ownership-filtered resource/event/receipt reads, cancellation receipts, lifecycle/session transitions, execution fencing and a dedicated coordinator advisory-lock connection. Startup reconciles interrupted work without redispatch. Known provider closure or conservative expiry releases occupancy; unknown launches remain blocked. Runtime grants remain limited to the existing tables. Run results retain no sensitive outputs by default; the bounded five-minute transient buffer lives only in the coordinator process.
+
+Run `pnpm db:migrate` to apply this migration to existing development data without resetting fixtures. `pnpm automation:configure` separately creates the ignored API token. `pnpm check:db` now passes 147 default tests and 24 database tests, including actual process death during session creation. [Runtime/API/reconciliation guide](RUNTIME.md).

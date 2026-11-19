@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: INT-001 through INT-006 are implemented and verified at their stated scope; INT-007 onward remain pending. Completion details are linked below. This plan does not authorize publishing/submission.
+Status: INT-001 through INT-008 are implemented and verified at their stated scope; INT-009 onward remain pending. INT-007/008 are delivered together as the executor/API milestone; discovery/replay workers are still explicitly unavailable until INT-009/010. Completion details are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -64,17 +64,21 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
     **Verified:** connected PostgreSQL-backed React/Mantine staff shell and same-origin servicing iframe, search/overview/inquiry/details, persistent staff/member identity, repeated row-scoped Open controls, distinct current/available balances and reordered M1001/M1002 accounts. Server context revisions and client cancellation reject stale searches/account reads; Back/Clear/new search behave coherently. A real Browserbase session verified both accounts and four negative states, used zero inference, and terminated with provider status `COMPLETED`. `pnpm check:db` passes typechecking, 113 default tests, 13 real PostgreSQL tests, and all builds. See [portal setup/limits](PORTAL.md) and [curated UI evidence](evidence/int-006/README.md). This implements the target surface; discovery, artifact replay, full exception injection, and assessment-wide acceptance remain later tasks.
 
-7. **INT-007 — Implement the shared executor and safe recording boundary.**
+7. **INT-007 — Implement the shared executor and safe recording boundary. (Complete)**
 
     Wrap supported SDK operations with policy, owner/revision checks, action serialization, scoped unique targeting, bounded state waits, and deterministic extraction. Preserve unknown action outcomes and stop/escalate rather than repeat uncertain actions; this safety behavior is baseline, not deferred restart hardening. Record safe action intent/result events and richer evidence through a sanitization boundary before storage. Do not implement speculative fallback locators, model recovery, or blind action retries.
 
     **Done when:** allowed operations execute, disallowed/ambiguous operations dispatch nothing, deadlines stop waiting, and a representative failure produces a useful sanitized snapshot or screenshot. Synthetic sensitive markers are excluded from retained event/capture fields. **Depends on:** INT-003, INT-004, INT-005. **Acceptance:** REP-03, SAFE-01, SAFE-03, OBS-01, OBS-02.
 
-8. **INT-008 — Implement run coordination and the initial API.**
+    **Verified:** semantic frame/container/table-row/cell/field targeting, atomic uniqueness/actionability/policy checks, owner/revision fencing, serialized dispatch, cumulative action/time budgets, bounded waits, checked deterministic extraction, no blind retry of uncertain commands, and allowlisted structural failure evidence. The actual hosted executor traversed both baseline members, verified their identity/balances, and stopped on two unscoped Open controls with zero dispatches for that target. Its richer failure snapshot shows the screen/control/table structure without record values. Zero inference and provider `COMPLETED` cleanup passed. See [runtime boundaries and limitations](RUNTIME.md) and [live executor evidence](evidence/int-007-008/README.md). Full privacy/scenario verification remains INT-012–INT-016.
+
+8. **INT-008 — Implement run coordination and the initial API. (Complete)**
 
     Add Express/Zod endpoints for starting and reading runs, exact capability retrieval, events, and safe cancellation. Run UI work outside request handlers. Pin configurations, enforce one active run including human pauses, provide basic authentication/authorization, and atomically associate accepted mutations with request receipts. Define safe result/output-availability behavior. Enforce one coordinator for the runtime store and finite session lifetimes. On restart, leave interrupted work stopped and mark it explicitly; require confirmed closure/expiry of its old session before admitting another run. Documented manual reconciliation is acceptable for the baseline; automatic cleanup/reconciliation scenarios are follow-on INT-017.
 
     **Done when:** run creation returns a reference promptly; callers can inspect progress/results; duplicate creation requests resolve to one run and a second distinct active run is rejected. Invalid requests, capability inputs, and authorization failures return the documented contracts. Stopping or restarting the backend never silently redispatches interrupted UI work; session cleanup uncertainty blocks new admission. **Depends on:** INT-004, INT-005, INT-007. **Acceptance:** DISC-01, DISC-03, REP-07, DEL-01.
+
+    **Verified:** authenticated asynchronous create/read/exact-capability/events/receipt/cancel/evidence routes; safe errors and duplicate-key JSON rejection; transactional principal-scoped receipts/capacity; frozen and persisted configuration; one coordinator lock; finite provider sessions; safe cancellation/drain; startup interruption without redispatch; unconfirmed session/launch cleanup blocks new runs until verified closure or conservative expiry. Tests include actual child-process death during session creation, in-flight cancellation, authorization, exact versions, request deduplication and transient-output expiry. `pnpm check:db` passes typechecking, 147 default tests, 24 PostgreSQL tests, and all builds. The local smoke command verifies the initial API; normal discovery/replay requests still terminate with explicit unavailable-mode results until INT-009/010. See [API setup and reconciliation](RUNTIME.md). This is orchestration support, not completed discovery/replay acceptance.
 
 9. **INT-009 — Implement model-driven discovery and artifact construction.**
 

@@ -1,0 +1,7 @@
+{
+  "id": "demo-credit-union",
+  "version": 2,
+  "surface": "browser",
+  "applicationFamily": "demo-credit-union",
+  "entryPoint": "http://127.0.0.1:3002/"
+}

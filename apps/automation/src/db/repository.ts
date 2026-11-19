@@ -7,25 +7,25 @@ import type { Capability, RunRequest, Values } from '@interface-ai/contracts';
 import { migrate, transaction } from '@interface-ai/postgres';
 import type { Pool, PoolClient } from '@interface-ai/postgres';
 
-export const automationMigrations = [new URL('../../migrations/001_initial.sql', import.meta.url)];
+export const automationMigrations = [new URL('../../migrations/001_initial.sql', import.meta.url), new URL('../../migrations/002_runtime.sql', import.meta.url)];
 export const migrateAutomation = (pool: Pool) => migrate(pool, 'automation', automationMigrations);
-const targetSchema = z.strictObject({ id: IdentifierSchema, version: z.number().int().positive(),
+export const targetSchema = z.strictObject({ id: IdentifierSchema, version: z.number().int().positive(),
   surface: z.literal('browser'), applicationFamily: IdentifierSchema,
   entryPoint: z.url().refine((value) => {
     const url = new URL(value);
     return !url.username && !url.password && !url.search && !url.hash
       && (url.protocol === 'https:' || (url.protocol === 'http:' && ['127.0.0.1', 'localhost'].includes(url.hostname)));
   }, 'Target entry must be an HTTPS or loopback HTTP URL without credentials/query/fragment.') });
-const policySchema = z.strictObject({ id: IdentifierSchema, version: z.number().int().positive(),
+export const policySchema = z.strictObject({ id: IdentifierSchema, version: z.number().int().positive(),
   allowedOrigins: z.array(z.url().refine((value) => new URL(value).origin === value)).min(1).max(16),
   allowedActions: z.array(z.enum(['navigate', 'fill', 'click', 'wait', 'capture', 'intervene'])).min(1),
-  allowRiskyActions: z.literal(false), budgets: RuntimeBudgetsSchema });
-export async function loadConfigurations() {
-  const target = targetSchema.parse(JSON.parse(await readFile(new URL('../../config/target.v1.json', import.meta.url), 'utf8')));
-  const policy = policySchema.parse(JSON.parse(await readFile(new URL('../../config/policy.v1.json', import.meta.url), 'utf8')));
+  allowRiskyActions: z.literal(false), allowedClickNames: z.array(z.string().min(1).max(500)).max(64).optional(), allowedFillNames: z.array(z.string().min(1).max(500)).max(32).optional(), budgets: RuntimeBudgetsSchema });
+export async function loadConfigurations(files?: { target: URL; policy: URL }) {
+  const target = targetSchema.parse(JSON.parse(await readFile(files?.target ?? new URL('../../config/target.v1.json', import.meta.url), 'utf8')));
+  const policy = policySchema.parse(JSON.parse(await readFile(files?.policy ?? new URL('../../config/policy.v1.json', import.meta.url), 'utf8')));
   return { target, policy };
 }
-function canonical(value: unknown): string {
+export function canonical(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
   return '{' + Object.keys(value).sort().map((key) => JSON.stringify(key) + ':' + canonical((value as Record<string, unknown>)[key])).join(',') + '}';
@@ -35,14 +35,14 @@ export class RepositoryError extends Error {
   constructor(readonly code: string) { super(code); }
 }
 const eventSchema = z.strictObject({
-  type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'INTERVENTION_OPENED']),
+  type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_DISPATCHED', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'RUN_FAILED', 'RUN_CANCELLED', 'CANCEL_REQUESTED', 'INTERVENTION_OPENED']),
   actor: z.enum(['system', 'caller', 'automation', 'human']), stepId: IdentifierSchema.nullable(), interventionId: z.uuid().optional(),
-  details: z.strictObject({ code: IdentifierSchema, targetRef: IdentifierSchema.optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
+  details: z.strictObject({ code: IdentifierSchema, targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
 }).superRefine((event, ctx) => {
   if (event.actor === 'human' && !event.interventionId) ctx.addIssue({ code: 'custom', message: 'Human events require their intervention reference.' });
 });
 export type StoredEventInput = z.infer<typeof eventSchema>;
-async function append(client: PoolClient, runId: string, event: StoredEventInput) {
+export async function append(client: PoolClient, runId: string, event: StoredEventInput) {
   const safe = eventSchema.parse(event);
   const updated = await client.query<{ sequence: number }>('UPDATE automation.runs SET next_event_sequence=next_event_sequence+1,updated_at=now() WHERE run_id=$1 RETURNING next_event_sequence-1 AS sequence', [runId]);
   const sequence = updated.rows[0]?.sequence;
@@ -63,7 +63,6 @@ export class AutomationRepository {
     const principal = IdentifierSchema.parse(metadata.principal);
     const { idempotencyKey } = MutationMetadataSchema.parse({ idempotencyKey: metadata.idempotencyKey });
     const target = targetSchema.parse(configuration.target); const policy = policySchema.parse(configuration.policy);
-    if (request.targetId !== target.id || !policy.allowedOrigins.includes(new URL(target.entryPoint).origin)) throw new RepositoryError('INCOMPATIBLE_TARGET');
     const keyDigest = this.digest('key:' + principal + ':create-run:' + idempotencyKey);
     const fingerprint = this.digest('payload:' + canonical(request));
     try {
@@ -73,23 +72,29 @@ export class AutomationRepository {
         const wrongKey = await client.query('SELECT 1 FROM automation.request_receipts WHERE fingerprint_key_id<>$1 OR fingerprint_key_version<>1 LIMIT 1', [this.keyId]);
         if (wrongKey.rowCount) throw new RepositoryError('FINGERPRINT_KEY_MISMATCH');
         const found = await client.query<{ run_id: string; receipt_id: string; payload_fingerprint: string; expired: boolean; status: string }>(
-          'SELECT q.run_id,q.receipt_id,q.payload_fingerprint,q.expires_at<now() AS expired,r.status FROM automation.request_receipts q JOIN automation.runs r USING(run_id) WHERE principal_ref=$1 AND operation_scope=$2 AND key_digest=$3', [principal, 'create-run', keyDigest]);
+          'SELECT q.run_id,q.receipt_id,q.payload_fingerprint,q.expires_at<now() AS expired,r.status FROM automation.request_receipts q JOIN automation.runs r USING(run_id) WHERE q.principal_ref=$1 AND q.operation_scope=$2 AND q.key_digest=$3', [principal, 'create-run', keyDigest]);
         const prior = found.rows[0];
         if (prior) {
           if (prior.payload_fingerprint !== fingerprint) throw new RepositoryError('IDEMPOTENCY_KEY_REUSED');
           if (prior.expired && ['completed', 'failed', 'cancelled'].includes(prior.status)) throw new RepositoryError('IDEMPOTENCY_WINDOW_EXPIRED');
           return { runId: prior.run_id, receiptId: prior.receipt_id, reused: true };
         }
+        if (request.targetId !== target.id) throw new RepositoryError('TARGET_NOT_FOUND');
+        if (!policy.allowedOrigins.includes(new URL(target.entryPoint).origin)) throw new RepositoryError('INCOMPATIBLE_TARGET');
+        const occupied = await client.query("SELECT 1 FROM automation.runs WHERE status NOT IN ('completed','failed','cancelled') OR session_state NOT IN ('none','closed') LIMIT 1");
+        if (occupied.rowCount) throw new RepositoryError('RUN_CAPACITY_REACHED');
         if (request.mode === 'replay') {
           const artifact = await this.getCapability(request.capability.id, request.capability.version, client);
-          validateReplayRequest(artifact, request);
+          const source = await client.query('SELECT principal_ref FROM automation.runs WHERE run_id=$1', [artifact.sourceDiscoveryRunId]);
+          if (source.rows[0]?.principal_ref !== principal) throw new RepositoryError('CAPABILITY_NOT_FOUND');
+          try { validateReplayRequest(artifact, request); } catch { throw new RepositoryError('INVALID_CAPABILITY_INPUTS'); }
           if (artifact.surfaceRequirements.applicationFamily !== target.applicationFamily || !artifact.surfaceRequirements.compatibleTargetVersions.includes(target.version)) throw new RepositoryError('INCOMPATIBLE_TARGET');
         }
         const runId = randomUUID(); const receiptId = randomUUID();
         const reference = request.mode === 'replay' ? request.capability : undefined;
-        await client.query(`INSERT INTO automation.runs(run_id,mode,target_id,target_version,policy_id,policy_version,target_snapshot,policy_snapshot,target_checksum,policy_checksum,capability_id,capability_version,input_names)
-          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
-          [runId, request.mode, target.id, target.version, policy.id, policy.version, JSON.stringify(target), JSON.stringify(policy), hash(target), hash(policy), reference?.id ?? null, reference?.version ?? null, JSON.stringify(Object.keys(request.inputs))]);
+        await client.query(`INSERT INTO automation.runs(run_id,mode,target_id,target_version,policy_id,policy_version,target_snapshot,policy_snapshot,target_checksum,policy_checksum,capability_id,capability_version,input_names,principal_ref)
+          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+          [runId, request.mode, target.id, target.version, policy.id, policy.version, JSON.stringify(target), JSON.stringify(policy), hash(target), hash(policy), reference?.id ?? null, reference?.version ?? null, JSON.stringify(Object.keys(request.inputs)), principal]);
         await client.query(`INSERT INTO automation.request_receipts(receipt_id,principal_ref,operation_scope,key_digest,payload_fingerprint,fingerprint_key_id,fingerprint_key_version,run_id,state,result_reference,expires_at)
           VALUES($1,$2,'create-run',$3,$4,$5,1,$6,'settled',$7,now()+interval '24 hours')`,
           [receiptId, principal, keyDigest, fingerprint, this.keyId, runId, JSON.stringify({ kind: 'run', id: runId })]);

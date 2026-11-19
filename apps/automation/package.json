@@ -10,7 +10,8 @@
     "start": "node --env-file-if-exists=.env dist/index.js",
     "browserbase:check": "node --env-file-if-exists=.env --import tsx src/browserbase/cli.ts",
     "browserbase:spike": "node --env-file-if-exists=.env --import tsx src/browserbase/spike-cli.ts",
-    "browserbase:portal-check": "node --env-file-if-exists=.env --import tsx src/browserbase/portal-check.ts"
+    "browserbase:portal-check": "node --env-file-if-exists=.env --import tsx src/browserbase/portal-check.ts",
+    "executor:check": "node --env-file-if-exists=.env --import tsx src/execution/check-cli.ts"
   },
   "dependencies": {
     "@interface-ai/contracts": "workspace:*",

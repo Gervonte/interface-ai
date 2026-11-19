@@ -39,7 +39,7 @@ describe('real PostgreSQL persistence and isolation', () => {
   beforeAll(async () => {
     await provision(settings);
     automationOwner = createPool(settings.automation.migratorUrl); demoOwner = createPool(settings.demo.migratorUrl);
-    expect(await migrateAutomation(automationOwner)).toBe(1); expect(await migrateDemo(demoOwner)).toBe(1);
+    expect(await migrateAutomation(automationOwner)).toBe(2); expect(await migrateDemo(demoOwner)).toBe(1);
     await grantRuntime(automationOwner, 'automation', settings.automation.app); await grantRuntime(demoOwner, 'demo', settings.demo.app);
     automation = createPool(settings.automation.appUrl); demo = createPool(settings.demo.appUrl);
     repository = new AutomationRepository(automation, secrets.REQUEST_FINGERPRINT_KEY); target = new DemoRepository(demo);
@@ -58,15 +58,16 @@ describe('real PostgreSQL persistence and isolation', () => {
     const version = await automation.query('SHOW server_version'); expect(String(version.rows[0].server_version)).toMatch(/^18\.7/);
     expect((await automation.query('SHOW fsync')).rows[0].fsync).toBe('on');
     expect((await automation.query('SHOW synchronous_commit')).rows[0].synchronous_commit).toBe('on');
-    const history = await automationOwner.query('SELECT count(*)::integer AS count FROM automation.schema_migrations'); expect(history.rows[0].count).toBe(1);
+    const history = await automationOwner.query('SELECT count(*)::integer AS count FROM automation.schema_migrations'); expect(history.rows[0].count).toBe(2);
   });
   it('rejects changed migration history and rolls back failed migration DDL', async () => {
     const directory = await mkdtemp(tmpdir() + '/interface-migration-');
     const changed = pathToFileURL(directory + '/001_initial.sql'); await writeFile(changed, 'SELECT 1;');
     await expect(migrate(automationOwner, 'automation', [changed])).rejects.toThrow('mismatch');
     const valid = new URL('../../apps/automation/migrations/001_initial.sql', import.meta.url);
-    const failing = pathToFileURL(directory + '/002_bad.sql'); await writeFile(failing, 'CREATE TABLE automation.should_rollback(id integer); SELECT 1/0;');
-    await expect(migrate(automationOwner, 'automation', [valid, failing])).rejects.toMatchObject({ code: '22012' });
+    const runtime = new URL('../../apps/automation/migrations/002_runtime.sql', import.meta.url);
+    const failing = pathToFileURL(directory + '/003_bad.sql'); await writeFile(failing, 'CREATE TABLE automation.should_rollback(id integer); SELECT 1/0;');
+    await expect(migrate(automationOwner, 'automation', [valid, runtime, failing])).rejects.toMatchObject({ code: '22012' });
     expect((await automationOwner.query("SELECT to_regclass('automation.should_rollback') AS name")).rows[0].name).toBeNull();
   });
   it('deduplicates concurrent retries and rejects changed payloads before capacity checks', async () => {
