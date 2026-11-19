@@ -99,7 +99,7 @@ Run views reject contradictory lifecycle/controller/result states, mismatched su
 | Human intervention deadline | 600,000 ms (10 minutes) |
 | Overall elapsed run deadline | 900,000 ms (15 minutes) |
 
-`RuntimeBudgetsSchema` validates bounded server configuration and consistent wait/poll/deadline relationships. These are initial configuration defaults, not newly implemented run enforcement. INT-007/INT-009/INT-013 must enforce the minimum of requested step/rule budgets, current policy ceilings, and remaining run budgets, without resetting deadlines on retries/handoff. A capability/request cannot select a policy override or grant itself more permission. The configured browser lifetime must cover the admitted overall run lifetime while still remaining finite.
+`RuntimeBudgetsSchema` validates bounded server configuration and consistent wait/poll/deadline relationships. These defaults are enforced by the shared executor/coordinator for the current discovery/replay slice. Recovery and handoff extensions in INT-013 onward must preserve the minimum of requested step/rule budgets, current policy ceilings, and remaining run budgets, without resetting deadlines on retries/handoff. A capability/request cannot select a policy override or grant itself more permission. The configured browser lifetime must cover the admitted overall run lifetime while still remaining finite.
 
 ## Verification and remaining scope
 
@@ -109,4 +109,8 @@ No new hosted session, model call, database, UI route, or live discovery evidenc
 
 ## Executor/API integration (INT-007/008)
 
-The semantic target/read/condition contracts now have an executable same-origin browser adapter; its supported subset and failure behavior are documented in [RUNTIME.md](RUNTIME.md). `RunAcceptedSchema` additionally accepts a validated optional `operationUrl` that points to the accepted run's UUID receipt. Authenticated resource APIs, duplicate-key transport rejection, capability-aware replay invocation validation, durable principal/session state, cancellation and safe result access are implemented. Real discovery-derived artifact construction and the replay interpreter remain INT-009/010. The authored example remains a format/test fixture, not a production discovered capability.
+The semantic target/read/condition contracts now have an executable same-origin browser adapter; its supported subset and failure behavior are documented in [RUNTIME.md](RUNTIME.md). `RunAcceptedSchema` additionally accepts a validated optional `operationUrl` that points to the accepted run's UUID receipt. Authenticated resource APIs, duplicate-key transport rejection, capability-aware replay invocation validation, durable principal/session state, cancellation and safe result access are implemented. Real discovery-derived construction and deterministic replay are now implemented in INT-009/010; see [the workflow guide](WORKFLOWS.md) for supported scope and the entry-navigation/precondition convention. The authored example remains a format/test fixture, not a production discovered capability.
+
+## Actual discovered artifact (INT-009–011)
+
+[The live example](evidence/int-009-011/capability.json) was emitted by discovery and consumed by a later API process for another member. Its discovery sources resolve to confirmed events in the exported run log. Publication verifies matching step IDs/types, positive model usage, and complete ordered mutation history. Initial global preconditions are checked after the fresh-session entry navigation. Output captures and identity checks use deterministic UI operations. The authored `examples/` fixture remains distinct from this real capability.

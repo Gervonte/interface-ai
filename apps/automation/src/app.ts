@@ -39,6 +39,7 @@ export function createApp(options: { coordinator?: Coordinator; identities?: rea
     const accepted = await coordinator().accept(RunRequestSchema.parse(request.body), response.locals.principal, key(request));
     response.set('Location', accepted.statusUrl).status(202).json(accepted);
   });
+  app.get('/v1/interventions/:interventionId', async (request, response) => response.json(await coordinator().repository.intervention(z.uuid().parse(request.params.interventionId), response.locals.principal)));
   app.get('/v1/runs/:runId', async (request, response) => response.json(await coordinator().read(runId(request), response.locals.principal)));
   app.get('/v1/capabilities/:capabilityId/versions/:version', async (request, response) => {
     const id = IdentifierSchema.parse(request.params.capabilityId); const version = z.string().regex(/^[1-9]\d{0,8}$/).transform(Number).parse(request.params.version);
@@ -60,7 +61,7 @@ export function createApp(options: { coordinator?: Coordinator; identities?: rea
     const status = typeof failure === 'object' && failure !== null && 'status' in failure ? failure.status : undefined;
     if (status === 400 || status === 413 || status === 415) { error(response, status, status === 413 ? 'PAYLOAD_TOO_LARGE' : status === 415 ? 'UNSUPPORTED_MEDIA_TYPE' : 'INVALID_JSON'); return; }
     if (failure instanceof RepositoryError) {
-      const missing = ['RUN_NOT_FOUND', 'CAPABILITY_NOT_FOUND', 'TARGET_NOT_FOUND', 'OPERATION_NOT_FOUND', 'EVIDENCE_NOT_FOUND'];
+      const missing = ['RUN_NOT_FOUND', 'CAPABILITY_NOT_FOUND', 'TARGET_NOT_FOUND', 'OPERATION_NOT_FOUND', 'EVIDENCE_NOT_FOUND', 'INTERVENTION_NOT_FOUND'];
       const invalid = ['INVALID_CAPABILITY_INPUTS', 'INCOMPATIBLE_TARGET'];
       const conflicts = ['IDEMPOTENCY_KEY_REUSED', 'IDEMPOTENCY_WINDOW_EXPIRED', 'RUN_STATE_CONFLICT', 'RUN_CAPACITY_REACHED'];
       error(response, missing.includes(failure.code) ? 404 : invalid.includes(failure.code) ? 422 : conflicts.includes(failure.code) ? 409 : 503, failure.code); return;

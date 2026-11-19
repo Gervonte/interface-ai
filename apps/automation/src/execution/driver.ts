@@ -1,5 +1,8 @@
 import type { Page } from '@browserbasehq/stagehand';
 import { z } from 'zod';
+import type { Values } from '@interface-ai/contracts';
+import { observeDom } from '../workflows/observation-dom.js';
+import { ObservationSchema, safeLabels, staticValues } from '../workflows/contracts.js';
 import type { BrowserSurface, ResolvedTarget, SurfacePolicy } from './surface.js';
 import { TargetStateSchema } from './surface.js';
 import { operateDom, snapshotDom } from './dom.js';
@@ -7,6 +10,9 @@ import { ExecutionError, failureCodes } from './errors.js';
 
 export class StagehandSurface implements BrowserSurface {
   constructor(private readonly page: Page) {}
+  async observe(inputs: Values, policy: SurfacePolicy) {
+    return ObservationSchema.parse(await this.page.evaluate(`(() => { const __name = (value) => value; return (${observeDom.toString()})(${JSON.stringify(inputs)}, ${JSON.stringify(policy)}, ${JSON.stringify(safeLabels)}, ${JSON.stringify(staticValues)}); })()`));
+  }
   async location() { return this.page.url(); }
   private async invoke(target: ResolvedTarget, policy: SurfacePolicy, mode: 'inspect' | 'fill' | 'click', value?: string) {
     const data: unknown = await this.page.evaluate(`(() => { const __name = (value) => value; return (${operateDom.toString()})(${JSON.stringify({ target, policy, mode, ...(value === undefined ? {} : { value }) })}); })()`);

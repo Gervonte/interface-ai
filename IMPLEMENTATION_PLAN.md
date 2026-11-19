@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: INT-001 through INT-008 are implemented and verified at their stated scope; INT-009 onward remain pending. INT-007/008 are delivered together as the executor/API milestone; discovery/replay workers are still explicitly unavailable until INT-009/010. Completion details are linked below. This plan does not authorize publishing/submission.
+Status: INT-001 through INT-011 are implemented and verified at their stated scope. INT-009/010/011 form the first live discovery, saved-artifact, and fresh-process replay milestone. Scenario recovery and full operator handoff remain INT-012 onward. Completion details are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -78,7 +78,7 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
     **Done when:** run creation returns a reference promptly; callers can inspect progress/results; duplicate creation requests resolve to one run and a second distinct active run is rejected. Invalid requests, capability inputs, and authorization failures return the documented contracts. Stopping or restarting the backend never silently redispatches interrupted UI work; session cleanup uncertainty blocks new admission. **Depends on:** INT-004, INT-005, INT-007. **Acceptance:** DISC-01, DISC-03, REP-07, DEL-01.
 
-    **Verified:** authenticated asynchronous create/read/exact-capability/events/receipt/cancel/evidence routes; safe errors and duplicate-key JSON rejection; transactional principal-scoped receipts/capacity; frozen and persisted configuration; one coordinator lock; finite provider sessions; safe cancellation/drain; startup interruption without redispatch; unconfirmed session/launch cleanup blocks new runs until verified closure or conservative expiry. Tests include actual child-process death during session creation, in-flight cancellation, authorization, exact versions, request deduplication and transient-output expiry. `pnpm check:db` passes typechecking, 147 default tests, 24 PostgreSQL tests, and all builds. The local smoke command verifies the initial API; normal discovery/replay requests still terminate with explicit unavailable-mode results until INT-009/010. See [API setup and reconciliation](RUNTIME.md). This is orchestration support, not completed discovery/replay acceptance.
+    **Verified:** authenticated asynchronous create/read/exact-capability/events/receipt/cancel/evidence routes; safe errors and duplicate-key JSON rejection; transactional principal-scoped receipts/capacity; frozen and persisted configuration; one coordinator lock; finite provider sessions; safe cancellation/drain; startup interruption without redispatch; unconfirmed session/launch cleanup blocks new runs until verified closure or conservative expiry. Tests include actual child-process death during session creation, in-flight cancellation, authorization, exact versions, request deduplication and transient-output expiry. `pnpm check:db` passes typechecking, 147 default tests, 24 PostgreSQL tests, and all builds. The local smoke command verifies the initial API; at that milestone discovery/replay requests still used explicit unavailable-mode results, superseded by INT-009/010 below. See [API setup and reconciliation](RUNTIME.md). This is orchestration support, not completed discovery/replay acceptance.
 
 9. **INT-009 — Implement model-driven discovery and artifact construction.**
 
@@ -86,11 +86,15 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
     **Done when:** the system accepts a goal and target, performs genuinely model-selected UI actions, and saves a reloadable parameterized capability traceable to the run. Invalid construction or goal completion fails clearly rather than fabricating a capability. **Depends on:** INT-006, INT-007, INT-008. **Acceptance:** DISC-01, DISC-02, DISC-03, ART-01, ART-02, ART-03, ART-04, ART-05.
 
+    **Verified:** Genuine Gateway-selected portal actions produce the parameterized capability; strict UI completion and confirmed-history checks gate publication. Discovery failures expose owned intervention context; claim/resume remains later work. `pnpm check:db` passes typechecking, 156 default tests, 26 PostgreSQL tests, and all builds. [Workflow setup](WORKFLOWS.md) · [Live evidence](evidence/int-009-011/README.md). This is the first balance slice, not completed assessment-wide recovery/handoff acceptance.
+
 10. **INT-010 — Implement deterministic capability replay.**
 
     Interpret an exact saved capability version with new inputs, resolving targets and conditions through the shared executor. Read outputs through deterministic UI operations, verify member/account identity and amounts, and distinguish terminal success/outcome/failure. Keep the replay path free of model-dependent discovery/extraction and self-healing.
 
     **Done when:** a saved capability is loaded in a later process and replays for another member; observed UI outputs match its contract. Instrumented model access fails on any attempted inference. Wrong-record/invalid-output checks prevent success. **Depends on:** INT-009. **Acceptance:** REP-01, REP-02, REP-03, REP-04, ART-04.
+
+    **Verified:** The exact persisted capability replays for M1002 in a fresh API process with a rejecting inference callback, identity checks, typed UI reads, and zero model metrics. `pnpm check:db` passes typechecking, 156 default tests, 26 PostgreSQL tests, and all builds. [Workflow setup](WORKFLOWS.md) · [Live evidence](evidence/int-009-011/README.md). This is the first balance slice, not completed assessment-wide recovery/handoff acceptance.
 
 11. **INT-011 — Capture the first real end-to-end milestone.**
 
@@ -99,6 +103,8 @@ Execution order follows the dependencies and sections below, not the numeric ID.
     **Done when:** a reviewer can follow goal → genuine discovery → saved artifact → changed-input replay with the expected different balance and zero replay model calls. Evidence is real and clearly distinguished from fixture tests or illustrative examples. **Depends on:** INT-010. **Acceptance:** DISC-02, ART-01, REP-01, REP-02, REP-04, OBS-01, DEL-02, DEL-04.
 
 ## Baseline exceptions and human intervention
+
+    **Verified:** The real exported capability and discovery/replay logs show M1001/S2001 at 125034 minor units and M1002/S2002 at 8765, distinct processes, positive discovery usage, zero replay inference, and confirmed session closure. `pnpm check:db` passes typechecking, 156 default tests, 26 PostgreSQL tests, and all builds. [Workflow setup](WORKFLOWS.md) · [Live evidence](evidence/int-009-011/README.md). This is the first balance slice, not completed assessment-wide recovery/handoff acceptance.
 
 12. **INT-012 — Add repeatable target scenarios.**
 

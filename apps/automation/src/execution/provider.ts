@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { StagehandSurface } from './driver.js';
 import type { SessionFactory, Configuration } from './coordinator.js';
 import { ExecutionError } from './errors.js';
+import { GatewayPlanner } from '../workflows/planner.js';
 
 export class BrowserbaseSessions implements SessionFactory {
   inferenceAttempts = 0;
@@ -21,32 +22,49 @@ export class BrowserbaseSessions implements SessionFactory {
       body: JSON.stringify({ projectId: this.projectId, status: 'REQUEST_RELEASE' }), signal: AbortSignal.timeout(5000), redirect: 'error' });
     if (!response.ok) return false;
     for (let attempt = 0; attempt < 8; attempt++) {
-      this.finalStatus = await this.status(id);
-      if (['COMPLETED', 'ERROR', 'TIMED_OUT'].includes(this.finalStatus)) return true;
+      this.finalStatus = await this.status(id); if (['COMPLETED', 'ERROR', 'TIMED_OUT'].includes(this.finalStatus)) return true;
       await new Promise(resolve => setTimeout(resolve, 250));
     }
     return false;
   }
-  async open(configuration: Configuration, onCreated: (id: string) => Promise<void>, signal: AbortSignal) {
+  validate(configuration: Configuration) {
+    const url = new URL(configuration.target.entryPoint);
+    if (url.protocol !== 'https:' || ['localhost','127.0.0.1'].includes(url.hostname)) throw new ExecutionError('POLICY_BLOCKED');
+    if (configuration.policy.budgets.overallTimeoutMs > 1_800_000) throw new ExecutionError('BUDGET_EXHAUSTED');
+  }
+  async open(configuration: Configuration, onCreated: (id: string) => Promise<void>, signal: AbortSignal, mode: 'discovery' | 'replay' = 'replay') {
     if (signal.aborted) throw new ExecutionError('CANCELLED');
+    this.validate(configuration);
     const url = new URL(configuration.target.entryPoint);
     if (url.protocol !== 'https:' || ['localhost', '127.0.0.1'].includes(url.hostname)) throw new ExecutionError('POLICY_BLOCKED');
     const timeout = Math.ceil(configuration.policy.budgets.overallTimeoutMs / 1000);
     if (timeout > 1800) throw new ExecutionError('BUDGET_EXHAUSTED');
     const browser = await browserbase.launch({ apiKey: this.apiKey, projectId: this.projectId, region: 'us-west-2', api_timeout: timeout, keepAlive: false,
-      browserSettings: { allowedDomains: [url.hostname], logSession: false, recordSession: false, solveCaptchas: false, viewport: { width: 1440, height: 1000 } },
-      clientOptions: { timeout: 30_000, maxRetries: 0 } });
+      browserSettings: { allowedDomains: [url.hostname], logSession: false, recordSession: false, solveCaptchas: false, viewport: { width: 1440, height: 1000 } }, clientOptions: { timeout: 30_000, maxRetries: 0 } });
     let stagehand: Stagehand | undefined;
     try {
-      const id = z.uuid().parse(browser.sessionId); await onCreated(id);
-      if (signal.aborted) throw new ExecutionError('CANCELLED');
-      stagehand = await Stagehand.create({ browser, selfHeal: false, cache: false, logging: { level: 'off' }, model: { generate: async () => { this.inferenceAttempts++; throw new Error('INFERENCE_FORBIDDEN'); } } });
-      const page = await browser.context.newPage();
-      await page.goto('about:blank', { timeout: 10_000, waitUntil: 'domcontentloaded' });
-      return { id, surface: new StagehandSurface(page), close: async () => {
-        try { if (stagehand) this.lastMetrics = { ...await stagehand.metrics() }; await stagehand?.close(); } finally { await browser.close(); }
-        return this.reconcile(id);
-      } };
+      const id = z.uuid().parse(browser.sessionId); await onCreated(id); if (signal.aborted) throw new ExecutionError('CANCELLED');
+      let attempts = 0;
+      stagehand = await Stagehand.create({ browser, selfHeal: false, cache: false, logging: { level: 'off' },
+        model: mode === 'discovery' ? { modelName: 'openai/gpt-5' } : { generate: async () => { attempts++; this.inferenceAttempts++; throw new Error('INFERENCE_FORBIDDEN'); } } });
+      const page = await browser.context.newPage(); await page.goto('about:blank', { timeout: 10_000, waitUntil: 'domcontentloaded' });
+      const planner = mode === 'discovery' ? new GatewayPlanner(stagehand, async () => {
+        // No target app is loaded in the model-view document, so it cannot reset member context.
+        const helper = await browser.context.newPage(); await helper.goto(new URL('/__automation_model_view__', url).toString(), { timeout: 10_000, waitUntil: 'domcontentloaded' });
+        if (new URL(await helper.url()).origin !== url.origin) throw new ExecutionError('POLICY_BLOCKED');
+        return helper;
+      }) : undefined;
+      let closePromise: Promise<boolean> | undefined;
+      let metrics: Record<string, number> = {};
+      let finalStatus = 'UNKNOWN';
+      return { id, surface: new StagehandSurface(page), ...(planner ? { planner } : {}),
+        statistics: () => ({ mode, modelCalls: planner?.calls ?? 0, inferenceAttempts: attempts,
+          inputTokens: metrics.totalPromptTokens ?? 0, outputTokens: metrics.totalCompletionTokens ?? 0, finalStatus }),
+        close: () => closePromise ??= (async () => {
+          try { if (stagehand) metrics = this.lastMetrics = { ...await stagehand.metrics() }; await stagehand?.close(); }
+          finally { await browser.close(); }
+          const closed = await this.reconcile(id); finalStatus = this.finalStatus; return closed;
+        })() };
     } catch {
       try { await stagehand?.close(); } finally { await browser.close(); }
       throw new ExecutionError('SESSION_LOST');

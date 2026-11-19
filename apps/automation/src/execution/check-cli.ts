@@ -39,7 +39,8 @@ async function main() {
   const provider = new BrowserbaseSessions(credentials.apiKey, credentials.projectId);
   const verified: unknown[] = [];
   const base = new AutomationRepository(pool, process.env.REQUEST_FINGERPRINT_KEY);
-  const coordinator = new Coordinator(base, process.env.REQUEST_FINGERPRINT_KEY, configuration, new EvidenceStore(resolve(folder, 'evidence')), provider,
+  const deterministic = { open: (configuration: Parameters<typeof provider.open>[0], created: Parameters<typeof provider.open>[1], signal: AbortSignal) => provider.open(configuration, created, signal, 'replay'), reconcile: (id: string) => provider.reconcile(id) };
+  const coordinator = new Coordinator(base, process.env.REQUEST_FINGERPRINT_KEY, configuration, new EvidenceStore(resolve(folder, 'evidence')), deterministic,
     async (_request, context) => {
       const executor = await context.executor(targets); let index = 0;
       const click = (target: string) => executor.execute({ type: 'click', target }, 'check-' + ++index);

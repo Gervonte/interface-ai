@@ -35,9 +35,9 @@ export class RepositoryError extends Error {
   constructor(readonly code: string) { super(code); }
 }
 const eventSchema = z.strictObject({
-  type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_DISPATCHED', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'RUN_FAILED', 'RUN_CANCELLED', 'CANCEL_REQUESTED', 'INTERVENTION_OPENED']),
+  type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_DISPATCHED', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'RUN_FAILED', 'RUN_CANCELLED', 'CANCEL_REQUESTED', 'INTERVENTION_OPENED', 'MODEL_REQUESTED', 'MODEL_COMPLETED', 'MODEL_DECISION_STALE', 'SESSION_FINISHED']),
   actor: z.enum(['system', 'caller', 'automation', 'human']), stepId: IdentifierSchema.nullable(), interventionId: z.uuid().optional(),
-  details: z.strictObject({ code: IdentifierSchema, targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
+  details: z.strictObject({ code: IdentifierSchema, operation: z.enum(['navigate','click','fill','wait','capture']).optional(), inputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), outputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), modelCalls: z.number().int().min(0).max(100).optional(), inferenceAttempts: z.number().int().min(0).max(100).optional(), modelName: z.literal('openai/gpt-5').optional(), targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
 }).superRefine((event, ctx) => {
   if (event.actor === 'human' && !event.interventionId) ctx.addIssue({ code: 'custom', message: 'Human events require their intervention reference.' });
 });
@@ -119,7 +119,7 @@ export class AutomationRepository {
       await append(client, runId, { type: 'RUN_STARTED', actor: 'system', stepId: null, details: { code: 'started' } });
     });
   }
-  async publishCapability(runId: string, value: unknown, outputs: Values, retention: 'transient' | 'synthetic' = 'transient') {
+  async publishCapability(runId: string, value: unknown, outputs: Values, retention: 'transient' | 'synthetic' = 'transient', provenance: 'confirmed' | 'model-driven' = 'confirmed') {
     const artifact = parseCapability(value); const validatedOutputs = validateOutput(artifact, outputs);
     if (artifact.sourceDiscoveryRunId !== runId) throw new RepositoryError('SOURCE_RUN_MISMATCH');
     await transaction(this.pool, async (client) => {
@@ -134,12 +134,12 @@ export class AutomationRepository {
         ...artifact.steps.flatMap((step) => step.source.kind === 'authored' ? [] : [step.source.eventSequence]),
         ...artifact.manualContributions.flatMap((item) => item.eventSequences),
       ])];
-      const recorded = await client.query<{ sequence: number; actor: string; event_type: string; intervention_id: string | null }>(
-        'SELECT sequence,actor,event_type,intervention_id FROM automation.run_events WHERE run_id=$1 AND sequence=ANY($2::integer[])', [runId, sequences]);
+      const recorded = await client.query<{ sequence: number; actor: string; event_type: string; step_id: string | null; details: {operation?:string}; intervention_id: string | null }>(
+        'SELECT sequence,actor,event_type,step_id,details,intervention_id FROM automation.run_events WHERE run_id=$1 AND sequence=ANY($2::integer[])', [runId, sequences]);
       const events = new Map(recorded.rows.map((event) => [event.sequence, event]));
       for (const step of artifact.steps) if (step.source.kind !== 'authored') {
         const event = events.get(step.source.eventSequence);
-        if (!event || !['ACTION_COMPLETED', 'READ_COMPLETED'].includes(event.event_type)
+        if (!event || event.step_id !== step.id || (event.details.operation && event.details.operation !== step.type) || !['ACTION_COMPLETED', 'READ_COMPLETED'].includes(event.event_type)
           || event.actor !== (step.source.kind === 'manual' ? 'human' : 'automation')
           || (step.source.kind === 'manual' && event.intervention_id !== step.source.interventionId)) throw new RepositoryError('UNCONFIRMED_ARTIFACT_SOURCE');
       }
@@ -147,6 +147,15 @@ export class AutomationRepository {
         const event = events.get(sequence);
         if (!event || event.actor !== 'human' || event.intervention_id !== item.interventionId
           || !['ACTION_COMPLETED', 'READ_COMPLETED'].includes(event.event_type)) throw new RepositoryError('UNCONFIRMED_MANUAL_SOURCE');
+      }
+      const stepSequences = artifact.steps.flatMap(step => step.source.kind === 'authored' ? [] : [step.source.eventSequence]);
+      if (new Set(stepSequences).size !== stepSequences.length) throw new RepositoryError('UNCONFIRMED_ARTIFACT_SOURCE');
+      if (provenance === 'model-driven') {
+        const models = await client.query("SELECT 1 FROM automation.run_events WHERE run_id=$1 AND event_type='MODEL_COMPLETED' AND (details->>'inputTokens')::bigint>0 LIMIT 1", [runId]);
+        if (!models.rowCount) throw new RepositoryError('UNCONFIRMED_MODEL_SOURCE');
+        const mutations = await client.query<{sequence:number}>("SELECT sequence FROM automation.run_events WHERE run_id=$1 AND event_type='ACTION_COMPLETED' AND actor IN ('automation','human') AND details->>'operation' IN ('navigate','click','fill') ORDER BY sequence", [runId]);
+        const represented = artifact.steps.filter(step => ['navigate','click','fill'].includes(step.type)).map(step => step.source.kind === 'authored' ? -1 : step.source.eventSequence);
+        if (canonical(represented) !== canonical(mutations.rows.map(row => row.sequence))) throw new RepositoryError('INCOMPLETE_DISCOVERY_HISTORY');
       }
       const capability = { id: artifact.capabilityId, version: artifact.version };
       const result = { kind: 'success', capability, output: retention === 'synthetic'

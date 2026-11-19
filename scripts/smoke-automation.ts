@@ -21,7 +21,7 @@ async function main() {
     if (!response.ok) throw new Error('Read failed'); const run = RunViewSchema.parse(await response.json());
     if (['completed', 'failed', 'cancelled'].includes(run.status)) {
       console.info(JSON.stringify({ accepted: true, authenticationRequired: true, deduplicated: true, runId: run.runId, status: run.status, result: run.result }));
-      if (run.result?.kind !== 'failure' || run.result.code !== 'DISCOVERY_NOT_IMPLEMENTED') throw new Error('Unexpected current milestone result');
+      if (run.result?.kind !== 'failure' || run.result.code !== 'UNSUPPORTED_GOAL') throw new Error('Unexpected current milestone result');
       return;
     }
     await delay(100);

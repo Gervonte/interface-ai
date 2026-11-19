@@ -1,3 +1,4 @@
+import { NeedsIntervention } from '../../apps/automation/src/execution/errors.js';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { once } from 'node:events';
@@ -190,4 +191,28 @@ describe('authenticated run API and durable coordinator', () => {
     expect((await f.call('/v1/capabilities/runtime-owned-test/versions/2')).status).toBe(404);
     expect((await f.call('/v1/capabilities/runtime-owned-test/versions/1', undefined, randomUUID(), 'b'.repeat(64))).status).toBe(404);
   });
+  it('persists an owned intervention, retains the session, blocks capacity, and cancels cleanly', async () => {
+    let closes = 0; let location = 'about:blank';
+    const factory: SessionFactory = { reconcile: async () => true, open: async (_configuration, created) => {
+      const id = randomUUID(); await created(id);
+      return { id, surface: { location: async () => location, navigate: async url => { location = url; }, inspect: async () => { throw new Error('No target reads'); }, dispatch: async () => { throw new Error('No mutations'); }, snapshot: async () => ({ schemaVersion:1,kind:'structural-snapshot',redactedValues:true,documents:[],omittedFrames:0 }) }, close: async () => { closes++; return true; } };
+    } };
+    const f = await service(async (_request, context) => {
+      const executor = await context.executor({}); await executor.execute({type:'navigate',destination:'target-entry'},'entry');
+      throw new NeedsIntervention({ stepId:null,actionIndex:null,reason:'MANUAL_PREREQUISITE',dispatchState:'not_sent',effectState:'not_checked',checkpointId:null,expected:{code:'READY',description:'Ready'},observed:{code:'HELP',description:'Help requested'},evidenceIds:[] });
+    }, factory);
+    const accepted=RunAcceptedSchema.parse(await (await f.call('/v1/runs',request)).json());
+    await until(async () => (await repository.getRun(accepted.runId)).status === 'waiting_for_human');
+    const waiting=await repository.getRun(accepted.runId); expect(closes).toBe(0);expect(waiting.control.owner).toBe('none');
+    const route='/v1/interventions/'+waiting.activeInterventionId;
+    const response=await f.call(route);expect(response.status).toBe(200);expect(await response.json()).toMatchObject({status:'open',runId:accepted.runId,blocked:{reason:'MANUAL_PREREQUISITE'}});
+    expect((await f.call(route,undefined,randomUUID(),'b'.repeat(64))).status).toBe(404);
+    expect((await f.call('/v1/runs',request)).status).toBe(409);
+    expect((await f.coordinator.repository.state(accepted.runId)).session_state).toBe('live');
+    expect((await f.call(accepted.statusUrl+'/cancel',{reason:'USER_REQUESTED'})).status).toBe(202);
+    await f.coordinator.idle();expect(closes).toBe(1);expect((await repository.getRun(accepted.runId)).status).toBe('cancelled');
+    expect((await f.coordinator.repository.state(accepted.runId)).session_state).toBe('closed');
+    expect(await (await f.call(route)).json()).toMatchObject({status:'closed'});
+  });
+
 });

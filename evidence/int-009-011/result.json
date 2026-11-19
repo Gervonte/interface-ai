@@ -1,0 +1,59 @@
+{
+  "tasks": [
+    "INT-009",
+    "INT-010",
+    "INT-011"
+  ],
+  "finishedAt": "2026-11-19T03:05:46.234Z",
+  "configurationVersion": 1795056698,
+  "runs": [
+    {
+      "mode": "discovery",
+      "processId": 18461,
+      "runId": "96c165d4-4b17-46d7-88c8-ebfbd25839e6",
+      "capability": {
+        "id": "balance-0f6a7df9b43f44aeb45fad5ad53ca6d1",
+        "version": 1
+      },
+      "output": {
+        "memberId": "M1001",
+        "accountId": "S2001",
+        "accountType": "savings",
+        "currentBalanceMinor": 125034,
+        "currency": "USD"
+      },
+      "session": {
+        "code": "closed",
+        "modelName": "openai/gpt-5",
+        "modelCalls": 7,
+        "inputTokens": 10587,
+        "outputTokens": 21442,
+        "inferenceAttempts": 0
+      }
+    },
+    {
+      "mode": "replay",
+      "processId": 25302,
+      "runId": "fa7420ac-5077-43b7-8d2a-efcdb61d3045",
+      "capability": {
+        "id": "balance-0f6a7df9b43f44aeb45fad5ad53ca6d1",
+        "version": 1
+      },
+      "output": {
+        "currency": "USD",
+        "memberId": "M1002",
+        "accountId": "S2002",
+        "accountType": "savings",
+        "currentBalanceMinor": 8765
+      },
+      "session": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      }
+    }
+  ],
+  "success": true
+}

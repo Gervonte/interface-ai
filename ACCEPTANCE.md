@@ -1,10 +1,10 @@
 # Acceptance checklist
 
-Status: draft for review. No implementation criteria have been verified yet.
+Status: implementation in progress through INT-011. The first live balance discovery/replay proof is linked in [evidence/int-009-011](evidence/int-009-011/README.md). Full scenario and operator-handoff acceptance remains pending.
 
 Source: *Assignment A — Computer-Use Automation System*, especially sections 3–7 and 9. Section references below refer to that assignment.
 
-This checklist defines observable outcomes independently of implementation choices. The selected stack, agreed balance workflow, and reviewed implementation order are tracked in STACK.md, DEMO_WORKFLOW.md, and IMPLEMENTATION_PLAN.md. Planning coverage is not verification; all criteria remain unchecked.
+This checklist defines observable outcomes independently of implementation choices. The selected stack, agreed balance workflow, and reviewed implementation order are tracked in STACK.md, DEMO_WORKFLOW.md, and IMPLEMENTATION_PLAN.md. Planning coverage is not verification. The assessment-wide boxes remain unchecked pending the complete baseline verification; milestone evidence records the narrower behavior already demonstrated.
 
 ## How to use this checklist
 
