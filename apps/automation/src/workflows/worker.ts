@@ -141,8 +141,35 @@ async function discover(request: Extract<Parameters<Worker>[0], { mode: 'discove
   throw new ExecutionError('MODEL_BUDGET_EXHAUSTED');
 }
 
+async function replay(request: Extract<Parameters<Worker>[0], { mode: 'replay' }>, context: WorkerContext) {
+  const artifact = parseCapability(await context.capability()); validateInvocation(artifact, request.inputs);
+  if (artifact.outcomeRules.length || artifact.recoveryRules.length || artifact.manualContributions.length) throw problem('MANUAL_PREREQUISITE');
+  if (artifact.steps[0]?.type !== 'navigate' || artifact.steps.slice(1).some(step => step.type === 'navigate')) throw new ExecutionError('ARTIFACT_INVALID');
+  const variables: Values = {}; const executor = await context.executor(artifact.targets, variables);
+  let first = true;
+  for (const step of artifact.steps) {
+    if (step.type === 'intervene') throw problem(step.reason === 'MANUAL_PREREQUISITE' ? 'MANUAL_PREREQUISITE' : 'POLICY_BLOCKED', step.id);
+    await executor.assert(step.before, step.id + '-before', step.timeoutMs);
+    const output = await executor.execute(step, step.id, step.timeoutMs);
+    if (step.type === 'capture') {
+      if (Object.hasOwn(variables, step.variable)) throw new ExecutionError('ARTIFACT_INVALID');
+      const field = artifact.variables[step.variable]; if (!field) throw new ExecutionError('ARTIFACT_INVALID');
+      variables[step.variable] = validateData({ type: 'object', properties: { [step.variable]: field }, required: [step.variable], additionalProperties: false }, { [step.variable]: output })[step.variable]!;
+    }
+    await executor.assert(step.after, step.id + '-after', step.timeoutMs);
+    if (first) { for (const condition of Object.values(artifact.preconditions)) await executor.assert(condition, 'initial-precondition'); first = false; }
+  }
+  await executor.assert({ kind: 'all', conditions: [...artifact.successCondition.conditions,
+    ...artifact.successCondition.identity.map(check => same(check.target, { kind: 'input', name: check.input }))] }, 'verify-terminal');
+  const outputs: Values = {};
+  for (const [name, extraction] of Object.entries(artifact.outputs)) outputs[name] = (await executor.execute({ type: 'capture', sourceValue: extraction }, 'output-' + name))!;
+  validateOutput(artifact, outputs);
+  await executor.assert({kind:'all',conditions:artifact.successCondition.conditions}, 'verify-output-context');
+  for (const identity of artifact.successCondition.identity) for (const [name, extraction] of Object.entries(artifact.outputs)) if (extraction.target === identity.target && outputs[name] !== request.inputs[identity.input]) throw new ExecutionError('INVALID_EXTRACTION');
+  return { kind: 'success' as const, capability: request.capability, output: { availability: 'available' as const, values: outputs } };
+}
 export const workflowWorker: Worker = async (request, context) => {
-  try { return await (request.mode === 'discovery' ? discover(request, context) : { kind: 'failure' as const, code: 'REPLAY_NOT_IMPLEMENTED', summary: 'Capability replay is not implemented yet.', blocked: null, evidenceIds: [] }); } catch (error) {
+  try { return await (request.mode === 'discovery' ? discover(request, context) : replay(request, context)); } catch (error) {
     if (request.mode === 'discovery' && error instanceof ExecutionError && ['TARGET_NOT_FOUND','AMBIGUOUS_TARGET','STATE_TIMEOUT','TARGET_NOT_ACTIONABLE','MODEL_UNAVAILABLE','POLICY_BLOCKED'].includes(error.code)) { const intervention = problem(error.code === 'AMBIGUOUS_TARGET' ? 'AMBIGUOUS_TARGET' : error.code === 'POLICY_BLOCKED' ? 'POLICY_BLOCKED' : 'MANUAL_PREREQUISITE'); intervention.blocked.observed.code = error.code; throw intervention; }
     throw error;
   }
