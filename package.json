@@ -33,7 +33,8 @@
     "automation:configure": "node --import tsx scripts/configure-automation.ts",
     "executor:check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && pnpm --filter @interface-ai/automation executor:check",
     "automation:reconcile": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/reconcile-automation.ts",
-    "automation:smoke": "node --env-file=apps/automation/.env --import tsx scripts/smoke-automation.ts"
+    "automation:smoke": "node --env-file=apps/automation/.env --import tsx scripts/smoke-automation.ts",
+    "workflow:demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/workflow-demo.ts"
   },
   "devDependencies": {
     "@types/node": "26.2.0",

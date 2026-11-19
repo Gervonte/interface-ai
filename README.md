@@ -2,7 +2,7 @@
 
 A TypeScript workspace for the computer-use automation assessment, with a PostgreSQL-backed synthetic credit-union staff portal and separate automation/operator applications.
 
-Implemented through INT-008: public capability/run contracts, isolated persistence, Browserbase SDK qualification, the connected staff portal, a policy-checked deterministic executor, sanitized structural failure evidence, and authenticated asynchronous run coordination/APIs. Model-driven discovery and saved-capability replay remain INT-009/010. The normal API currently reports explicit unavailable-mode results; authored browser checks verify the underlying surface/executor without claiming discovery. [Portal setup](PORTAL.md) · [Executor/API setup and limits](RUNTIME.md).
+Implemented through INT-011: typed capability/run contracts, isolated persistence, the staff portal, a policy-checked executor, authenticated run APIs, live model-driven balance discovery, and saved-capability replay in a separate process with inference forbidden. Business outcomes, recovery scenarios, and the complete operator handoff remain later tasks. [Portal setup](PORTAL.md) · [Runtime/API limits](RUNTIME.md) · [Discovery/replay guide and evidence](WORKFLOWS.md).
 
 
 ## Requirements
@@ -11,7 +11,7 @@ Implemented through INT-008: public capability/run contracts, isolated persisten
 - pnpm **10.32.1**. Use your existing pnpm installation, or install that exact version with `npm install --global pnpm@10.32.1`.
 - Docker Desktop with Compose for the local PostgreSQL setup and database integration tests; the shell apps/default tests still run independently.
 
-The root `packageManager`, engine constraints, exact dependency catalog, and committed lockfile define the verified toolchain. Stagehand is pinned. Normal startup does not open a hosted session; explicit Browserbase checks or an installed browser worker do. The current unavailable-mode workers open none.
+The root `packageManager`, engine constraints, exact dependency catalog, and committed lockfile define the verified toolchain. Stagehand is pinned. Normal startup opens no hosted session. Accepted supported discovery/replay requests and explicit Browserbase checks use hosted browsers; discovery also makes model calls.
 
 ## Install and run
 
@@ -37,7 +37,7 @@ Health endpoints, the operator shell, and default tests run **without API keys o
 
 Browserbase credentials and fixture connectivity are documented in [BROWSERBASE_SETUP.md](BROWSERBASE_SETUP.md). The explicit `pnpm browserbase:check` command opens one hosted session; `pnpm dev:fixture` serves its separate synthetic-only target on port 3003. Do not place secrets in frontend `VITE_*` variables or shared public contracts. `.env` files, runtime storage, browser profiles, captures, and build output stay ignored. Curated synthetic verification evidence lives under `evidence/`; private runtime output remains ignored.
 
-The demo app has its own backend. Automation imports only public transport schemas; it has no access to target fixtures or business database credentials. INT-005 provisions separate application databases and least-privilege roles. See [DATABASE.md](DATABASE.md) for setup, migration, seed/reset, and shutdown commands. The staff portal uses the demo repository through its own target API. INT-008 provides the authenticated initial automation run API; its discovery/replay workers remain later tasks.
+The demo app has its own backend. Automation imports only public transport schemas; it has no access to target fixtures or business database credentials. INT-005 provisions separate application databases and least-privilege roles. See [DATABASE.md](DATABASE.md) for setup, migration, seed/reset, and shutdown commands. The staff portal uses the demo repository through its own target API. The automation run API now executes the supported balance discovery/replay profile; see [WORKFLOWS.md](WORKFLOWS.md).
 
 ## Local PostgreSQL
 
@@ -64,6 +64,24 @@ pnpm check
 Vitest runs HTTP, executor, transport and contract checks. The explicit database suite also verifies authenticated run coordination and actual process-death recovery. Injected-provider tests cover connection cleanup, termination verification, API health, and configuration validation. These tests are not discovery or replay evidence. Tests use ephemeral loopback ports and need no live service credentials. Builds run in workspace dependency order; both frontends output `dist/`, and APIs output runnable server modules.
 
 After building, start one backend with `pnpm --filter @interface-ai/automation start` or `pnpm --filter @interface-ai/demo-api start`. Use `pnpm demo:serve` to build and serve the complete target UI/API at http://127.0.0.1:3002. The operator UI still uses its Vite development preview. INT-002 uses a separate fixture-only server and temporary tunnel for Browserbase access; see [setup](BROWSERBASE_SETUP.md).
+
+## Real discovery and changed-input replay
+
+After configuring credentials/database and stopping any automation API/watcher:
+
+```sh
+pnpm db:up
+pnpm db:migrate
+pnpm db:reset-demo
+pnpm automation:configure
+pnpm demo:serve
+# In another terminal:
+cloudflared tunnel --url http://127.0.0.1:3002 --no-autoupdate
+# In a third terminal, use the printed current HTTPS root:
+BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm workflow:demo
+```
+
+This performs real model-driven discovery for M1001, exports the actual capability, restarts the API in another process, and replays that exact saved version for M1002 with a rejecting model callback. Expected balances are $1,250.34 and $87.65; replay must report zero inference. The command writes private ignored reports and closes its browser/API processes. Stop the target and tunnel afterward. [Full setup, data boundary, limits, and troubleshooting](WORKFLOWS.md) · [Real capability and run logs](evidence/int-009-011/README.md).
 
 ## Workspace
 

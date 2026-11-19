@@ -1,0 +1,317 @@
+{
+  "run": {
+    "runId": "5e539fae-683c-42b7-abe2-de1cc523f9f0",
+    "mode": "discovery",
+    "target": {
+      "id": "demo-credit-union",
+      "version": 1795057096
+    },
+    "policy": {
+      "id": "demo-policy",
+      "version": 1795057096
+    },
+    "status": "cancelled",
+    "control": {
+      "owner": "none",
+      "revision": 5
+    },
+    "capability": null,
+    "currentStepId": "step-002-after",
+    "activeInterventionId": null,
+    "result": {
+      "kind": "cancelled",
+      "reason": "USER_REQUESTED",
+      "dispatchState": "settled",
+      "effectState": "not_checked"
+    },
+    "createdAt": "2026-11-19T02:58:16.917Z",
+    "updatedAt": "2026-11-19T03:01:20.419Z"
+  },
+  "events": [
+    {
+      "eventId": "f1a51298-28a3-4c78-964f-962d7058e0f0",
+      "sequence": 1,
+      "type": "RUN_ACCEPTED",
+      "actor": "caller",
+      "stepId": null,
+      "details": {
+        "code": "accepted",
+        "bindingNames": [
+          "memberId"
+        ]
+      },
+      "createdAt": "2026-11-19T02:58:16.917Z"
+    },
+    {
+      "eventId": "101ae03a-e7a4-4f76-9337-4a7f65f63817",
+      "sequence": 2,
+      "type": "RUN_STARTED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "started"
+      },
+      "createdAt": "2026-11-19T02:58:16.957Z"
+    },
+    {
+      "eventId": "176ba08b-6046-40f6-a247-c86b14a3d16a",
+      "sequence": 3,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001-before",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-19T02:58:22.220Z"
+    },
+    {
+      "eventId": "f97b3a90-cec1-4ce0-a8ec-55a2abb1dc63",
+      "sequence": 4,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001-before",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-19T02:58:22.358Z"
+    },
+    {
+      "eventId": "bacfab5f-2b11-4406-ad3b-a6195f327f55",
+      "sequence": 5,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001",
+      "details": {
+        "code": "admitted",
+        "operation": "navigate"
+      },
+      "createdAt": "2026-11-19T02:58:22.501Z"
+    },
+    {
+      "eventId": "7e7f74ae-3d8d-4706-b8bf-9ae307a4f4bf",
+      "sequence": 6,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-001",
+      "details": {
+        "code": "dispatching"
+      },
+      "createdAt": "2026-11-19T02:58:22.509Z"
+    },
+    {
+      "eventId": "8ed9518e-1d87-4ad9-b156-f29cf5b39d7a",
+      "sequence": 7,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001",
+      "details": {
+        "code": "confirmed",
+        "operation": "navigate"
+      },
+      "createdAt": "2026-11-19T02:58:23.675Z"
+    },
+    {
+      "eventId": "a54f537d-e79d-44b4-b1f5-69ff0fe7a55d",
+      "sequence": 8,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001-after",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-19T02:58:26.275Z"
+    },
+    {
+      "eventId": "45d11a99-f7a3-4f7b-b969-31488c83de6d",
+      "sequence": 9,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001-after",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-19T02:58:26.431Z"
+    },
+    {
+      "eventId": "b1e66226-5ccd-4670-b756-b0c139bd6b62",
+      "sequence": 10,
+      "type": "MODEL_REQUESTED",
+      "actor": "automation",
+      "stepId": null,
+      "details": {
+        "code": "requesting",
+        "modelName": "openai/gpt-5",
+        "modelCalls": 1
+      },
+      "createdAt": "2026-11-19T02:58:27.248Z"
+    },
+    {
+      "eventId": "c69ba2a8-9eba-428a-94fa-d901e35faf26",
+      "sequence": 11,
+      "type": "MODEL_COMPLETED",
+      "actor": "automation",
+      "stepId": null,
+      "details": {
+        "code": "proposed",
+        "modelName": "openai/gpt-5",
+        "modelCalls": 1,
+        "inputTokens": 1351,
+        "outputTokens": 2112
+      },
+      "createdAt": "2026-11-19T02:59:14.720Z"
+    },
+    {
+      "eventId": "67c965ac-843a-45d7-bdfe-d7fbb0a60a83",
+      "sequence": 12,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-002-before",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-19T02:59:15.685Z"
+    },
+    {
+      "eventId": "88e14619-a48b-4d84-9cf8-81001a80089a",
+      "sequence": 13,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-002-before",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-19T02:59:15.837Z"
+    },
+    {
+      "eventId": "2c30e591-5c23-4edf-98fe-18983aff6110",
+      "sequence": 14,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-002",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "target2"
+      },
+      "createdAt": "2026-11-19T02:59:15.986Z"
+    },
+    {
+      "eventId": "41c14f06-31c6-4178-b961-07c09459e616",
+      "sequence": 15,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-002",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "target2"
+      },
+      "createdAt": "2026-11-19T02:59:16.143Z"
+    },
+    {
+      "eventId": "8aa4c8d7-fcb5-478e-a59e-79d304a058fb",
+      "sequence": 16,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-002",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "target2"
+      },
+      "createdAt": "2026-11-19T02:59:16.429Z"
+    },
+    {
+      "eventId": "510e1277-74cb-4b7b-ac40-d4066350ab04",
+      "sequence": 17,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-002-after",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-19T02:59:17.383Z"
+    },
+    {
+      "eventId": "f4682fef-d4ce-46ef-ab52-b85dfb4e81d0",
+      "sequence": 18,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-002-after",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-19T02:59:17.541Z"
+    },
+    {
+      "eventId": "a1e734bb-35df-44ed-b373-5e718e8aacd5",
+      "sequence": 19,
+      "type": "MODEL_REQUESTED",
+      "actor": "automation",
+      "stepId": null,
+      "details": {
+        "code": "requesting",
+        "modelName": "openai/gpt-5",
+        "modelCalls": 2
+      },
+      "createdAt": "2026-11-19T02:59:18.391Z"
+    },
+    {
+      "eventId": "2d06df5a-343a-43b3-894f-b0874c7e88f6",
+      "sequence": 20,
+      "type": "INTERVENTION_OPENED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "MANUAL_PREREQUISITE",
+        "evidenceId": "5a9ce909-bb3b-4440-8b1b-97f0d232f1a3"
+      },
+      "createdAt": "2026-11-19T03:01:18.892Z"
+    },
+    {
+      "eventId": "8ed37178-e79e-4da6-975b-bd865c39badc",
+      "sequence": 21,
+      "type": "CANCEL_REQUESTED",
+      "actor": "caller",
+      "stepId": null,
+      "details": {
+        "code": "user_requested"
+      },
+      "createdAt": "2026-11-19T03:01:19.319Z"
+    },
+    {
+      "eventId": "50d44ec3-10fc-4d67-a257-0fbcef3009dd",
+      "sequence": 22,
+      "type": "SESSION_FINISHED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "closed",
+        "modelName": "openai/gpt-5",
+        "modelCalls": 2,
+        "inputTokens": 1351,
+        "outputTokens": 2112,
+        "inferenceAttempts": 0
+      },
+      "createdAt": "2026-11-19T03:01:20.412Z"
+    },
+    {
+      "eventId": "f4561d72-1d01-4e04-a24b-29a221585b76",
+      "sequence": 23,
+      "type": "RUN_CANCELLED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "cancelled"
+      },
+      "createdAt": "2026-11-19T03:01:20.419Z"
+    }
+  ]
+}

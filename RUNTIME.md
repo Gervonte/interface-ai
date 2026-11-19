@@ -1,6 +1,6 @@
-# Shared executor and run API (INT-007/008)
+# Shared executor and run API (INT-007–011)
 
-This milestone implements policy-checked browser operations, sanitized structural failure evidence, authenticated asynchronous run APIs, single-coordinator ownership, cancellation, and restart reconciliation. Model-driven discovery and capability replay are INT-009/010. The normal server currently accepts a valid discovery request and then reports `DISCOVERY_NOT_IMPLEMENTED`; it does not pretend the goal was executed. Replay validates the exact owned capability and invocation, then reports `REPLAY_NOT_IMPLEMENTED` until its interpreter exists.
+The runtime implements policy-checked browser operations, sanitized structural evidence, authenticated asynchronous run APIs, single-coordinator ownership, cancellation, and restart reconciliation. Supported primary-savings discovery now constructs a capability from real model-selected actions, and replay interprets the exact saved version without inference. [Discovery/replay commands and limits](WORKFLOWS.md).
 
 ## Start and test
 
@@ -21,7 +21,7 @@ In a second terminal:
 pnpm automation:smoke
 ```
 
-The smoke command loads the private token itself, checks unauthenticated access is denied, creates a run, retries the same request key, and polls the same run. At this milestone, **`failed` with `DISCOVERY_NOT_IMPLEMENTED` is the expected smoke result**. No paid browser session or model call is made. A capacity error means another run/session still occupies execution; inspect it and reconcile rather than deleting database rows.
+The smoke command loads the private token itself, checks unauthenticated access is denied, creates a run, retries the same request key, and polls the same run. At this milestone, **`failed` with `UNSUPPORTED_GOAL` is the expected smoke result** (the smoke request deliberately uses an unsupported goal). No paid browser session or model call is made. A capacity error means another run/session still occupies execution; inspect it and reconcile rather than deleting database rows.
 
 Run the broader checks independently:
 
@@ -45,6 +45,7 @@ Run routes require `Authorization: Bearer <server-only token>`. The configured l
 | GET | `/v1/capabilities/:capabilityId/versions/:version` | Retrieve an exact capability owned through its source run |
 | GET | `/v1/runs/:runId/operations/:receiptId` | Inspect a mutation's safe state/reference |
 | POST | `/v1/runs/:runId/cancel` | Request safe cancellation with `{ "reason": "USER_REQUESTED" }`; return `202` while stopping, `200` when already cancelled |
+| GET | `/v1/interventions/:interventionId` | Inspect the caller's structured intervention; claim/resume are later work |
 | GET | `/v1/runs/:runId/evidence/:evidenceId` | Read linked, unexpired, sanitized structural evidence belonging to that run |
 
 Mutations require an `Idempotency-Key` of 8–128 letters/digits/underscores/hyphens. The receipt window is 24 hours. Same principal/scope/key/payload returns the same logical operation; a changed valid payload returns `409`. Receipt lookup precedes target/capacity checks for accepted retries. Active work cannot expire into a second run. Fingerprint-key loss/change fails closed. Inputs/goals/raw request keys are not persisted; values exist only in the current process's worker context.
@@ -63,7 +64,7 @@ Intervention claim/resume and live operator-action routes are not implemented he
 - Policy origin and operation allowlists, explicit click/fill control-name allowlists, controller/revision checks, finite cumulative action/time budgets, and serialized admissions apply before mutation. Save-like controls are absent from the baseline policy. Off-origin form/link targets, new windows/downloads, password/hidden/file inputs, and inaccessible frames are blocked. Frame readiness can poll an initial blank document only when its declared source has an allowed origin.
 - Dispatch intent is persisted before crossing into the browser. A command timeout/transport failure is treated as an unknown action outcome, closes admission, and never causes a blind retry. Closing/cancelling a gate does not free an unresolved command's slot. Cancellation returns promptly while cleanup/drain proceeds.
 - Waits poll observations only. Every branch of a compound condition is evaluated; an error cannot be hidden by a true `any` branch or false `all` branch. Amount conversion uses checked integer minor units; invalid formats/overflow and wrong read types stop execution.
-- The deterministic provider client rejects model calls and disables SDK self-healing/cache and provider recording/logging/CAPTCHA solving. Discovery's model proposal channel and its model budgets are still INT-009 work; model observations are not produced by this milestone.
+- The replay provider client rejects model calls and disables SDK self-healing/cache and provider recording/logging/CAPTCHA solving. Discovery has a separate sanitized model-proposal channel with cumulative model/time budgets; see [WORKFLOWS.md](WORKFLOWS.md).
 
 Supported surface limits: the current adapter targets the known synthetic DOM and same-origin frames. It does not implement full accessible-name computation, arbitrary shadow DOM/cross-origin frames, complex spanned tables, trusted physical input events, or a desktop adapter. Unsupported structures fail closed. Control-name/origin allowlists express the known target contract; they cannot infer business effects in an arbitrary hostile application. Full scenario/policy/privacy verification remains INT-012–INT-016.
 

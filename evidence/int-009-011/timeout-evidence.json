@@ -1,0 +1,74 @@
+{
+  "evidenceId": "5a9ce909-bb3b-4440-8b1b-97f0d232f1a3",
+  "runId": "5e539fae-683c-42b7-abe2-de1cc523f9f0",
+  "stepId": null,
+  "capturedAt": "2026-11-19T03:01:18.891Z",
+  "expiresAt": "2026-11-20T03:01:18.891Z",
+  "sanitizationVersion": 1,
+  "snapshot": {
+    "schemaVersion": 1,
+    "kind": "structural-snapshot",
+    "redactedValues": true,
+    "omittedFrames": 0,
+    "documents": [
+      {
+        "depth": 0,
+        "headings": [],
+        "controls": [
+          {
+            "kind": "button",
+            "label": "Staff workspace",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Member Search",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Member Overview",
+            "enabled": false
+          },
+          {
+            "kind": "button",
+            "label": "Account Inquiry",
+            "enabled": false
+          }
+        ],
+        "tables": []
+      },
+      {
+        "depth": 1,
+        "headings": [
+          {
+            "kind": "h1",
+            "label": "Member Search"
+          },
+          {
+            "kind": "h2",
+            "label": null
+          }
+        ],
+        "controls": [
+          {
+            "kind": "input",
+            "label": null,
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Search",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Clear",
+            "enabled": true
+          }
+        ],
+        "tables": []
+      }
+    ]
+  }
+}
