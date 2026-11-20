@@ -1,0 +1,69 @@
+{
+  "evidenceId": "5a8314cc-a502-4688-a112-bbabe854860e",
+  "runId": "7444d640-a353-4691-aafc-cf75baea6324",
+  "stepId": "step-006",
+  "capturedAt": "2026-11-20T11:20:13.241Z",
+  "expiresAt": "2026-11-21T11:20:13.241Z",
+  "sanitizationVersion": 1,
+  "snapshot": {
+    "schemaVersion": 1,
+    "kind": "structural-snapshot",
+    "redactedValues": true,
+    "omittedFrames": 0,
+    "documents": [
+      {
+        "depth": 0,
+        "headings": [],
+        "controls": [
+          {
+            "kind": "button",
+            "label": "Staff workspace",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Member Search",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Member Overview",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Account Inquiry",
+            "enabled": true
+          }
+        ],
+        "tables": []
+      },
+      {
+        "depth": 1,
+        "headings": [
+          {
+            "kind": "h1",
+            "label": "Account Inquiry"
+          },
+          {
+            "kind": "h2",
+            "label": "Staff session expired"
+          }
+        ],
+        "controls": [
+          {
+            "kind": "button",
+            "label": "New member search",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Restore staff session",
+            "enabled": true
+          }
+        ],
+        "tables": []
+      }
+    ]
+  }
+}

@@ -67,7 +67,7 @@ Provider errors are reduced to a failure phase rather than printed with authenti
 | Setting | Value |
 | --- | --- |
 | SDK | Stagehand 4.4.0; locked transitive Browserbase SDK 2.27.0 |
-| Discovery model selection | `openai/gpt-5` through Browserbase Model Gateway |
+| Compatibility spike model | `openai/gpt-5` through Browserbase Model Gateway |
 | Region | `us-west-2` |
 | Provider session timeout | 180 seconds; SDK 2.27 calls the launch option `api_timeout` |
 | Provider HTTP timeout / retries | 30 seconds / zero retries |
@@ -97,3 +97,5 @@ The compatibility fixture above remains isolated on port 3003. To test the full 
 ## Shared executor verification (INT-007/008)
 
 The full runtime check is now `BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm executor:check`, after database migration and with only the built target on port 3002 tunneled. Stop the automation API first: this verifier uses the same database-backed single-coordinator lock. It verifies both accounts through the actual executor, deliberately rejects ambiguous Open controls with no mutation, captures sanitized structural evidence and confirms provider cleanup. [Setup and limits](RUNTIME.md#hosted-executor-verification). This remains authored QA, not discovery/replay evidence.
+
+Current integrated discovery pins `openai/gpt-4.1`; the compatibility milestones above used `openai/gpt-5`. The change follows completed GPT-5 decisions taking 30–107 seconds and later request/active-budget stops. Model names in retained events describe the model actually selected for each run. See [handoff verification](HANDOFF.md).

@@ -1,6 +1,6 @@
 # Discovery and saved-capability replay (INT-009–011)
 
-The supported discovery task is the current balance and currency of a member's designated primary savings account. The request supplies a natural-language goal, the configured target ID, and a `memberId` input. The input/output contract and permitted UI vocabulary are authored. The route, selected controls, and output field references are chosen by `openai/gpt-5` through Browserbase Model Gateway from observations of the live portal. No expected balance, member record, or authored sequence is supplied to the planner.
+The supported discovery task is the current balance and currency of a member's designated primary savings account. The request supplies a natural-language goal, the configured target ID, and a `memberId` input. The input/output contract and permitted UI vocabulary are authored. The route, selected controls, and output field references are chosen by `openai/gpt-4.1` through Browserbase Model Gateway from observations of the live portal. No expected balance, member record, or authored sequence is supplied to the planner.
 
 ## Run the real demo
 
@@ -74,4 +74,6 @@ A successful hosted run is recorded alongside a later bounded model-timeout atte
 
 Offline tests use injected planners/surfaces to exercise construction, changed-input replay, provenance, current/available balance mapping, identity rejection, unsupported goals/bindings, and the sanitized gateway document. They are distinguished from the real hosted runs. `pnpm check:db` additionally verifies transactional publication, omitted-history rejection, intervention ownership/session retention/cancellation, and the earlier lifecycle boundaries. The full assessment and final submission report remain later work.
 
-The default runtime now uses committed target/policy v3. V1/v2 bindings and saved artifacts remain unchanged. Existing capabilities need an explicit immutable rule revision to gain the new declarations; the scenario verifier creates one without inventing another discovery.
+The default runtime now uses committed target v3 and policy v4. Earlier bindings and saved artifacts remain unchanged. Existing capabilities need an explicit immutable rule revision to gain the new declarations; the scenario verifier creates one without inventing another discovery.
+
+Integrated operator claim, manual actions, and validated resume are documented in [HANDOFF.md](HANDOFF.md). Real discovery and exact-artifact replay handoffs are verified in [evidence/int-014-015](evidence/int-014-015/README.md), including explicit human contribution provenance and zero replay inference. Use `handoff:demo` for operator verification; this baseline `workflow:demo` verifier still cancels unexpected interventions for cleanup.
