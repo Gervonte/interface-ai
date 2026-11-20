@@ -1,3 +1,4 @@
+import { discoveryModelName } from '../workflows/model.js';
 import { browserbase, Stagehand } from '@browserbasehq/stagehand';
 import { z } from 'zod';
 import { StagehandSurface } from './driver.js';
@@ -46,12 +47,13 @@ export class BrowserbaseSessions implements SessionFactory {
       const id = z.uuid().parse(browser.sessionId); await onCreated(id); if (signal.aborted) throw new ExecutionError('CANCELLED');
       let attempts = 0;
       stagehand = await Stagehand.create({ browser, selfHeal: false, cache: false, logging: { level: 'off' },
-        model: mode === 'discovery' ? { modelName: 'openai/gpt-5' } : { generate: async () => { attempts++; this.inferenceAttempts++; throw new Error('INFERENCE_FORBIDDEN'); } } });
+        model: mode === 'discovery' ? { modelName: discoveryModelName } : { generate: async () => { attempts++; this.inferenceAttempts++; throw new Error('INFERENCE_FORBIDDEN'); } } });
       const page = await browser.context.newPage(); await page.goto('about:blank', { timeout: 10_000, waitUntil: 'domcontentloaded' });
       const planner = mode === 'discovery' ? new GatewayPlanner(stagehand, async () => {
-        // No target app is loaded in the model-view document, so it cannot reset member context.
-        const helper = await browser.context.newPage(); await helper.goto(new URL('/__automation_model_view__', url).toString(), { timeout: 10_000, waitUntil: 'domcontentloaded' });
-        if (new URL(await helper.url()).origin !== url.origin) throw new ExecutionError('POLICY_BLOCKED');
+        // Keep model preparation independent of target routes, cookies, and staff context.
+        const helper = await browser.context.newPage();
+        await helper.goto('about:blank', { timeout: 10_000, waitUntil: 'domcontentloaded' });
+        if (await helper.url() !== 'about:blank') throw new ExecutionError('POLICY_BLOCKED');
         return helper;
       }) : undefined;
       let closePromise: Promise<boolean> | undefined;

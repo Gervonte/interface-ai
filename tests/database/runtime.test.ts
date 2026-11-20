@@ -226,4 +226,77 @@ describe('authenticated run API and durable coordinator', () => {
     const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',request)).json());await f.coordinator.idle();expect((await f.coordinator.read(accepted.runId,'test-operator')).result).toMatchObject({kind:'failure',code:'WORKER_FAILED'});
   });
 
+  async function handoffFixture(slow=false,timeoutMs?:number) {
+    let location='about:blank',resolved=false,changed=false,dispatches=0,continuations=0,opens=0,closes=0;
+    let release=()=>{};let started=false;
+    const pending=new Promise<void>(resolve=>{release=resolve;});
+    const target={scope:{kind:'document' as const},within:[],locator:{kind:'role' as const,role:'button' as const,name:'Dismiss servicing review',exact:true as const},expectedMatches:1 as const};
+    const surface={location:async()=>location,navigate:async(url:string)=>{location=url;},
+      observe:async()=>({observationId:randomUUID(),fingerprint:(changed?'c':resolved?'b':'a').repeat(64),ready:true,headings:[],fields:[],controls:[{ref:'c1',kind:'click' as const,label:'Dismiss servicing review' as const,target,enabled:true,filled:false,row:{},matchesInputs:[]}]}),
+      inspect:async(value:unknown)=>({count:JSON.stringify(value).includes('Checkpoint')?(resolved?1:0):1,visible:true,enabled:true,editable:false,text:'',value:'',checked:false,tag:'button',name:'Dismiss servicing review',inputType:''}),
+      dispatch:async()=>{dispatches++;started=true;if(slow)await pending;resolved=true;},
+      snapshot:async()=>({schemaVersion:1,kind:'structural-snapshot',redactedValues:true,documents:[],omittedFrames:0})};
+    const factory:SessionFactory={reconcile:async()=>true,open:async(_config,created)=>{opens++;const id=randomUUID();await created(id);return{id,surface,close:async()=>{closes++;return true;}};}};
+    const worker:Worker=async(_request,context)=>{
+      const executor=await context.executor({checkpoint:{...target,locator:{kind:'role',role:'heading',name:'Checkpoint',exact:true}}});
+      await executor.execute({type:'navigate',destination:'target-entry'},'entry');
+      await context.intervene!({stepId:'checkpoint',actionIndex:null,reason:'UNEXPECTED_DIALOG',dispatchState:'settled',effectState:'not_checked',checkpointId:'checkpoint',expected:{code:'READY',description:'Checkpoint ready'},observed:{code:'UNEXPECTED_DIALOG',description:'Manual dismissal needed'},evidenceIds:[]},async()=>(await executor.checkConditions([{kind:'visible',target:'checkpoint'}],'resume-check'))[0]===true,timeoutMs);
+      continuations++;await context.record({type:'BUSINESS_OUTCOME',actor:'automation',stepId:'done',details:{code:'MEMBER_NOT_FOUND'}});
+      return{kind:'business_outcome',code:'MEMBER_NOT_FOUND',summary:'Synthetic coordinator test.',evidenceIds:[]};
+    };
+    const previous=configuration;
+    configuration={...configuration,policy:{...configuration.policy,manualClickNames:['Dismiss servicing review']}};
+    let f:Awaited<ReturnType<typeof service>>;
+    try{f=await service(worker,factory);}finally{configuration=previous;}
+    const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',request)).json());
+    await until(async()=>(await repository.getRun(accepted.runId)).status==='waiting_for_human');
+    const run=await repository.getRun(accepted.runId),path='/v1/interventions/'+run.activeInterventionId;
+    return{...f,path,id:accepted.runId,run,counts:()=>({dispatches,continuations,opens,closes}),mutate:()=>{changed=true;},release,started:()=>started};
+  }
+  it('claims exclusively, fences stale requests, records the operator, and resumes the same session once',async()=>{
+    const f=await handoffFixture();expect(await(await f.call(f.path+'/context')).json()).toMatchObject({resumable:true});
+    expect((await f.call(f.path+'/claim',{expectedControlRevision:f.run.control.revision},randomUUID(),'b'.repeat(64))).status).toBe(404);
+    expect((await f.call(f.path+'/observation?revision='+f.run.control.revision,undefined,randomUUID(),'c'.repeat(64))).status).toBe(403);
+    const claims=await Promise.all([f.call(f.path+'/claim',{expectedControlRevision:f.run.control.revision}),f.call(f.path+'/claim',{expectedControlRevision:f.run.control.revision})]);
+    expect(claims.map(r=>r.status).sort()).toEqual([200,409]);const human=await repository.getRun(f.id);expect(human.control.owner).toBe('human');
+    expect((await f.call(f.path+'/observation?revision='+f.run.control.revision)).status).toBe(409);expect(f.counts().continuations).toBe(0);
+    const observation=await(await f.call(f.path+'/observation?revision='+human.control.revision)).json();const key=randomUUID();
+    const body={expectedControlRevision:human.control.revision,observationId:observation.observationId,action:{type:'click',controlRef:'c1'}};
+    expect((await f.call(f.path+'/actions',body,key)).status).toBe(200);expect((await f.call(f.path+'/actions',body,key)).status).toBe(200);expect(f.counts().dispatches).toBe(1);
+    expect((await f.call(f.path+'/actions',{...body,action:{type:'click',controlRef:'c2'}},key)).status).toBe(409);
+    expect((await f.call(f.path+'/resume',{expectedControlRevision:human.control.revision,resolutionNote:'private-note-must-not-be-retained'})).status).toBe(200);
+    await f.coordinator.idle();const completed=await repository.getRun(f.id);expect(completed.status).toBe('completed');expect(f.counts()).toEqual({dispatches:1,continuations:1,opens:1,closes:1});
+    const events=await(await f.call('/v1/runs/'+f.id+'/events?limit=200')).json();expect(events.events.some((e:any)=>e.type==='CONTROL_RETURNED'&&e.details.operatorId==='test-operator')).toBe(true);
+    expect(events.events.some((e:any)=>e.actor==='human'&&e.type==='ACTION_COMPLETED'&&e.interventionId===f.run.activeInterventionId)).toBe(true);expect(JSON.stringify(events)).not.toContain('private-note');
+  });
+  it('rejects premature resume, requires a fresh claim, and then allows validated hand-back',async()=>{
+    const f=await handoffFixture();await f.call(f.path+'/claim',{expectedControlRevision:f.run.control.revision});let run=await repository.getRun(f.id);
+    const old=run.control.revision;expect((await f.call(f.path+'/resume',{expectedControlRevision:old})).status).toBe(409);
+    run=await repository.getRun(f.id);expect(run.status).toBe('waiting_for_human');expect(f.counts().continuations).toBe(0);
+    expect((await f.call(f.path+'/claim',{expectedControlRevision:old})).status).toBe(409);
+    await f.call(f.path+'/claim',{expectedControlRevision:run.control.revision});run=await repository.getRun(f.id);
+    const observation=await(await f.call(f.path+'/observation?revision='+run.control.revision)).json();await f.call(f.path+'/actions',{expectedControlRevision:run.control.revision,observationId:observation.observationId,action:{type:'click',controlRef:'c1'}});
+    expect((await f.call(f.path+'/resume',{expectedControlRevision:run.control.revision})).status).toBe(200);await f.coordinator.idle();expect(f.counts().continuations).toBe(1);
+  });
+  it('rejects a changed manual observation without dispatching or losing the claim',async()=>{
+    const f=await handoffFixture();await f.call(f.path+'/claim',{expectedControlRevision:f.run.control.revision});const run=await repository.getRun(f.id);
+    const observation=await(await f.call(f.path+'/observation?revision='+run.control.revision)).json();f.mutate();
+    const result=await f.call(f.path+'/actions',{expectedControlRevision:run.control.revision,observationId:observation.observationId,action:{type:'click',controlRef:'c1'}});
+    expect(result.status).toBe(409);expect((await result.json()).error.code).toBe('STALE_OBSERVATION');expect(f.counts().dispatches).toBe(0);expect((await repository.getRun(f.id)).status).toBe('human_controlled');
+    await f.call('/v1/runs/'+f.id+'/cancel',{reason:'USER_REQUESTED'});await f.coordinator.idle();
+  });
+  it('blocks resume during a manual dispatch and preserves uncertainty when cancellation wins',async()=>{
+    const f=await handoffFixture(true);await f.call(f.path+'/claim',{expectedControlRevision:f.run.control.revision});const run=await repository.getRun(f.id);
+    const observation=await(await f.call(f.path+'/observation?revision='+run.control.revision)).json();
+    const manual=f.call(f.path+'/actions',{expectedControlRevision:run.control.revision,observationId:observation.observationId,action:{type:'click',controlRef:'c1'}});
+    await until(async()=>f.started());expect((await f.call(f.path+'/resume',{expectedControlRevision:run.control.revision})).status).toBe(409);
+    await f.call('/v1/runs/'+f.id+'/cancel',{reason:'USER_REQUESTED'});f.release();await manual;await f.coordinator.idle();
+    const cancelled=await repository.getRun(f.id);expect(cancelled.status).toBe('cancelled');expect(cancelled.result).toMatchObject({kind:'cancelled',dispatchState:'unknown',effectState:'unknown'});expect(f.counts().continuations).toBe(0);expect(f.counts().dispatches).toBe(1);
+  });
+
+  it('honors a shorter declared intervention deadline and closes its retained session',async()=>{
+    const f=await handoffFixture(false,1000);await f.coordinator.idle();
+    expect((await repository.getRun(f.id)).result).toMatchObject({kind:'failure',code:'INTERVENTION_TIMEOUT'});expect(f.counts().continuations).toBe(0);expect(f.counts().closes).toBe(1);
+  });
+
 });

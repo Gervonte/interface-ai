@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: INT-001 through INT-013 are implemented and verified at their stated scope. INT-009/010/011 form the first live discovery, saved-artifact, and fresh-process replay milestone. Repeatable scenarios and bounded recovery are verified. Remaining baseline work is the minimal live handoff (INT-014/015), goal-driven output selection (INT-023), safety and precise failure diagnostics (INT-016), and submission documentation/evidence (INT-021/022). Completion details are linked below. This plan does not authorize publishing/submission.
+Status: INT-001 through INT-015 are implemented and verified at their stated scope. The live discovery/replay, scenario/recovery, and same-session operator handoff milestones are complete. Remaining baseline work is goal-driven output selection (INT-023), safety and precise failure diagnostics (INT-016), and submission documentation/evidence (INT-021/022). Completion details and exact evidence references are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -12,7 +12,7 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
 ## Remaining priorities after assignment review
 
-1. **INT-014 → INT-015:** finish a minimal, real handoff in the running system, with manual-action evidence and validated same-session resume in discovery and replay.
+1. **INT-014 → INT-015 (complete):** real discovery and exact-artifact replay handoffs preserve their sessions, record human actions, and validate continuation; see the linked evidence below.
 2. **INT-023:** make the goal and requested output contract determine discovery/extraction; demonstrate current and available balance without task-specific planner instructions.
 3. **INT-016:** demonstrate explicit risky-action treatment, verify data boundaries, and improve expected/observed failure details.
 4. **INT-021 → INT-022:** make the repository easy to evaluate, assemble the evidence, and deliver the short report with the required headings. Draft documentation alongside implementation; finalize it against verified behavior.
@@ -132,7 +132,7 @@ The review's business-outcome/recovery gap is covered by INT-012/013 and its exi
 
     **Verified:** A rule-enhanced immutable revision of the genuine discovered capability passes the 19-case hosted replay matrix with zero inference, exact outcomes, finite recovery, no duplicate ordinary-step dispatch, structured pauses, and verified cleanup. Discovery tests cover negative results, rule attachment, and executed-recovery provenance. Original artifacts/results remain intact. Full claim/manual-action/resume support remains later work. [Scenario guide](SCENARIOS.md) · [Live evidence](evidence/int-012-013/README.md). Typechecking, 195 default tests, 30 PostgreSQL tests, and production builds pass at this milestone. Assessment-wide privacy/handoff acceptance remains incomplete.
 
-14. **INT-014 — Implement intervention state and exclusive control transfer.**
+14. **INT-014 — Implement intervention state and exclusive control transfer. (Complete at stated scope)**
 
     Complete the existing coordinator's pause → claim → manual action → resume path. Expose only the intervention inspection, claim, manual observation/action, and resume operations needed for this flow; reuse existing run/events/cancel support. Close automated admissions and account for in-flight actions before transfer. Keep the same browser, run, member context, and explicit controller/revision throughout. Capture authenticated operator identity and sanitized manual actions, then validate the recorded continuation checkpoint before returning control.
 
@@ -140,11 +140,13 @@ The review's business-outcome/recovery gap is covered by INT-012/013 and its exi
 
     **Done when:** only the current owner can dispatch; automation dispatches nothing while the human owns the session; stale/late actions are rejected; and hand-back validates state without duplicating a completed action. Discovery may return to model reasoning after validated resume, while replay continues only through recorded deterministic rules/checkpoints. Tests cover the actual dispatch boundary and the relevant ownership/cancellation races. **Depends on:** INT-003, INT-008, INT-012, INT-013. **Acceptance:** HUM-01, HUM-02, HUM-03, HUM-04, HUM-05, SAFE-02.
 
-15. **INT-015 — Build the minimal operator surface and demonstrate real takeover.**
+15. **INT-015 — Build the minimal operator surface and demonstrate real takeover. (Complete at stated scope)**
 
     Replace the operator health-only shell with one usable intervention flow: select an existing run, inspect its goal/capability, blocked step, reason, safe state/evidence, and controller; claim its live session; perform the manual resolution; and signal resume. Expose the Browserbase live view where the provider supports the required access boundaries. Use provider input only where action capture and ownership guarantees are established; otherwise use the mediated controls proven in INT-003. Run creation, capability browsing, and polished console features are unnecessary for this milestone; documented CLI/API commands can start the demonstrations.
 
     **Done when:** two real demonstrations pass: (1) discovery gets blocked, requests help, accepts a manual resolution in its existing session, resumes, and constructs a valid capability that explicitly accounts for the human contribution; (2) replay gets blocked, accepts manual help in its existing session, and completes after deterministic resume validation with zero inference. Each demonstration preserves its run/browser identity and records who held control, what the person did, and how continuation was validated. A live view alone, target-control QA, or a fresh browser does not satisfy this check. Unrepresentable human steps must not be silently omitted from an artifact. **Depends on:** INT-014. **Acceptance:** DISC-02, ART-01, HUM-01, HUM-02, HUM-03, HUM-04, HUM-05, OBS-01.
+
+    **Verified:** The real operator resolved discovery run `af5a769d-4f85-4e9c-bd99-0c50285ea96b` in its existing browser; discovery resumed and published `balance-d010c6229cb74dbd9c82e5af929c75fb` v1 with an explicit `runtime_guard` contribution referencing the actual human completion event. A separate process replayed that exact version in run `49ddcfee-643c-4a7d-8edc-b37d76a1f38a` for M1002, accepted manual restoration in its existing browser, and returned the correct S2002 current balance of 8765 minor units with zero inference. Both browsers were confirmed closed. No automation event occurs during human ownership; each ordinary step dispatches at most once. `pnpm check:db` passes typechecking, 200 default tests, 36 PostgreSQL tests, and builds. Coverage includes exclusive/stale claims, failed validation/reclaim, cancellation during manual dispatch, shorter intervention deadlines, planner-help boundaries, guarded artifact construction/replay, and publication rejecting omitted human mutations. The live run exposed and the regression verifies a fix for validating manual contribution references before their guard declarations were attached. [Setup and limits](HANDOFF.md) · [Discovery/replay handoff evidence](evidence/int-014-015/README.md).
 
 ## Goal-driven discovery and baseline safety
 
@@ -237,6 +239,6 @@ The review's business-outcome/recovery gap is covered by INT-012/013 and its exi
 | Additional restart assurance | INT-017 | Deeper recovery/failure-injection scenarios pass without being prerequisites for baseline readiness or the write workflow. |
 | Optional local replay | INT-024 | The shared replay engine operates a localhost browser without hosted-browser/tunnel/model credentials; baseline readiness is independent. |
 
-The remaining baseline execution order is INT-014 → INT-015 → INT-023 → INT-016 → INT-021 → INT-022. INT-023 is our chosen bounded proof of goal-driven discovery, not a requirement to build a general agent. INT-018–INT-020, INT-017, and optional INT-024 remain follow-on work and are not ancestors of baseline readiness. If completed, add their real evidence and update the report/Cuts; do not imply pending features are part of the implemented submission.
+The remaining baseline execution order is INT-023 → INT-016 → INT-021 → INT-022. INT-023 is our chosen bounded proof of goal-driven discovery, not a requirement to build a general agent. INT-018–INT-020, INT-017, and optional INT-024 remain follow-on work and are not ancestors of baseline readiness. If completed, add their real evidence and update the report/Cuts; do not imply pending features are part of the implemented submission.
 
 If a dependency changes, update affected items explicitly while preserving IDs. Do not expand into desktop implementation, multi-tenant infrastructure, a general capability catalog, or extra automation frameworks to compensate for unresolved core behavior.

@@ -1,0 +1,63 @@
+{
+  "tasks": [
+    "INT-014",
+    "INT-015"
+  ],
+  "verificationScope": "discovery-and-replay-handoff",
+  "configurationVersion": 1795209302,
+  "finishedAt": "2026-11-20T21:19:39.968Z",
+  "runs": [
+    {
+      "mode": "discovery",
+      "processId": 3604,
+      "runId": "af5a769d-4f85-4e9c-bd99-0c50285ea96b",
+      "capability": {
+        "id": "balance-d010c6229cb74dbd9c82e5af929c75fb",
+        "version": 1
+      },
+      "output": {
+        "memberId": "M1001",
+        "accountId": "S2001",
+        "accountType": "savings",
+        "currentBalanceMinor": 125034,
+        "currency": "USD"
+      },
+      "session": {
+        "code": "closed",
+        "modelName": "openai/gpt-4.1",
+        "modelCalls": 7,
+        "inputTokens": 10599,
+        "outputTokens": 765,
+        "inferenceAttempts": 0
+      },
+      "manualActions": 1,
+      "sessionRef": "8d7bc722-0293-4d2b-a835-320e9362d809"
+    },
+    {
+      "mode": "replay",
+      "processId": 4538,
+      "runId": "49ddcfee-643c-4a7d-8edc-b37d76a1f38a",
+      "capability": {
+        "id": "balance-d010c6229cb74dbd9c82e5af929c75fb",
+        "version": 1
+      },
+      "output": {
+        "currency": "USD",
+        "memberId": "M1002",
+        "accountId": "S2002",
+        "accountType": "savings",
+        "currentBalanceMinor": 8765
+      },
+      "session": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "manualActions": 1,
+      "sessionRef": "7b63b6f6-a8be-44dc-8d0a-0f2872d767b0"
+    }
+  ],
+  "success": true
+}

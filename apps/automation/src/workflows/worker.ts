@@ -24,6 +24,7 @@ class Builder {
   readonly targets: Record<string, Target> = {};
   readonly steps: Capability['steps'] = [];
   readonly variables: Capability['variables'] = {};
+  readonly manualContributions:Capability['manualContributions']=[];
   readonly values: Values = {};
   private registry = new Map<string, string>();
   private index = 0;
@@ -42,8 +43,21 @@ class Builder {
     if (table?.kind === 'tableRow') conditions.push(visible(this.target({ scope: row!.target.scope, within: [], locator: { kind: 'caption', text: table.tableCaption, exact: true }, expectedMatches: 1 })));
     return conditions.length === 1 ? conditions[0]! : { kind: 'all', conditions };
   }
+  async handoff(executor:Executor,observation:Observation){
+    if(!this.context.intervene)throw problem('MANUAL_PREREQUISITE');
+    const id=this.id(),before=this.anchor(observation);let after:Predicate|undefined;
+    const blocked={...problem('MANUAL_PREREQUISITE',id).blocked,checkpointId:id};
+    const contribution=await this.context.intervene(blocked,async()=>{
+      const current=await executor.observe();
+      if(!current.ready||current.fingerprint===observation.fingerprint||current.fields.some(field=>field.label==='Member ID'&&!field.matchesInputs.includes('memberId')))return false;
+      after=this.anchor(current);return true;
+    });
+    if(!after)throw new ExecutionError('ARTIFACT_INVALID');
+    this.steps.push({id,type:'intervene',before,after,resumeCondition:after,reason:'MANUAL_PREREQUISITE',timeoutMs:this.context.configuration.policy.budgets.stepTimeoutMs,interventionTimeoutMs:this.context.configuration.policy.budgets.interventionTimeoutMs,outcomeRuleIds:[],recoveryRuleIds:[],source:{kind:'authored',reason:'Discovery required a human contribution; replay must preserve this explicit manual boundary.'}});
+    this.manualContributions.push({handling:'required_intervention',stepId:id,...contribution});
+  }
   async record(executor: Executor, operation: ExecutorOperation, before: Predicate, after: Predicate | (() => Promise<Predicate>), capture?: { variable: string; field: Capability['variables'][string] }) {
-    const id = this.id(); const deadline=Date.now()+this.context.configuration.policy.budgets.stepTimeoutMs;const remaining=()=>Math.max(1,deadline-Date.now()); if(this.runtime && operation.type!=='navigate')await this.runtime.guard(before,id,remaining(),'not_sent');else await executor.assert(before, id + '-before'); const output = await executor.execute(operation, id,remaining()); const sequence = executor.lastEventSequence;
+    const id = this.id(); const deadline=(this.context.activeNow?.()??Date.now())+this.context.configuration.policy.budgets.stepTimeoutMs;const remaining=()=>Math.max(1,deadline-(this.context.activeNow?.()??Date.now())); if(this.runtime && operation.type!=='navigate')await this.runtime.guard(before,id,remaining(),'not_sent');else await executor.assert(before, id + '-before'); const output = await executor.execute(operation, id,remaining()); const sequence = executor.lastEventSequence;
     if (!sequence) throw new ExecutionError('ARTIFACT_INVALID');
     if (capture) {
       this.variables[capture.variable] = capture.field;
@@ -51,7 +65,7 @@ class Builder {
       this.values[capture.variable] = values[capture.variable]!;
     }
     let postcondition = typeof after === 'function' ? await after() : after;
-    if(this.runtime){await this.runtime.guard(postcondition,id,remaining());if(typeof after==='function')postcondition=await after();}else await executor.assert(postcondition, id + '-after');
+    if(this.runtime){await this.runtime.guard(postcondition,id,remaining(),'settled',typeof after==='function'?after:undefined);if(typeof after==='function')postcondition=await after();}else await executor.assert(postcondition, id + '-after');
     const base = { id, before, after: postcondition, timeoutMs: this.context.configuration.policy.budgets.stepTimeoutMs,
       outcomeRuleIds: [], recoveryRuleIds: [], source: { kind: 'discovery' as const, runId: this.context.runId, eventSequence: sequence } };
     if (operation.type === 'capture') {
@@ -87,7 +101,7 @@ async function discover(request: Extract<Parameters<Worker>[0], { mode: 'discove
     if (decision.observationId !== observation.observationId) throw problem('POLICY_BLOCKED');
     const current = await executor.observe();
     if (current.fingerprint !== observation.fingerprint) { await context.record({ type: 'MODEL_DECISION_STALE', actor: 'system', stepId: null, details: { code: 'state_changed' } }); continue; }
-    if (decision.action === 'help') throw problem('MANUAL_PREREQUISITE');
+    if (decision.action === 'help') { if(decision.reason==='unsupported_goal')throw new ExecutionError('UNSUPPORTED_GOAL'); await builder.handoff(executor,observation);history.push({action:'intervene',label:'Manual prerequisite'});continue; }
     if (decision.action === 'finish') {
       if (!selectedAccount || decision.controlRef || decision.inputName) throw problem('POLICY_BLOCKED');
       const outputs: Capability['outputs'] = {};
@@ -113,12 +127,14 @@ async function discover(request: Extract<Parameters<Worker>[0], { mode: 'discove
       validateData(outputSchema, values);
       await executor.assert({ kind: 'all', conditions }, 'verify-captured-identity');
       if (values.memberId !== inputs.memberId || values.accountId !== builder.values[selectedAccount]) throw new ExecutionError('INVALID_EXTRACTION');
-      let artifact = parseCapability({ schemaVersion: 1, capabilityId: 'balance-' + randomUUID().replaceAll('-', ''), version: 1,
+      // Assemble referenced guards before validating recorded manual contributions.
+      let artifact: Capability = { schemaVersion: 1, capabilityId: 'balance-' + randomUUID().replaceAll('-', ''), version: 1,
         name: 'Primary savings current balance', description: 'Constructed from confirmed model-selected browser actions and verified UI reads.', sourceDiscoveryRunId: context.runId,
         surfaceRequirements: { kind: 'browser', applicationFamily: context.configuration.target.applicationFamily, compatibleTargetVersions: [context.configuration.target.version], features: ['frames', 'labels', 'roles', 'table-rows', 'dom-text'] },
         inputSchema, outputSchema, variables: builder.variables, targets: builder.targets, preconditions: { entryReady: initialCondition }, steps: builder.steps, outputs,
-        successCondition: { conditions, identity: [{ target: outputs.memberId!.target, input: 'memberId' }] }, outcomeRules: [], recoveryRules: [], manualContributions: [] });
-      if(builder.rules){artifact=attachBalanceRules(artifact);for(const rule of artifact.recoveryRules){const events=builder.rules.recoveryRules.find(item=>item.id===rule.id)?.source.observedEventSequences;if(events)rule.source.observedEventSequences=[...events];}artifact=parseCapability(artifact);}
+        successCondition: { conditions, identity: [{ target: outputs.memberId!.target, input: 'memberId' }] }, outcomeRules: [], recoveryRules: [], manualContributions: [...builder.manualContributions,...(builder.runtime?.manualContributions??[])] };
+      if(builder.rules){artifact=attachBalanceRules(artifact);for(const rule of artifact.recoveryRules){const events=builder.rules.recoveryRules.find(item=>item.id===rule.id)?.source.observedEventSequences;if(events)rule.source.observedEventSequences=[...events];}}
+      artifact=parseCapability(artifact);
       validateInvocation(artifact, inputs); validateOutput(artifact, values);
       await context.publish(artifact, values); return;
     }
@@ -151,14 +167,20 @@ async function discover(request: Extract<Parameters<Worker>[0], { mode: 'discove
 
 async function replay(request: Extract<Parameters<Worker>[0], { mode: 'replay' }>, context: WorkerContext) {
   const artifact = parseCapability(await context.capability()); validateInvocation(artifact, request.inputs);
-  if (artifact.manualContributions.length) throw problem('MANUAL_PREREQUISITE');
+  if (artifact.manualContributions.some(item=>!['runtime_guard','required_intervention'].includes(item.handling))) throw problem('MANUAL_PREREQUISITE');
   if (artifact.steps[0]?.type !== 'navigate' || artifact.steps.slice(1).some(step => step.type === 'navigate')) throw new ExecutionError('ARTIFACT_INVALID');
   const variables: Values = {}; const executor = await context.executor(artifact.targets, variables);
   const runtime=new RuleEngine(artifact,executor,context);
   let first = true;
   for (const step of artifact.steps) {
-    const deadline=Date.now()+Math.min(step.timeoutMs,context.configuration.policy.budgets.stepTimeoutMs);const remaining=()=>Math.max(1,deadline-Date.now());
-    if (step.type === 'intervene') throw problem(step.reason === 'MANUAL_PREREQUISITE' ? 'MANUAL_PREREQUISITE' : 'POLICY_BLOCKED', step.id);
+    const now=()=>context.activeNow?.()??Date.now();const deadline=now()+Math.min(step.timeoutMs,context.configuration.policy.budgets.stepTimeoutMs);const remaining=()=>Math.max(1,deadline-now());
+    if(step.type==='intervene'){
+      const blocked={...problem('MANUAL_PREREQUISITE',step.id).blocked,reason:step.reason,checkpointId:step.id};
+      if(!context.intervene)throw new NeedsIntervention(blocked);
+      await runtime.guard(step.before,step.id,remaining(),'not_sent');
+      await context.intervene(blocked,async()=>(await executor.checkConditions([step.resumeCondition],step.id+'-resume'))[0]===true,step.interventionTimeoutMs);
+      await runtime.guard(step.after,step.id,remaining());continue;
+    }
     if(step.type==='navigate')await executor.assert(step.before,step.id+'-before',remaining());else await runtime.guard(step.before,step.id,remaining(),'not_sent');
     const output = await executor.execute(step, step.id, remaining());
     if (step.type === 'capture') {
@@ -181,7 +203,7 @@ async function replay(request: Extract<Parameters<Worker>[0], { mode: 'replay' }
 export const workflowWorker: Worker = async (request, context) => {
   try { return await (request.mode === 'discovery' ? discover(request, context) : replay(request, context)); } catch (error) {
     if(error instanceof BusinessOutcome)return{kind:'business_outcome',code:error.code,summary:'A declared business outcome was verified in the live UI.',evidenceIds:[]};
-    if (request.mode === 'discovery' && error instanceof ExecutionError && ['TARGET_NOT_FOUND','AMBIGUOUS_TARGET','STATE_TIMEOUT','TARGET_NOT_ACTIONABLE','MODEL_UNAVAILABLE','POLICY_BLOCKED'].includes(error.code)) { const intervention = problem(error.code === 'AMBIGUOUS_TARGET' ? 'AMBIGUOUS_TARGET' : error.code === 'POLICY_BLOCKED' ? 'POLICY_BLOCKED' : 'MANUAL_PREREQUISITE'); intervention.blocked.observed.code = error.code; throw intervention; }
+    if (request.mode === 'discovery' && error instanceof ExecutionError && ['TARGET_NOT_FOUND','AMBIGUOUS_TARGET','STATE_TIMEOUT','TARGET_NOT_ACTIONABLE','POLICY_BLOCKED'].includes(error.code)) { const intervention = problem(error.code === 'AMBIGUOUS_TARGET' ? 'AMBIGUOUS_TARGET' : error.code === 'POLICY_BLOCKED' ? 'POLICY_BLOCKED' : 'MANUAL_PREREQUISITE'); intervention.blocked.observed.code = error.code; throw intervention; }
     throw error;
   }
 };

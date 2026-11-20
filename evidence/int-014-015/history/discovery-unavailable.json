@@ -1,0 +1,208 @@
+{
+  "mode": "discovery",
+  "processId": 87065,
+  "run": {
+    "runId": "5a91c75f-bf66-4b88-9fd1-589ce9999d38",
+    "mode": "discovery",
+    "target": {
+      "id": "demo-credit-union",
+      "version": 1795173326
+    },
+    "policy": {
+      "id": "demo-policy",
+      "version": 1795173326
+    },
+    "status": "failed",
+    "control": {
+      "owner": "none",
+      "revision": 3
+    },
+    "capability": null,
+    "currentStepId": "discovery-state-classify",
+    "activeInterventionId": null,
+    "result": {
+      "kind": "failure",
+      "code": "MODEL_UNAVAILABLE",
+      "blocked": null,
+      "summary": "Execution stopped. Inspect the sanitized run events for context.",
+      "evidenceIds": []
+    },
+    "createdAt": "2026-11-20T03:31:40.997Z",
+    "updatedAt": "2026-11-20T03:33:52.849Z"
+  },
+  "intervention": null,
+  "events": [
+    {
+      "eventId": "1940244e-b687-4c5e-bcd0-45a9e1e95771",
+      "sequence": 1,
+      "type": "RUN_ACCEPTED",
+      "actor": "caller",
+      "stepId": null,
+      "details": {
+        "code": "accepted",
+        "bindingNames": [
+          "memberId"
+        ]
+      },
+      "createdAt": "2026-11-20T03:31:40.997Z"
+    },
+    {
+      "eventId": "5a14cdc2-d7d1-4496-bb98-2b8ba1b972b0",
+      "sequence": 2,
+      "type": "RUN_STARTED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "started"
+      },
+      "createdAt": "2026-11-20T03:31:41.051Z"
+    },
+    {
+      "eventId": "5abf0e3b-6568-4f37-a643-6c9de86f6c83",
+      "sequence": 3,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001-before",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-20T03:31:45.819Z"
+    },
+    {
+      "eventId": "df92a5af-2bf0-435f-9797-9c74c6ee8986",
+      "sequence": 4,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001-before",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-20T03:31:45.944Z"
+    },
+    {
+      "eventId": "460aaa09-ff1f-4cda-99ca-539597cdaee5",
+      "sequence": 5,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001",
+      "details": {
+        "code": "admitted",
+        "operation": "navigate"
+      },
+      "createdAt": "2026-11-20T03:31:46.064Z"
+    },
+    {
+      "eventId": "32ccfe88-f787-4d4d-b42a-7cb1cf991ab2",
+      "sequence": 6,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-001",
+      "details": {
+        "code": "dispatching"
+      },
+      "createdAt": "2026-11-20T03:31:46.082Z"
+    },
+    {
+      "eventId": "e467439f-5c79-4687-81c1-146bdb375219",
+      "sequence": 7,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001",
+      "details": {
+        "code": "confirmed",
+        "operation": "navigate"
+      },
+      "createdAt": "2026-11-20T03:31:46.802Z"
+    },
+    {
+      "eventId": "95f47b33-dafe-49ec-94f4-d7bfa680eb5d",
+      "sequence": 8,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-20T03:31:49.124Z"
+    },
+    {
+      "eventId": "50951dc9-77fa-4689-bf8b-5930c504c895",
+      "sequence": 9,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-20T03:31:49.279Z"
+    },
+    {
+      "eventId": "44d7337c-1bbc-43fe-808c-77680cfba9e6",
+      "sequence": 10,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "discovery-state-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-20T03:31:50.875Z"
+    },
+    {
+      "eventId": "2ebcc4ed-a9da-48f7-b9cd-750ae5358461",
+      "sequence": 11,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "discovery-state-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-20T03:31:51.015Z"
+    },
+    {
+      "eventId": "c071d0c0-5d9a-4e88-88d4-e6fd564ed96a",
+      "sequence": 12,
+      "type": "MODEL_REQUESTED",
+      "actor": "automation",
+      "stepId": null,
+      "details": {
+        "code": "requesting",
+        "modelName": "openai/gpt-5",
+        "modelCalls": 1
+      },
+      "createdAt": "2026-11-20T03:31:51.025Z"
+    },
+    {
+      "eventId": "b8061287-a90c-421c-aef9-593e1a4cedd8",
+      "sequence": 13,
+      "type": "SESSION_FINISHED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "closed",
+        "modelName": "openai/gpt-5",
+        "modelCalls": 1,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "createdAt": "2026-11-20T03:33:52.838Z"
+    },
+    {
+      "eventId": "cc70a946-5492-49a0-b568-f99933010b01",
+      "sequence": 14,
+      "type": "RUN_FAILED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "failed"
+      },
+      "createdAt": "2026-11-20T03:33:52.849Z"
+    }
+  ]
+}

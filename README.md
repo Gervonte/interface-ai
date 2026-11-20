@@ -2,7 +2,7 @@
 
 A TypeScript workspace for the computer-use automation assessment, with a PostgreSQL-backed synthetic credit-union staff portal and separate automation/operator applications.
 
-Implemented through INT-013: typed capability/run contracts, isolated persistence, the staff portal, a policy-checked executor, authenticated run APIs, live model-driven balance discovery, and saved-capability replay in a separate process with inference forbidden. Repeatable portal scenarios, declared business outcomes, bounded recovery, and safe escalation are implemented. Operator claim/manual actions/hand-back remain INT-014/015. [Portal setup](PORTAL.md) · [Runtime/API limits](RUNTIME.md) · [Discovery/replay guide and evidence](WORKFLOWS.md) · [Scenario and recovery guide](SCENARIOS.md).
+Implemented through INT-013: typed capability/run contracts, isolated persistence, the staff portal, a policy-checked executor, authenticated run APIs, live model-driven balance discovery, and saved-capability replay in a separate process with inference forbidden. Repeatable portal scenarios, declared business outcomes, bounded recovery, and safe escalation are implemented. INT-014/015 complete the minimal operator handoff: real discovery accepts manual help and publishes its capability; a separate process replays that exact version for another member, accepts manual restoration, and completes with zero inference. [Handoff setup and limits](HANDOFF.md) · [Discovery/replay handoff evidence](evidence/int-014-015/README.md). [Portal setup](PORTAL.md) · [Runtime/API limits](RUNTIME.md) · [Discovery/replay guide and evidence](WORKFLOWS.md) · [Scenario and recovery guide](SCENARIOS.md).
 
 
 ## Requirements
@@ -63,7 +63,7 @@ pnpm check
 
 Vitest runs HTTP, executor, transport and contract checks. The explicit database suite also verifies authenticated run coordination and actual process-death recovery. Injected-provider tests cover connection cleanup, termination verification, API health, and configuration validation. These tests are not discovery or replay evidence. Tests use ephemeral loopback ports and need no live service credentials. Builds run in workspace dependency order; both frontends output `dist/`, and APIs output runnable server modules.
 
-After building, start one backend with `pnpm --filter @interface-ai/automation start` or `pnpm --filter @interface-ai/demo-api start`. Use `pnpm demo:serve` to build and serve the complete target UI/API at http://127.0.0.1:3002. The operator UI still uses its Vite development preview. INT-002 uses a separate fixture-only server and temporary tunnel for Browserbase access; see [setup](BROWSERBASE_SETUP.md).
+After building, start one backend with `pnpm --filter @interface-ai/automation start` or `pnpm --filter @interface-ai/demo-api start`. Use `pnpm demo:serve` to build and serve the complete target UI/API at http://127.0.0.1:3002. The operator UI uses its Vite development server; see [handoff setup](HANDOFF.md) for token entry, run inspection, and manual control. INT-002 uses a separate fixture-only server and temporary tunnel for Browserbase access; see [setup](BROWSERBASE_SETUP.md).
 
 ## Real discovery and changed-input replay
 
@@ -92,7 +92,7 @@ BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm scenar
 BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm scenario:controls
 ```
 
-The first command publishes an immutable authored-rule revision and exercises 19 live cases with zero inference. The second is separate target-control UI QA for restoration/dismissal in the same browser; actual operator takeover follows in INT-014/015. Use `pnpm demo:scenario --list` for setup names and `pnpm demo:scenario baseline` to reset the next staff session. [Setup, scenario table, limits, and verifier resume](SCENARIOS.md) · [Curated live evidence](evidence/int-012-013/README.md).
+The first command publishes an immutable authored-rule revision and exercises 19 live cases with zero inference. The second is separate target-control UI QA for restoration/dismissal in the same browser; actual discovery and replay takeover are verified separately in [INT-014/015 evidence](evidence/int-014-015/README.md). Use `pnpm demo:scenario --list` for setup names and `pnpm demo:scenario baseline` to reset the next staff session. [Setup, scenario table, limits, and verifier resume](SCENARIOS.md) · [Curated live evidence](evidence/int-012-013/README.md).
 
 ## Workspace
 
@@ -155,4 +155,4 @@ Open http://127.0.0.1:3002. To verify hosted reachability, follow the target-onl
 
 `pnpm check:db` passes typechecking, 147 default tests, 24 real PostgreSQL tests and all builds. The real shared executor traversed both members through Browserbase, verified identity/current/available balances, then deliberately failed on ambiguous Open controls with no dispatch and a sanitized structural snapshot. Inference counters stayed zero and provider termination was confirmed. API tests cover authorization, asynchronous acceptance/deduplication, cancellation, exact versions, transient outputs, singleton ownership and real process death with blocked session reconciliation. [Commands/API/limits](RUNTIME.md); [curated hosted evidence](evidence/int-007-008/README.md).
 
-After `pnpm db:migrate`, run `pnpm automation:configure` once, then `pnpm dev:automation`. In a second terminal, `pnpm automation:smoke` checks the initial API without displaying its token. `DISCOVERY_NOT_IMPLEMENTED` is the expected current worker result. Stop the API before using `pnpm executor:check` or `pnpm automation:reconcile`, since they acquire the same coordinator lock.
+After `pnpm db:migrate`, run `pnpm automation:configure` once, then `pnpm dev:automation`. In a second terminal, `pnpm automation:smoke` checks the initial API without displaying its token. `DISCOVERY_NOT_IMPLEMENTED` was the INT-008 milestone result; the current configured worker performs the balance discovery/replay profile. Stop the API before using `pnpm executor:check` or `pnpm automation:reconcile`, since they acquire the same coordinator lock.
