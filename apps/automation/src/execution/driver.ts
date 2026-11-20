@@ -38,5 +38,6 @@ export class StagehandSurface implements BrowserSurface {
     const response = await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(error=>this.transport(error));
     if (!response?.ok()) throw new ExecutionError('ACTION_OUTCOME_UNKNOWN', 'unknown', 'unknown');
   }
+  async image() { return this.page.screenshot({type:'png'}).catch(error=>this.transport(error)); }
   async snapshot(policy: SurfacePolicy) { return this.evaluate(`(() => { const __name = (value) => value; return (${snapshotDom.toString()})(${JSON.stringify(policy)}); })()`); }
 }

@@ -1,3 +1,5 @@
+import {ExecutionError} from '../apps/automation/src/execution/errors.js';
+import {resolveTarget} from '../apps/automation/src/execution/surface.js';
 import { describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { mkdtemp } from 'node:fs/promises';
@@ -96,6 +98,49 @@ describe('model-selected discovery and deterministic capability replay', () => {
     const f=await fixture('M1001',undefined,false,true);const inspect=f.surface.inspect;
     f.surface.inspect=async(target,policy)=>{const state=await inspect(target,policy);if(target.locator.kind==='attribute'&&['Servicing notice','true'].includes(target.locator.value)&&f.actions.includes('Account Inquiry')&&!f.actions.includes('Acknowledge notice'))return{...state,count:1,visible:true};return state;};
     await f.discover();const rule=f.artifact().recoveryRules.find(rule=>rule.id==='acknowledge-notice')!;expect(rule.source.observedEventSequences).toHaveLength(1);const sequence=rule.source.observedEventSequences![0]!;expect(f.events[sequence-1]).toMatchObject({type:'ACTION_COMPLETED',details:{operation:'click',targetRef:'ruleAcknowledge'}});expect(f.actions.filter(action=>action==='Acknowledge notice')).toHaveLength(1);
+  });
+
+  it('publishes a guarded discovery handoff with its declared guard and replays the same boundary without inference',async()=>{
+    const manualDialog=(f:Awaited<ReturnType<typeof fixture>>)=>{
+      let dismissed=false;const inspect=f.surface.inspect;
+      f.surface.inspect=async(target,policy)=>{
+        const state=await inspect(target,policy);
+        if(target.locator.kind==='attribute'&&target.locator.name==='aria-modal'&&target.locator.value==='true'&&f.actions.filter(action=>action==='Open').length===2&&!dismissed)return{...state,count:1,visible:true};
+        return state;
+      };
+      f.context.intervene=async(blocked,validate)=>{
+        expect(blocked.reason).toBe('UNEXPECTED_DIALOG');const interventionId=randomUUID();dismissed=true;
+        await f.surface.dispatch('click',resolveTarget(role('Dismiss servicing review'),{},{}),configuration.policy as any);
+        const eventSequence=await f.context.record({type:'ACTION_COMPLETED',actor:'human',stepId:'manual-dismiss',interventionId,details:{code:'confirmed',operation:'click'}});
+        expect(await validate()).toBe(true);return{interventionId,eventSequences:[eventSequence]};
+      };
+    };
+    const discovery=await fixture('M1001',undefined,false,true);manualDialog(discovery);await discovery.discover();const artifact=discovery.artifact();
+    expect(artifact.manualContributions).toMatchObject([{handling:'runtime_guard',guardId:'unexpected-dialog'}]);
+    expect(artifact.runtimeGuards!.find(guard=>guard.id==='unexpected-dialog')).toMatchObject({handling:'intervention'});
+    expect(artifact.steps.some(step=>step.type==='click'&&artifact.targets[step.target]?.locator.kind==='role'&&(artifact.targets[step.target]!.locator as any).name==='Dismiss servicing review')).toBe(false);
+    const replay=await fixture('M1002',artifact,false,true);manualDialog(replay);
+    expect(await workflowWorker({mode:'replay',targetId:'demo-credit-union',capability:{id:artifact.capabilityId,version:artifact.version},inputs:{memberId:'M1002'}},replay.context)).toMatchObject({kind:'success',output:{values:{memberId:'M1002',accountId:'S2002',currentBalanceMinor:8765}}});
+    expect(replay.calls()).toBe(0);expect(replay.actions).toEqual(discovery.actions);
+  });
+
+  it('treats an unavailable model as a hard failure without inventing a resumable checkpoint',async()=>{
+    const f=await fixture('M1001');f.context.plan=async()=>{throw new ExecutionError('MODEL_UNAVAILABLE');};
+    await expect(f.discover()).rejects.toMatchObject({code:'MODEL_UNAVAILABLE'});expect(f.artifact()).toBeUndefined();
+  });
+  it('records explicit planner-help contributions and preserves the manual boundary during model-free replay',async()=>{
+    const discovery=await fixture('M1001');const plan=discovery.context.plan;let first=true;
+    discovery.context.plan=async data=>{const decision=await plan(data);if(first){first=false;return{...decision,action:'help',controlRef:'',inputName:'',outputs:blankOutputs,reason:'blocked'};}return decision;};
+    const manual=(f:Awaited<ReturnType<typeof fixture>>)=>async(_blocked:unknown,validate:()=>Promise<boolean>)=>{
+      const interventionId=randomUUID();await f.surface.dispatch('click',resolveTarget(role('Member Search'),{memberId:'M1001'},{}),configuration.policy as any);
+      const eventSequence=await f.context.record({type:'ACTION_COMPLETED',actor:'human',stepId:'manual-search',interventionId,details:{code:'confirmed',operation:'click'}});
+      expect(await validate()).toBe(true);return{interventionId,eventSequences:[eventSequence]};
+    };
+    discovery.context.intervene=manual(discovery);await discovery.discover();const artifact=discovery.artifact();
+    expect(artifact.manualContributions).toMatchObject([{handling:'required_intervention'}]);expect(artifact.steps.some(step=>step.type==='intervene')).toBe(true);
+    const replay=await fixture('M1002',artifact);replay.context.intervene=manual(replay);
+    const result=await workflowWorker({mode:'replay',targetId:'demo-credit-union',capability:{id:artifact.capabilityId,version:artifact.version},inputs:{memberId:'M1002'}},replay.context);
+    expect(result).toMatchObject({kind:'success',output:{values:{memberId:'M1002',currentBalanceMinor:8765}}});expect(replay.calls()).toBe(0);
   });
 
 });

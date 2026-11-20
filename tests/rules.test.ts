@@ -45,4 +45,18 @@ describe('declared business outcomes and bounded UI recovery',()=>{
   it.each([['Staff session expired','SESSION_EXPIRED'],['Servicing review required','UNEXPECTED_DIALOG']])('pauses on %s before dispatch',async(label,reason)=>{const f=await fixture({[label]:true,'Any dialog':true});await expect(f.engine.guard(f.condition,f.stepId)).rejects.toMatchObject({blocked:{reason,stepId:f.stepId}});expect(f.actions).toEqual([]);});
   it('stops target validation instead of repeatedly submitting Search',async()=>{const f=await fixture({'Member search validation error':true});await expect(f.engine.guard(f.condition,f.stepId)).rejects.toMatchObject({code:'TARGET_VALIDATION_ERROR'});expect(f.actions).toEqual([]);});
   it('cannot recover after dispatch admissions were closed',async()=>{const f=await fixture({'Account inquiry unavailable':true});f.gate.close();await expect(f.engine.guard(f.condition,f.stepId)).rejects.toMatchObject({code:'CONTROL_CHANGED'});expect(f.actions).toEqual([]);});
+  it('resumes a blocked rule at its checkpoint and preserves explicit manual contribution provenance',async()=>{
+    const f=await fixture({'Staff session expired':true,'Any dialog':true},1,true);let validations=0;
+    f.context.intervene=async(_blocked,validate)=>{
+      f.state['Staff session expired']=false;f.state['Any dialog']=false;f.state.Ready=true;
+      expect(await validate()).toBe(true);validations++;return{interventionId:randomUUID(),eventSequences:[100]};
+    };
+    await f.engine.guard(f.condition,f.stepId);expect(validations).toBe(1);expect(f.engine.manualContributions).toMatchObject([{handling:'runtime_guard',guardId:'staff-session-expired',eventSequences:[100]}]);expect(f.actions).toEqual([]);
+  });
+  it('refuses hand-back when manual resolution changes the selected member identity',async()=>{
+    const f=await fixture({'Staff session expired':true,'Any dialog':true});
+    f.context.intervene=async(_blocked,validate)=>{f.state['Staff session expired']=false;f.state['Any dialog']=false;f.state.Ready=true;f.state['Active member:Member ID']='M1002';expect(await validate()).toBe(false);throw Error('HAND_BACK_REFUSED');};
+    await expect(f.engine.guard(f.condition,f.stepId)).rejects.toThrow('HAND_BACK_REFUSED');expect(f.actions).toEqual([]);
+  });
+
 });

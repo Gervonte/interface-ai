@@ -21,6 +21,10 @@ export class DispatchGate {
     finally { this.busy = false; if (this.pending === work) this.pending = undefined; }
   }
   close() { if (!this.closed) { this.closed = true; this.revision++; } }
+  reopen(revision: number) {
+    if (!this.closed || this.busy || revision < this.revision) throw new ExecutionError('CONTROL_CHANGED');
+    this.closed = false; this.revision = revision;
+  }
   async drain(timeoutMs: number) {
     if (!this.pending) return true;
     let timer: ReturnType<typeof setTimeout> | undefined;

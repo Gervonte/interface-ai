@@ -244,4 +244,24 @@ describe('real PostgreSQL persistence and isolation', () => {
     await repository.publishRuleRevision(revised,1,'test-operator');expect((await repository.getCapability(artifact.capabilityId,2)).recoveryRules.find(item=>item.id===rule.id)?.source.observedEventSequences).toEqual(rule.source.observedEventSequences);
   });
 
+  it('accounts for runtime-guard human mutations when publishing a model-driven capability',async()=>{
+    const {runId}=await accept();await repository.markRunning(runId);
+    let artifact=JSON.parse(await readFile(new URL('../../examples/primary-savings.contract.json',import.meta.url),'utf8')) as Capability;
+    artifact.sourceDiscoveryRunId=runId;artifact.capabilityId='test-handoff-'+randomBytes(4).toString('hex');
+    for(const step of artifact.steps){
+      if(step.type==='intervene')throw Error('Unexpected fixture intervention');
+      const eventSequence=await repository.appendEvent(runId,{type:step.type==='capture'?'READ_COMPLETED':'ACTION_COMPLETED',actor:'automation',stepId:step.id,details:{code:'confirmed',operation:step.type}});
+      step.source={kind:'discovery',runId,eventSequence};
+    }
+    await repository.appendEvent(runId,{type:'MODEL_COMPLETED',actor:'automation',stepId:null,details:{code:'synthetic_test_fixture',modelName:'openai/gpt-4.1',inputTokens:1,outputTokens:1}});
+    const session=randomUUID(),interventionId=randomUUID();await automation.query('UPDATE automation.runs SET session_ref=$2 WHERE run_id=$1',[runId,session]);
+    await automation.query("INSERT INTO automation.interventions(intervention_id,run_id,status,blocked,operator_ref,control_revision,session_ref,expires_at) VALUES($1,$2,'resolved','{}','test-operator',2,$3,now()+interval '10 minutes')",[interventionId,runId,session]);
+    const sequence=await repository.appendEvent(runId,{type:'ACTION_COMPLETED',actor:'human',stepId:'manual-dismiss',interventionId,details:{code:'confirmed',operation:'click',controlName:'dismiss-servicing-review'}});
+    artifact=attachBalanceRules(artifact);
+    await expect(repository.publishCapability(runId,artifact,outputs,'transient','model-driven')).rejects.toMatchObject({code:'INCOMPLETE_DISCOVERY_HISTORY'});
+    artifact.manualContributions=[{handling:'runtime_guard',guardId:'unexpected-dialog',interventionId,eventSequences:[sequence]}];
+    await repository.publishCapability(runId,artifact,outputs,'transient','model-driven');
+    expect((await repository.getCapability(artifact.capabilityId,1)).manualContributions).toEqual(artifact.manualContributions);
+  });
+
 });

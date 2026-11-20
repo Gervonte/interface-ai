@@ -17,6 +17,7 @@ export interface BrowserSurface {
   dispatch(type: 'click' | 'fill', target: ResolvedTarget, policy: SurfacePolicy, value?: string): Promise<void>;
   navigate(url: string, timeoutMs: number): Promise<void>;
   snapshot(policy: SurfacePolicy): Promise<unknown>;
+  image?(): Promise<Uint8Array>;
 }
 export function resolveTarget(target: Target, inputs: Values, variables: Values): ResolvedTarget {
   return { ...target, within: target.within.map((scope) => {

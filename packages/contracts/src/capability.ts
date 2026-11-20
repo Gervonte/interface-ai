@@ -86,6 +86,7 @@ const RuntimeGuard = z.strictObject({ id: Id, when: PredicateSchema, require: Pr
   reason: z.enum(['UNEXPECTED_DIALOG','SESSION_EXPIRED','STATE_TIMEOUT','POLICY_BLOCKED','AMBIGUOUS_TARGET']), appliesToStepIds:z.array(Id).min(1).max(128),
   source:RuleSource });
 const ManualContribution = z.discriminatedUnion('handling', [
+  z.strictObject({ handling: z.literal('runtime_guard'), interventionId: z.uuid(), eventSequences: z.array(z.number().int().positive()).min(1).max(128), guardId: Id }),
   z.strictObject({ handling: z.literal('included'), interventionId: z.uuid(), eventSequences: z.array(z.number().int().positive()).min(1).max(128), stepIds: z.array(Id).min(1).max(128) }),
   z.strictObject({ handling: z.literal('required_intervention'), interventionId: z.uuid(), eventSequences: z.array(z.number().int().positive()).min(1).max(128), stepId: Id }),
   z.strictObject({ handling: z.literal('precondition'), interventionId: z.uuid(), eventSequences: z.array(z.number().int().positive()).min(1).max(128), preconditionId: Id }),
@@ -218,7 +219,9 @@ function semanticValidation(cap: Capability, ctx: z.RefinementCtx) {
   }
   for (const contribution of cap.manualContributions) {
     unique(contribution.eventSequences, 'manual event sequence');
-    if (contribution.handling === 'precondition') {
+    if (contribution.handling === 'runtime_guard') {
+      if (!cap.runtimeGuards?.some(guard=>guard.id===contribution.guardId && guard.handling==='intervention')) issue('Manual contribution needs a declared intervention guard.');
+    } else if (contribution.handling === 'precondition') {
       if (!cap.preconditions[contribution.preconditionId]) issue('Unresolved manual precondition.');
     } else if (contribution.handling === 'required_intervention') {
       if (!cap.steps.some((step) => step.id === contribution.stepId && step.type === 'intervene')) issue('Manual contribution needs an intervention step.');

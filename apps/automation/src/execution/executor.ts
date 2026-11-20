@@ -18,6 +18,7 @@ export interface ExecutorOptions {
   targets: Record<string, Target>; inputs: Values; variables?: Values; routes?: Record<string, string>;
   record(event: StoredEventInput): Promise<unknown>;
   authorize(): Promise<void>;
+  beforeDispatch?():Promise<void>;
   evidence: EvidenceStore;
 }
 export function transform(value: string | boolean, name: Extraction['transform']) {
@@ -38,6 +39,10 @@ export function transform(value: string | boolean, name: Extraction['transform']
 export class Executor {
   private readonly startedAt: number;
   private admissions = 0;
+  private pausedMs = 0;
+  rebind(revision: number) { this.options.revision = revision; this.lastFailure = undefined; }
+  accountPause(ms: number) { this.pausedMs += Math.max(0, ms); }
+  private remaining() { const b=this.options.policy.budgets; return Math.min(b.activeTimeoutMs-(Date.now()-this.startedAt-this.pausedMs), b.overallTimeoutMs-(Date.now()-this.startedAt)); }
   private conditionStates:Record<string,TargetState>|undefined;
   lastEventSequence: number | undefined;
   lastFailure: { stepId: string; code: string; evidenceIds: string[]; dispatchState: 'not_sent' | 'sent' | 'settled' | 'unknown'; effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' } | undefined;
@@ -46,8 +51,7 @@ export class Executor {
   private check() {
     this.options.gate.check(this.options.revision);
     if (this.options.signal.aborted) throw new ExecutionError('CANCELLED');
-    const budgets = this.options.policy.budgets;
-    if (Date.now() - this.startedAt >= Math.min(budgets.activeTimeoutMs, budgets.overallTimeoutMs)) throw new ExecutionError('BUDGET_EXHAUSTED');
+    if (this.remaining() <= 0) throw new ExecutionError('BUDGET_EXHAUSTED');
   }
   private locationsOnly(condition: Predicate): boolean { return condition.kind === 'location' || ((condition.kind === 'all' || condition.kind === 'any') && condition.conditions.every(child => this.locationsOnly(child))); }
   async assert(condition: Predicate, stepId: string, timeoutMs?: number) { await this.execute({ type: 'wait', condition }, stepId, timeoutMs); }
@@ -130,11 +134,12 @@ export class Executor {
     this.check();
     if (!Number.isFinite(requestedTimeoutMs) || requestedTimeoutMs < 1) throw new ExecutionError('BUDGET_EXHAUSTED');
     const budgets = this.options.policy.budgets;
-    const timeout = Math.max(1, Math.min(requestedTimeoutMs, budgets.stepTimeoutMs, Math.min(budgets.activeTimeoutMs, budgets.overallTimeoutMs) - (Date.now() - this.startedAt)));
+    const timeout = Math.max(1, Math.min(requestedTimeoutMs, budgets.stepTimeoutMs, this.remaining()));
     let sent = false; let timer: ReturnType<typeof setTimeout> | undefined;
     this.lastState = { dispatchState: 'not_sent', effectState: 'not_checked' };
     const work = this.options.gate.dispatch(this.options.revision, async () => {
       this.check(); await this.options.authorize(); this.check(); await this.origin(operation.type === 'navigate' || (operation.type === 'wait' && this.locationsOnly(operation.condition)));
+      await this.options.beforeDispatch?.();this.check();
       await this.options.record({ type: 'ACTION_INTENT', actor: 'automation', stepId, details: { code: 'admitted', operation: eventOperation, ...('target' in operation ? { targetRef: operation.target } : {}) } });
       this.check();
       let output: string | number | boolean | boolean[] | undefined;
@@ -185,6 +190,7 @@ export class Executor {
     try {
       return await Promise.race([work, aborted, new Promise<never>((_resolve, reject) => { timer = setTimeout(() => reject(new ExecutionError(sent ? 'ACTION_OUTCOME_UNKNOWN' : 'STATE_TIMEOUT', sent ? 'unknown' : 'not_sent', sent ? 'unknown' : 'not_checked')), timeout); })]);
     } catch (error) {
+      if(!sent && error instanceof ExecutionError && error.code==='STALE_OBSERVATION')throw error;
       const failure = safeExecutionError(error, sent); this.lastState = { dispatchState: failure.dispatchState, effectState: failure.effectState };
       // Even a timed-out READ keeps the gate occupied until its real promise settles.
       this.options.gate.close();

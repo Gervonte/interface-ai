@@ -24,6 +24,7 @@ export async function observeDom(inputs: Values, policy: SurfacePolicy, labels: 
     docs.push({ doc, scope: { kind: 'frame', frames: [{ attribute: 'title', value: title }] } });
   }
   if (!frameCount) ready = false;
+  const dialogs=docs.flatMap(({doc})=>[...doc.querySelectorAll('dialog[open],[role="dialog"][aria-modal="true"]')].filter(visible));
   for (const { doc, scope } of docs) {
     if (!policy.allowedOrigins.includes(doc.location.origin)) throw new Error('POLICY_BLOCKED');
     signature.push(doc.location.href);
@@ -63,7 +64,7 @@ export async function observeDom(inputs: Values, policy: SurfacePolicy, labels: 
         const form = el.closest('form[aria-label]'); const formName = safe(form?.getAttribute('aria-label'));
         if (formName) within.push({ kind: 'container', locator: { kind: 'role', role: 'form', name: formName, exact: true } });
       }
-      const enabled = !el.matches(':disabled,[aria-disabled="true"]') && (!fill || !input.readOnly);
+      const enabled = !dialogs.some(dialog=>!dialog.contains(el)) && !el.matches(':disabled,[aria-disabled="true"]') && (!fill || !input.readOnly);
       if (fill) signature.push(label + ':' + input.value);
       controls.push({ ref: 'c' + ++controlIndex, kind: fill ? 'fill' : 'click', label,
         target: { scope, within, locator: fill ? { kind: 'label', text: label, exact: true } : { kind: 'role', role: el.tagName === 'A' ? 'link' : 'button', name: label, exact: true }, expectedMatches: 1 },

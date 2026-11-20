@@ -22,8 +22,8 @@ export class RuntimeRepository {
   }
   async events(runId: string, principal: string, after: number, limit: number) {
     await this.owned(runId, principal);
-    const rows = await this.base.pool.query('SELECT event_id,sequence,event_type,actor,step_id,details,created_at FROM automation.run_events WHERE run_id=$1 AND sequence>$2 ORDER BY sequence LIMIT $3', [runId, after, limit]);
-    return { events: rows.rows.map(row => ({ eventId: row.event_id, sequence: row.sequence, type: row.event_type, actor: row.actor, stepId: row.step_id,
+    const rows = await this.base.pool.query('SELECT event_id,sequence,event_type,actor,step_id,intervention_id,details,created_at FROM automation.run_events WHERE run_id=$1 AND sequence>$2 ORDER BY sequence LIMIT $3', [runId, after, limit]);
+    return { events: rows.rows.map(row => ({ eventId: row.event_id, sequence: row.sequence, type: row.event_type, actor: row.actor, stepId: row.step_id, ...(row.intervention_id?{interventionId:row.intervention_id}:{}),
       details: row.details, createdAt: row.created_at.toISOString() })), nextSequence: rows.rows.at(-1)?.sequence ?? after };
   }
   async operation(runId: string, receiptId: string, principal: string) {
