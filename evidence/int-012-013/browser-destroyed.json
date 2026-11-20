@@ -1,0 +1,178 @@
+{
+  "scenario": "browser-destroyed",
+  "delayMs": 0,
+  "run": {
+    "runId": "fd6e9e18-89b6-4941-84f5-53e8de93bc86",
+    "mode": "replay",
+    "target": {
+      "id": "demo-credit-union",
+      "version": 1795127269
+    },
+    "policy": {
+      "id": "demo-policy",
+      "version": 1795127269
+    },
+    "status": "failed",
+    "control": {
+      "owner": "none",
+      "revision": 3
+    },
+    "capability": {
+      "id": "balance-0f6a7df9b43f44aeb45fad5ad53ca6d1",
+      "version": 3
+    },
+    "currentStepId": null,
+    "activeInterventionId": null,
+    "result": {
+      "kind": "failure",
+      "code": "SESSION_LOST",
+      "blocked": {
+        "stepId": "step-001-before",
+        "actionIndex": null,
+        "reason": "SESSION_LOST",
+        "dispatchState": "not_sent",
+        "effectState": "not_checked",
+        "checkpointId": null,
+        "expected": {
+          "code": "UNIQUE_READY_TARGET",
+          "description": "One permitted actionable target and a satisfied UI condition."
+        },
+        "observed": {
+          "code": "SESSION_LOST",
+          "description": "The required UI condition was not confirmed."
+        },
+        "evidenceIds": []
+      },
+      "summary": "Execution stopped. Inspect the sanitized run events for context.",
+      "evidenceIds": []
+    },
+    "createdAt": "2026-11-19T22:46:38.691Z",
+    "updatedAt": "2026-11-19T22:46:43.825Z"
+  },
+  "sameSession": true,
+  "sessionState": "closed",
+  "events": [
+    {
+      "eventId": "642b4209-258b-4cf7-8b2c-29a4b0ebf21f",
+      "sequence": 1,
+      "type": "RUN_ACCEPTED",
+      "actor": "caller",
+      "stepId": null,
+      "details": {
+        "code": "accepted",
+        "bindingNames": [
+          "memberId"
+        ]
+      },
+      "createdAt": "2026-11-19T22:46:38.691Z"
+    },
+    {
+      "eventId": "080dd5a4-e503-460f-8c7b-00c3f45f61f1",
+      "sequence": 2,
+      "type": "RUN_STARTED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "started"
+      },
+      "createdAt": "2026-11-19T22:46:38.825Z"
+    },
+    {
+      "eventId": "071c824b-2565-4b3b-a042-b8558ce0124c",
+      "sequence": 3,
+      "type": "ACTION_FAILED",
+      "actor": "automation",
+      "stepId": "step-001-before",
+      "details": {
+        "code": "SESSION_LOST",
+        "effectState": "not_checked",
+        "dispatchState": "not_sent"
+      },
+      "createdAt": "2026-11-19T22:46:43.798Z"
+    },
+    {
+      "eventId": "2b99d899-2082-433a-a148-f7eae4c76d85",
+      "sequence": 4,
+      "type": "SESSION_FINISHED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "createdAt": "2026-11-19T22:46:43.817Z"
+    },
+    {
+      "eventId": "44de2467-6b6d-452b-afc0-4d0952d819e6",
+      "sequence": 5,
+      "type": "RUN_FAILED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "failed"
+      },
+      "createdAt": "2026-11-19T22:46:43.825Z"
+    }
+  ],
+  "normalDispatches": [
+    {
+      "id": "step-001",
+      "count": 0
+    },
+    {
+      "id": "step-002",
+      "count": 0
+    },
+    {
+      "id": "step-003",
+      "count": 0
+    },
+    {
+      "id": "step-004",
+      "count": 0
+    },
+    {
+      "id": "step-005",
+      "count": 0
+    },
+    {
+      "id": "step-006",
+      "count": 0
+    },
+    {
+      "id": "step-007",
+      "count": 0
+    },
+    {
+      "id": "step-008",
+      "count": 0
+    },
+    {
+      "id": "step-009",
+      "count": 0
+    },
+    {
+      "id": "step-010",
+      "count": 0
+    },
+    {
+      "id": "step-011",
+      "count": 0
+    },
+    {
+      "id": "step-012",
+      "count": 0
+    },
+    {
+      "id": "step-013",
+      "count": 0
+    }
+  ],
+  "expected": "SESSION_LOST",
+  "actual": "SESSION_LOST",
+  "recoveryAttempts": 0,
+  "passed": true
+}

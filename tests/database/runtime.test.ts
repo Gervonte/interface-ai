@@ -41,7 +41,7 @@ async function service(worker?: Worker, sessions?: SessionFactory) {
 async function until(check: () => Promise<boolean>) { for (let i = 0; i < 100; i++) { if (await check()) return; await delay(20); } throw new Error('Timed out waiting for test state'); }
 describe('authenticated run API and durable coordinator', () => {
   beforeAll(async () => {
-    await provision(settings); owner = createPool(settings.automation.migratorUrl); expect(await migrateAutomation(owner)).toBe(2);
+    await provision(settings); owner = createPool(settings.automation.migratorUrl); expect(await migrateAutomation(owner)).toBe(4);
     await grantRuntime(owner, 'automation', settings.automation.app); pool = createPool(settings.automation.appUrl);
     repository = new AutomationRepository(pool, secrets.REQUEST_FINGERPRINT_KEY); configuration = await loadConfigurations();
     folder = await mkdtemp(tmpdir() + '/runtime-evidence-');
@@ -213,6 +213,17 @@ describe('authenticated run API and durable coordinator', () => {
     await f.coordinator.idle();expect(closes).toBe(1);expect((await repository.getRun(accepted.runId)).status).toBe('cancelled');
     expect((await f.coordinator.repository.state(accepted.runId)).session_state).toBe('closed');
     expect(await (await f.call(route)).json()).toMatchObject({status:'closed'});
+  });
+
+  it('accepts a confirmed negative discovery result without publishing a capability', async () => {
+    const f=await service(async(_request,context)=>{await context.record({type:'BUSINESS_OUTCOME',actor:'automation',stepId:'search-member',details:{code:'MEMBER_NOT_FOUND',ruleId:'member-not-found'}});return{kind:'business_outcome',code:'MEMBER_NOT_FOUND',summary:'Verified negative.',evidenceIds:[]};});
+    const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',request)).json());await f.coordinator.idle();
+    const run=await f.coordinator.read(accepted.runId,'test-operator');expect(run.status).toBe('completed');expect(run.capability).toBeNull();expect(run.result).toMatchObject({kind:'business_outcome',code:'MEMBER_NOT_FOUND'});
+    expect((await pool.query('SELECT 1 FROM automation.capabilities WHERE source_discovery_run_id=$1',[run.runId])).rowCount).toBe(0);
+  });
+  it('rejects an unconfirmed negative discovery result', async()=>{
+    const f=await service(async()=>({kind:'business_outcome',code:'MEMBER_NOT_FOUND',summary:'Unconfirmed.',evidenceIds:[]}));
+    const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',request)).json());await f.coordinator.idle();expect((await f.coordinator.read(accepted.runId,'test-operator')).result).toMatchObject({kind:'failure',code:'WORKER_FAILED'});
   });
 
 });

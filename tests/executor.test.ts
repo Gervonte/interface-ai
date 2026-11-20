@@ -60,6 +60,12 @@ describe('shared executor dispatch boundary', () => {
     const f = await fixture({ dispatch: async () => { throw new ExecutionError('AMBIGUOUS_TARGET', 'not_sent', 'not_applied'); } });
     await expect(f.executor.execute({ type: 'fill', target: 'member', value: { kind: 'input', name: 'memberId' } }, 'fill-member')).rejects.toMatchObject({ dispatchState: 'not_sent', effectState: 'not_applied' });
   });
+  it('preserves uncertainty when the browser transport is lost after dispatch',async()=>{
+    let sends=0;const f=await fixture({dispatch:async()=>{sends++;throw new ExecutionError('SESSION_LOST');}});
+    await expect(f.executor.execute({type:'fill',target:'member',value:{kind:'input',name:'memberId'}},'lost-dispatch')).rejects.toMatchObject({code:'SESSION_LOST',dispatchState:'unknown',effectState:'unknown'});
+    await expect(f.executor.execute({type:'fill',target:'member',value:{kind:'input',name:'memberId'}},'no-retry')).rejects.toMatchObject({code:'CONTROL_CHANGED'});
+    expect(sends).toBe(1);expect(f.events.at(-1)?.details).toMatchObject({code:'SESSION_LOST',dispatchState:'unknown',effectState:'unknown'});
+  });
   it('keeps an aborted in-flight command occupied until its actual promise settles', async () => {
     let release!: () => void; let started!: () => void;
     const ready = new Promise<void>(resolve => { started = resolve; });

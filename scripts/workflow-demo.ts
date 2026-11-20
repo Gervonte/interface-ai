@@ -21,7 +21,7 @@ async function stop(child: ChildProcess) {
 async function main() {
   for (const key of ['DATABASE_URL', 'REQUEST_FINGERPRINT_KEY', 'AUTOMATION_API_TOKEN', 'BROWSERBASE_API_KEY', 'BROWSERBASE_PROJECT_ID']) if (!process.env[key]) throw new Error('CONFIGURATION_REQUIRED');
   const entry = new URL(process.env.BROWSERBASE_PORTAL_URL ?? ''); if (entry.protocol !== 'https:') throw new Error('HTTPS_PORTAL_REQUIRED'); readBrowserbaseConfig({ ...process.env, BROWSERBASE_FIXTURE_URL: new URL('/compatibility',entry).toString() }); entry.pathname = '/'; entry.search = ''; entry.hash = '';
-  const initial = await loadConfigurations({ target: new URL('../apps/automation/config/target.v2.json', import.meta.url), policy: new URL('../apps/automation/config/policy.v2.json', import.meta.url) });
+  const initial = await loadConfigurations({ target: new URL('../apps/automation/config/target.v3.json', import.meta.url), policy: new URL('../apps/automation/config/policy.v3.json', import.meta.url) });
   const previous = process.env.WORKFLOW_REPLAY_ONLY === '1' ? JSON.parse(await readFile(resolve(folder,'result.json'),'utf8')) : undefined;
   if (previous && (!previous.success || !previous.runs?.[0]?.capability)) throw new Error('PRIOR_DISCOVERY_REQUIRED');
   const version: number = previous?.configurationVersion ?? Math.floor(Date.now() / 1000);

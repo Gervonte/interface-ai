@@ -1,6 +1,6 @@
 # Acceptance checklist
 
-Status: implementation in progress through INT-011. The first live balance discovery/replay proof is linked in [evidence/int-009-011](evidence/int-009-011/README.md). Full scenario and operator-handoff acceptance remains pending.
+Status: implementation in progress through INT-013. The first live balance discovery/replay proof is linked in [evidence/int-009-011](evidence/int-009-011/README.md). The scenario/recovery matrix is linked in [evidence/int-012-013](evidence/int-012-013/README.md). Full operator-handoff and privacy acceptance remains pending.
 
 Source: *Assignment A — Computer-Use Automation System*, especially sections 3–7 and 9. Section references below refer to that assignment.
 

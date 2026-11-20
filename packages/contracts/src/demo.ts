@@ -23,7 +23,7 @@ export const DemoOverviewSchema = z.strictObject({ member: DemoMemberSchema,
   accountSummary: z.strictObject({ total: z.number().int().min(0), savings: z.number().int().min(0), checking: z.number().int().min(0) }).nullable(),
 });
 export type DemoOverview = z.infer<typeof DemoOverviewSchema>;
-export const DemoAccountsSchema = z.strictObject({ member: DemoMemberSchema, accounts: z.array(DemoAccountSchema) })
+export const DemoAccountsSchema = z.strictObject({ member: DemoMemberSchema, accounts: z.array(DemoAccountSchema), conflictingSignals: z.boolean().optional() })
   .refine((value) => value.accounts.every((account) => account.memberId === value.member.id));
 export const DemoDetailsSchema = z.strictObject({ member: DemoMemberSchema, account: DemoAccountSchema })
   .refine((value) => value.account.memberId === value.member.id);

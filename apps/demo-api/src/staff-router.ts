@@ -1,3 +1,6 @@
+import { setTimeout as delay } from 'node:timers/promises';
+import { baselineScenario } from './scenarios.js';
+import type { Scenario, ScenarioLoader } from './scenarios.js';
 import { randomUUID } from 'node:crypto';
 import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
@@ -12,13 +15,13 @@ type AccountRow = NonNullable<Awaited<ReturnType<MemberStore['listAccounts']>>>[
 const memberDto = (row: MemberRow) => DemoMemberSchema.parse({ id: row.member_id, name: row.display_name, status: row.status, accountAccess: row.account_access ? 'allowed' : 'denied' });
 const accountDto = (row: AccountRow) => DemoAccountSchema.parse({ id: row.account_id, memberId: row.member_id, type: row.account_type,
   isPrimary: row.is_primary, status: row.status, currentBalanceMinor: row.current_balance_minor, availableBalanceMinor: row.available_balance_minor, currency: row.currency });
-interface StaffSession { expiresAt: number; epoch: number; active: string | null; search: { memberId: string; found: boolean; revision: number } | null }
+interface StaffSession { scenario: Scenario; inquiries: number; acknowledged: boolean; reviewed: boolean; suspended: boolean; expiryTriggered: boolean; expiresAt: number; epoch: number; active: string | null; search: { memberId: string; found: boolean; revision: number } | null }
 const operator = { id: 'STF-104', name: 'Alex Chen', branch: 'Training Branch', role: 'Member Services' };
 function reject(response: Response, status: number, code: string, message: string) {
   response.status(status).json({ error: { code, message } });
 }
 
-export function createStaffRouter(repository: MemberStore | undefined, sessionTtlMs = 3_600_000) {
+export function createStaffRouter(repository: MemberStore | undefined, sessionTtlMs = 3_600_000, scenario: ScenarioLoader = async () => baselineScenario()) {
   const router = express.Router();
   const sessions = new Map<string, StaffSession>();
   function session(request: Request) {
@@ -30,6 +33,7 @@ export function createStaffRouter(repository: MemberStore | undefined, sessionTt
   }
   function required(request: Request, response: Response): StaffSession | undefined {
     const value = session(request);
+    if (value?.suspended) { reject(response,401,'STAFF_SESSION_EXPIRED','Staff session expired. Restore the training session to continue.'); return undefined; }
     if (!value) reject(response, 401, 'STAFF_SESSION_REQUIRED', 'Your staff session has ended. Reopen the workspace.');
     return value;
   }
@@ -47,10 +51,12 @@ export function createStaffRouter(repository: MemberStore | undefined, sessionTt
   });
   router.get('/session', async (request, response) => {
     let value = session(request);
+    if (value?.suspended) { reject(response,401,'STAFF_SESSION_EXPIRED','Staff session expired. Restore the training session to continue.'); return; }
     if (!value) {
+      const selectedScenario=await scenario();
       for (const [id, item] of sessions) if (item.expiresAt <= Date.now()) sessions.delete(id);
       if (sessions.size >= 100) { reject(response, 503, 'SESSION_CAPACITY_REACHED', 'Staff services are busy. Try again shortly.'); return; }
-      const id = randomUUID(); value = { expiresAt: Date.now() + sessionTtlMs, epoch: 0, active: null, search: null }; sessions.set(id, value);
+      const id = randomUUID(); value = { scenario: selectedScenario, inquiries:0, acknowledged:false, reviewed:false, suspended:false, expiryTriggered:false, expiresAt: Date.now() + sessionTtlMs, epoch: 0, active: null, search: null }; sessions.set(id, value);
       response.cookie('demo_staff', id, { httpOnly: true, sameSite: 'lax', secure: request.secure, path: '/', maxAge: sessionTtlMs });
     }
     const epoch = value.epoch;
@@ -58,6 +64,22 @@ export function createStaffRouter(repository: MemberStore | undefined, sessionTt
     if (!current(value, epoch, response)) return;
     if (value.active && !member) { value.active = null; value.search = null; value.epoch++; }
     response.json(DemoSessionSchema.parse({ operator, status: 'active', contextRevision: value.epoch, activeMember: member ? memberDto(member) : null }));
+  });
+  // Ordinary synthetic staff controls. There is no scenario-selection HTTP endpoint.
+  router.post('/session/restore', (request,response) => {
+    const value=session(request); if (!value?.suspended) { reject(response,409,'SESSION_NOT_EXPIRED','No suspended training session is available.'); return; }
+    if (!z.strictObject({}).safeParse(request.body).success) { reject(response,400,'INVALID_REQUEST','Invalid staff request.'); return; }
+    value.suspended=false; value.epoch++; value.expiresAt=Date.now()+sessionTtlMs; response.json({ok:true});
+  });
+  router.post('/servicing/acknowledge', (request,response) => {
+    const value=required(request,response);if(!value)return;
+    if(!value.active || !['servicing-notice','persistent-notice'].includes(value.scenario.name) || !z.strictObject({}).safeParse(request.body).success){reject(response,409,'NO_SERVICING_NOTICE','No notice is awaiting acknowledgment.');return;}
+    value.acknowledged=true;response.json({ok:true});
+  });
+  router.post('/servicing/review/dismiss', (request,response) => {
+    const value=required(request,response);if(!value)return;
+    if(!value.active || value.scenario.name!=='unexpected-modal' || !z.strictObject({}).safeParse(request.body).success){reject(response,409,'NO_SERVICING_REVIEW','No servicing review is awaiting dismissal.');return;}
+    value.reviewed=true;response.json({ok:true});
   });
   router.post('/context/reset', (request, response) => {
     const value = required(request, response); if (!value) return;
@@ -69,7 +91,9 @@ export function createStaffRouter(repository: MemberStore | undefined, sessionTt
     value.epoch++; value.active = null; value.search = null; const epoch = value.epoch;
     const input = z.strictObject({ memberId: DemoMemberIdSchema }).safeParse(request.body);
     if (!input.success) { reject(response, 400, 'INVALID_MEMBER_ID', 'Enter a member ID in the format M1234.'); return; }
-    const member = await repository!.findMember(input.data.memberId);
+    if (value.scenario.name==='slow-search') await delay(value.scenario.delayMs);
+    if (value.scenario.name==='validation-error') { reject(response,422,'MEMBER_SEARCH_VALIDATION','Member search validation error. Check the supplied member identifier.'); return; }
+    const member = value.scenario.name==='member-not-found' ? null : await repository!.findMember(input.data.memberId);
     if (!current(value, epoch, response)) return;
     value.search = { memberId: input.data.memberId, found: member !== null, revision: epoch };
     response.json(DemoSearchSchema.parse({ memberId: input.data.memberId, member: member ? memberDto(member) : null, searchRevision: epoch }));
@@ -113,16 +137,28 @@ export function createStaffRouter(repository: MemberStore | undefined, sessionTt
     return rows;
   }
   router.get('/members/:memberId/accounts', memberRoute(async (_request, response, value, epoch, member) => {
+    const name=value.scenario.name;
+    if(name==='session-expired'&&!value.expiryTriggered){value.expiryTriggered=true;value.suspended=true;value.epoch++;reject(response,401,'STAFF_SESSION_EXPIRED','Staff session expired. Restore the training session to continue.');return;}
+    if(name==='slow-inquiry')await delay(value.scenario.delayMs);
+    if(!current(value,epoch,response,member.member_id))return;
+    if(name==='access-denied'){reject(response,403,'ACCESS_DENIED','Account access is restricted for this member.');return;}
+    if(name==='failed-inquiry'||(name==='transient-inquiry'&&value.inquiries++<value.scenario.failuresBeforeSuccess)){reject(response,503,'INQUIRY_UNAVAILABLE','Account inquiry temporarily unavailable.');return;}
+    if(name==='persistent-notice'||(name==='servicing-notice'&&!value.acknowledged)){reject(response,409,'SERVICING_NOTICE_REQUIRED','Acknowledge the servicing notice before continuing.');return;}
     const accounts = await accountsFor(member, response); if (!accounts || !current(value, epoch, response, member.member_id)) return;
-    response.json(DemoAccountsSchema.parse({ member: memberDto(member), accounts: accounts.map(accountDto) }));
+    let shown=accounts.map(accountDto);let identity=memberDto(member);
+    if(name==='no-primary-savings')shown=shown.map(account=>({...account,isPrimary:false}));
+    if(name==='duplicate-account'){const primary=shown.find(account=>account.type==='savings'&&account.isPrimary);if(primary)shown.push({...primary});}
+    if(name==='wrong-member'){identity={...identity,id:member.member_id==='M1002'?'M1001':'M1002'};shown=shown.map(account=>({...account,memberId:identity.id}));}
+    response.json(DemoAccountsSchema.parse({ member: identity, accounts: shown, ...(name==='conflicting-outcomes'?{conflictingSignals:true}:{}) }));
   }));
   router.get('/members/:memberId/accounts/:accountId', memberRoute(async (request, response, value, epoch, member) => {
+    if(value.scenario.name==='unexpected-modal'&&!value.reviewed){reject(response,409,'MANUAL_REVIEW_REQUIRED','Complete the servicing review before opening account details.');return;}
     const id = DemoAccountIdSchema.safeParse(request.params.accountId);
     if (!id.success) { reject(response, 400, 'INVALID_ACCOUNT_ID', 'Invalid account reference.'); return; }
     const accounts = await accountsFor(member, response); if (!accounts || !current(value, epoch, response, member.member_id)) return;
     const account = accounts.find((row) => row.account_id === id.data);
     if (!account) { reject(response, 404, 'ACCOUNT_NOT_FOUND', 'Account not found for the active member.'); return; }
-    response.json(DemoDetailsSchema.parse({ member: memberDto(member), account: accountDto(account) }));
+    response.json(DemoDetailsSchema.parse({ member: memberDto(member), account: value.scenario.name==='wrong-account' ? {...accountDto(account),id:'S2999'} : accountDto(account) }));
   }));
   return router;
 }

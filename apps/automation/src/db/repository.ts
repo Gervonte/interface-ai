@@ -7,7 +7,7 @@ import type { Capability, RunRequest, Values } from '@interface-ai/contracts';
 import { migrate, transaction } from '@interface-ai/postgres';
 import type { Pool, PoolClient } from '@interface-ai/postgres';
 
-export const automationMigrations = [new URL('../../migrations/001_initial.sql', import.meta.url), new URL('../../migrations/002_runtime.sql', import.meta.url)];
+export const automationMigrations = [new URL('../../migrations/001_initial.sql', import.meta.url), new URL('../../migrations/002_runtime.sql', import.meta.url), new URL('../../migrations/003_rule_revisions.sql', import.meta.url), new URL('../../migrations/004_revision_trigger.sql', import.meta.url)];
 export const migrateAutomation = (pool: Pool) => migrate(pool, 'automation', automationMigrations);
 export const targetSchema = z.strictObject({ id: IdentifierSchema, version: z.number().int().positive(),
   surface: z.literal('browser'), applicationFamily: IdentifierSchema,
@@ -35,9 +35,9 @@ export class RepositoryError extends Error {
   constructor(readonly code: string) { super(code); }
 }
 const eventSchema = z.strictObject({
-  type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_DISPATCHED', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'RUN_FAILED', 'RUN_CANCELLED', 'CANCEL_REQUESTED', 'INTERVENTION_OPENED', 'MODEL_REQUESTED', 'MODEL_COMPLETED', 'MODEL_DECISION_STALE', 'SESSION_FINISHED']),
+  type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_DISPATCHED', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'RUN_FAILED', 'RUN_CANCELLED', 'CANCEL_REQUESTED', 'INTERVENTION_OPENED', 'MODEL_REQUESTED', 'MODEL_COMPLETED', 'MODEL_DECISION_STALE', 'SESSION_FINISHED','RULE_MATCHED','RECOVERY_STARTED','RECOVERY_COMPLETED','RECOVERY_EXHAUSTED','BUSINESS_OUTCOME','CAPABILITY_REVISED']),
   actor: z.enum(['system', 'caller', 'automation', 'human']), stepId: IdentifierSchema.nullable(), interventionId: z.uuid().optional(),
-  details: z.strictObject({ code: IdentifierSchema, operation: z.enum(['navigate','click','fill','wait','capture']).optional(), inputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), outputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), modelCalls: z.number().int().min(0).max(100).optional(), inferenceAttempts: z.number().int().min(0).max(100).optional(), modelName: z.literal('openai/gpt-5').optional(), targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
+  details: z.strictObject({ code: IdentifierSchema, ruleId:IdentifierSchema.optional(), attempt:z.number().int().min(0).max(10).optional(), operation: z.enum(['navigate','click','fill','wait','capture']).optional(), inputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), outputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), modelCalls: z.number().int().min(0).max(100).optional(), inferenceAttempts: z.number().int().min(0).max(100).optional(), modelName: z.literal('openai/gpt-5').optional(), targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
 }).superRefine((event, ctx) => {
   if (event.actor === 'human' && !event.interventionId) ctx.addIssue({ code: 'custom', message: 'Human events require their intervention reference.' });
 });
@@ -133,6 +133,7 @@ export class AutomationRepository {
       const sequences = [...new Set([
         ...artifact.steps.flatMap((step) => step.source.kind === 'authored' ? [] : [step.source.eventSequence]),
         ...artifact.manualContributions.flatMap((item) => item.eventSequences),
+        ...artifact.recoveryRules.flatMap(rule=>rule.source.observedEventSequences??[]),
       ])];
       const recorded = await client.query<{ sequence: number; actor: string; event_type: string; step_id: string | null; details: {operation?:string}; intervention_id: string | null }>(
         'SELECT sequence,actor,event_type,step_id,details,intervention_id FROM automation.run_events WHERE run_id=$1 AND sequence=ANY($2::integer[])', [runId, sequences]);
@@ -148,13 +149,24 @@ export class AutomationRepository {
         if (!event || event.actor !== 'human' || event.intervention_id !== item.interventionId
           || !['ACTION_COMPLETED', 'READ_COMPLETED'].includes(event.event_type)) throw new RepositoryError('UNCONFIRMED_MANUAL_SOURCE');
       }
+      for(const rule of artifact.recoveryRules){const observed=rule.source.observedEventSequences??[];for(const [index,sequence] of observed.entries()){const event=events.get(sequence);const action=rule.actions[index%rule.actions.length]!;if(!event||event.actor!=='automation'||event.event_type!=='ACTION_COMPLETED'||event.details.operation!==action.type||('target' in action && (event.details as {targetRef?:string}).targetRef!==action.target))throw new RepositoryError('UNCONFIRMED_RECOVERY_SOURCE');}}
+      for(const rule of artifact.recoveryRules)for(const sequence of rule.source.observedEventSequences??[]){
+        const event=events.get(sequence)!;const parentIndex=artifact.steps.findIndex(step=>event.step_id?.startsWith(step.id+'-r')&&rule.appliesToStepIds.includes(step.id));
+        const parent=artifact.steps[parentIndex];if(!parent||parent.source.kind==='authored')throw new RepositoryError('UNCONFIRMED_RECOVERY_SOURCE');
+        const previous=artifact.steps[parentIndex-1],next=artifact.steps[parentIndex+1];
+        const lower=rule.dispatchState==='settled'?parent.source.eventSequence:previous?.source.kind==='discovery'?previous.source.eventSequence:0;
+        const upper=rule.dispatchState==='not_sent'?parent.source.eventSequence:next?.source.kind==='discovery'?next.source.eventSequence:Number.MAX_SAFE_INTEGER;
+        if(sequence<=lower||sequence>=upper)throw new RepositoryError('UNCONFIRMED_RECOVERY_SOURCE');
+      }
       const stepSequences = artifact.steps.flatMap(step => step.source.kind === 'authored' ? [] : [step.source.eventSequence]);
       if (new Set(stepSequences).size !== stepSequences.length) throw new RepositoryError('UNCONFIRMED_ARTIFACT_SOURCE');
       if (provenance === 'model-driven') {
         const models = await client.query("SELECT 1 FROM automation.run_events WHERE run_id=$1 AND event_type='MODEL_COMPLETED' AND (details->>'inputTokens')::bigint>0 LIMIT 1", [runId]);
         if (!models.rowCount) throw new RepositoryError('UNCONFIRMED_MODEL_SOURCE');
         const mutations = await client.query<{sequence:number}>("SELECT sequence FROM automation.run_events WHERE run_id=$1 AND event_type='ACTION_COMPLETED' AND actor IN ('automation','human') AND details->>'operation' IN ('navigate','click','fill') ORDER BY sequence", [runId]);
-        const represented = artifact.steps.filter(step => ['navigate','click','fill'].includes(step.type)).map(step => step.source.kind === 'authored' ? -1 : step.source.eventSequence);
+        const recoverySequences=artifact.recoveryRules.flatMap(rule=>(rule.source.observedEventSequences??[]).filter(sequence=>events.get(sequence)?.details.operation==='click'));
+        const represented = artifact.steps.filter(step => ['navigate','click','fill'].includes(step.type)).map(step => step.source.kind === 'authored' ? -1 : step.source.eventSequence).concat(recoverySequences).sort((a,b)=>a-b);
+        if(new Set(represented).size!==represented.length)throw new RepositoryError('INCOMPLETE_DISCOVERY_HISTORY');
         if (canonical(represented) !== canonical(mutations.rows.map(row => row.sequence))) throw new RepositoryError('INCOMPLETE_DISCOVERY_HISTORY');
       }
       const capability = { id: artifact.capabilityId, version: artifact.version };
@@ -163,6 +175,25 @@ export class AutomationRepository {
       await client.query('INSERT INTO automation.capabilities(capability_id,version,schema_version,source_discovery_run_id,artifact) VALUES($1,$2,$3,$4,$5)', [artifact.capabilityId, artifact.version, artifact.schemaVersion, runId, JSON.stringify(artifact)]);
       await client.query("UPDATE automation.runs SET status='completed',controller='none',control_revision=control_revision+1,capability_id=$2,capability_version=$3,result=$4,updated_at=now() WHERE run_id=$1", [runId, artifact.capabilityId, artifact.version, JSON.stringify(result)]);
       await append(client, runId, { type: 'RUN_COMPLETED', actor: 'system', stepId: null, details: { code: 'capability_saved' } });
+    });
+  }
+  // Setup/operator tool only: attach authored scenario rules without inventing a discovery run.
+  async publishRuleRevision(value: unknown, baseVersion: number, principal: string) {
+    const artifact=parseCapability(value);
+    return transaction(this.pool,async client=>{
+      const source=(await client.query("SELECT r.run_id FROM automation.runs r JOIN automation.capabilities c ON c.source_discovery_run_id=r.run_id WHERE c.capability_id=$1 AND c.version=$2 AND r.principal_ref=$3 AND r.status='completed' FOR UPDATE OF r",[artifact.capabilityId,baseVersion,principal])).rows[0];
+      if(!source)throw new RepositoryError('CAPABILITY_NOT_FOUND');
+      const original=await this.getCapability(artifact.capabilityId,baseVersion,client);
+      const latest=(await client.query('SELECT max(version)::integer AS version FROM automation.capabilities WHERE capability_id=$1',[artifact.capabilityId])).rows[0].version;
+      if(latest!==baseVersion||artifact.version!==baseVersion+1)throw new RepositoryError('CAPABILITY_VERSION_CONFLICT');
+      const core=(cap:typeof artifact)=>({schemaVersion:cap.schemaVersion,capabilityId:cap.capabilityId,sourceDiscoveryRunId:cap.sourceDiscoveryRunId,inputSchema:cap.inputSchema,outputSchema:cap.outputSchema,variables:cap.variables,preconditions:cap.preconditions,outputs:cap.outputs,successCondition:cap.successCondition,manualContributions:cap.manualContributions,steps:cap.steps.map(({outcomeRuleIds:_outcomes,recoveryRuleIds:_recoveries,...step})=>step)});
+      if(canonical(core(original))!==canonical(core(artifact))||Object.entries(original.targets).some(([key,target])=>canonical(target)!==canonical(artifact.targets[key]))||original.surfaceRequirements.applicationFamily!==artifact.surfaceRequirements.applicationFamily)throw new RepositoryError('INVALID_RULE_REVISION');
+      for(const old of original.recoveryRules)if((old.source.observedEventSequences??[]).length&&canonical(old)!==canonical(artifact.recoveryRules.find(rule=>rule.id===old.id)))throw new RepositoryError('INVALID_RULE_REVISION');
+      // Historical recovery executions belong to the source artifact, never a new authored rule.
+      for(const rule of artifact.recoveryRules)if((rule.source.observedEventSequences??[]).length&&canonical(rule.source.observedEventSequences)!==canonical(original.recoveryRules.find(old=>old.id===rule.id)?.source.observedEventSequences))throw new RepositoryError('INVALID_RULE_REVISION');
+      await client.query('INSERT INTO automation.capabilities(capability_id,version,schema_version,source_discovery_run_id,artifact,base_version) VALUES($1,$2,$3,$4,$5,$6)',[artifact.capabilityId,artifact.version,artifact.schemaVersion,artifact.sourceDiscoveryRunId,JSON.stringify(artifact),baseVersion]);
+      await append(client,source.run_id,{type:'CAPABILITY_REVISED',actor:'system',stepId:null,details:{code:'authored_scenario_rules'}});
+      return artifact;
     });
   }
   async getRun(runId: string) {

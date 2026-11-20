@@ -12,6 +12,7 @@ export interface SurfacePolicy { allowedOrigins: readonly string[]; allowedClick
 export interface BrowserSurface {
   location(): Promise<string>;
   observe?(inputs: Values, policy: SurfacePolicy): Promise<Observation>;
+  inspectMany?(targets: Record<string,ResolvedTarget>, policy:SurfacePolicy):Promise<Record<string,TargetState>>;
   inspect(target: ResolvedTarget, policy: SurfacePolicy): Promise<TargetState>;
   dispatch(type: 'click' | 'fill', target: ResolvedTarget, policy: SurfacePolicy, value?: string): Promise<void>;
   navigate(url: string, timeoutMs: number): Promise<void>;

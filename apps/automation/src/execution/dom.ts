@@ -85,12 +85,15 @@ export function operateDom(request: { target: ResolvedTarget; policy: SurfacePol
     const elements = locate(root, request.target.locator);
     if (elements.length !== 1) return { ...empty, count: elements.length };
     const element = elements[0]!; const input = element as HTMLInputElement;
-    const enabled = !element.matches(':disabled,[aria-disabled="true"]') && !element.closest('[inert]');
+    const modalDocuments: Document[] = [document];
+    for (const frame of [...document.querySelectorAll('iframe')]) { try { if(frame.contentDocument && allowed(frame.contentDocument)) modalDocuments.push(frame.contentDocument); } catch { return fail('UNSUPPORTED_SURFACE'); } }
+    const dialogs=modalDocuments.flatMap(item=>[...item.querySelectorAll('dialog[open],[role=\"dialog\"][aria-modal=\"true\"]')].filter(visible));
+    const blockedByDialog=dialogs.some(dialog=>!dialog.contains(element));
+    const enabled = !blockedByDialog && !element.matches(':disabled,[aria-disabled="true"]') && !element.closest('[inert]');
     const editable = ['INPUT', 'TEXTAREA'].includes(element.tagName) && !input.readOnly && enabled && !['password', 'hidden', 'file', 'checkbox', 'radio', 'submit', 'button'].includes(input.type);
     const state = { count: 1, visible: visible(element), enabled, editable, text: normalize((element as HTMLElement).innerText ?? element.textContent),
       value: input.type !== 'password' && typeof input.value === 'string' ? input.value : '', checked: input.checked === true, tag: element.tagName.toLowerCase(), name: name(element), inputType: input.type ?? '' };
     if (request.mode === 'inspect') return state;
-    const dialogs = [...doc.querySelectorAll('dialog[open],[role=\"dialog\"][aria-modal=\"true\"]')].filter(visible);
     if (dialogs.some(dialog => !dialog.contains(element))) return fail('TARGET_NOT_ACTIONABLE');
     if (!state.visible || !state.enabled || (request.mode === 'fill' && !state.editable)) return fail('TARGET_NOT_ACTIONABLE');
     // These checks and dispatch share one browser turn: no first-match/ordinal fallback or DOM mutation to tag targets.
@@ -120,7 +123,7 @@ export function operateDom(request: { target: ResolvedTarget; policy: SurfacePol
 // IDs, values, URLs, attributes, or hidden DOM. Unknown text is omitted, not regex-redacted.
 export function snapshotDom(policy: SurfacePolicy) {
   const labels = ['Staff workspace', 'Member Search', 'Member Overview', 'Account Inquiry', 'Account Details', 'No matching member', 'No primary savings account', 'Access denied',
-    'Unable to continue', 'Member ID', 'Account ID', 'Account Type', 'Designation', 'Status', 'Current Balance', 'Available Balance', 'Currency', 'Action', 'Member Name', 'Membership Status',
+    'Servicing notice', 'Servicing review required', 'Staff session expired', 'Acknowledge notice', 'Dismiss servicing review', 'Restore staff session', 'Account inquiry unavailable', 'Member search validation error', 'Loading servicing screen', 'Searched Member ID', 'Unable to continue', 'Member ID', 'Account ID', 'Account Type', 'Designation', 'Status', 'Current Balance', 'Available Balance', 'Currency', 'Action', 'Member Name', 'Membership Status',
     ...policy.allowedClickNames, ...policy.allowedFillNames];
   const safe = (value: string | null) => labels.find(label => label === (value ?? '').replace(/\s+/g, ' ').trim()) ?? null;
   let omittedFrames = 0;

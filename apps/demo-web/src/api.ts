@@ -4,6 +4,11 @@ export class PortalError extends Error {
   constructor(readonly code: string, message: string) { super(message); }
 }
 const errors: Record<string, string> = {
+  STAFF_SESSION_EXPIRED: 'Staff session expired. Restore the training session to continue.',
+  SERVICING_NOTICE_REQUIRED: 'Review and acknowledge the servicing notice before continuing.',
+  MANUAL_REVIEW_REQUIRED: 'A servicing review requires your attention before opening account details.',
+  MEMBER_SEARCH_VALIDATION: 'Member search validation error. Check the supplied member identifier.',
+  INQUIRY_UNAVAILABLE: 'Account inquiry temporarily unavailable. Try again.',
   ACCESS_DENIED: 'Account access is restricted for this member and staff role.',
   MEMBER_CONTEXT_CHANGED: 'Member context changed. Start a new search.',
   STALE_SEARCH_RESULT: 'Search results changed. Search for the member again.',
@@ -24,6 +29,9 @@ async function call<T>(path: string, schema: z.ZodType<T>, signal?: AbortSignal,
   return schema.parse(data);
 }
 export const api = {
+  acknowledge: () => call('/servicing/acknowledge',z.object({ok:z.literal(true)}),undefined,{}),
+  dismissReview: () => call('/servicing/review/dismiss',z.object({ok:z.literal(true)}),undefined,{}),
+  restore: () => call('/session/restore',z.object({ok:z.literal(true)}),undefined,{}),
   session: (signal?: AbortSignal) => call('/session', DemoSessionSchema, signal),
   reset: (signal?: AbortSignal) => call('/context/reset', z.object({ ok: z.literal(true) }), signal, {}),
   search: (memberId: string, signal?: AbortSignal) => call('/search', DemoSearchSchema, signal, { memberId }),

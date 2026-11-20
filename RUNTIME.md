@@ -1,6 +1,6 @@
-# Shared executor and run API (INT-007–011)
+# Shared executor and run API (INT-007–013)
 
-The runtime implements policy-checked browser operations, sanitized structural evidence, authenticated asynchronous run APIs, single-coordinator ownership, cancellation, and restart reconciliation. Supported primary-savings discovery now constructs a capability from real model-selected actions, and replay interprets the exact saved version without inference. [Discovery/replay commands and limits](WORKFLOWS.md).
+The runtime implements policy-checked browser operations, sanitized structural evidence, authenticated asynchronous run APIs, single-coordinator ownership, cancellation, and restart reconciliation. Declared outcome/recovery/runtime-guard handling and setup-controlled target scenarios are documented in [SCENARIOS.md](SCENARIOS.md). Supported primary-savings discovery now constructs a capability from real model-selected actions, and replay interprets the exact saved version without inference. [Discovery/replay commands and limits](WORKFLOWS.md).
 
 ## Start and test
 
@@ -58,7 +58,7 @@ Intervention claim/resume and live operator-action routes are not implemented he
 
 `apps/automation/src/execution` contains the gate, executor, browser adapter, provider lifecycle, and evidence recorder. Discovery/replay workers must call this executor rather than directly mutating a browser. The coordinator owns its factory, session, and cleanup; the request handler only commits acceptance and schedules asynchronous work.
 
-- Operations are configured-entry navigation, input-bound fill, semantic click, bounded wait, and deterministic capture. An `intervene` step is handled by the later lifecycle layer, not silently executed as a browser action.
+- Operations are configured-entry navigation, input-bound fill, semantic click, bounded wait, and deterministic capture. An `intervene` step opens structured intervention context; full ownership transfer/resume is later work, and it is never silently executed as a browser action.
 - Targets use explicit same-origin frame chains, named containers, exact labels/roles/text/attributes, captioned tables with named-column row predicates, named cells, and definition-list fields. Ambiguous scope or targets fail. Column offsets are derived from unique visible headers; durable descriptors never contain ordinal rows, generated IDs/classes, raw CSS/XPath, or coordinates.
 - The fixed browser function receives descriptors/values as JSON data. It resolves the target, checks cardinality/actionability and allowed control names, and dispatches in the same browser turn. It does not tag/mask the live DOM or select a first match. The native input setter and input/change events support the React target; `.click()` dispatches the UI event. Browserbase/Stagehand supply browser transport/session control; the TypeScript adapter owns this semantic/policy boundary.
 - Policy origin and operation allowlists, explicit click/fill control-name allowlists, controller/revision checks, finite cumulative action/time budgets, and serialized admissions apply before mutation. Save-like controls are absent from the baseline policy. Off-origin form/link targets, new windows/downloads, password/hidden/file inputs, and inaccessible frames are blocked. Frame readiness can poll an initial blank document only when its declared source has an allowed origin.
@@ -66,7 +66,7 @@ Intervention claim/resume and live operator-action routes are not implemented he
 - Waits poll observations only. Every branch of a compound condition is evaluated; an error cannot be hidden by a true `any` branch or false `all` branch. Amount conversion uses checked integer minor units; invalid formats/overflow and wrong read types stop execution.
 - The replay provider client rejects model calls and disables SDK self-healing/cache and provider recording/logging/CAPTCHA solving. Discovery has a separate sanitized model-proposal channel with cumulative model/time budgets; see [WORKFLOWS.md](WORKFLOWS.md).
 
-Supported surface limits: the current adapter targets the known synthetic DOM and same-origin frames. It does not implement full accessible-name computation, arbitrary shadow DOM/cross-origin frames, complex spanned tables, trusted physical input events, or a desktop adapter. Unsupported structures fail closed. Control-name/origin allowlists express the known target contract; they cannot infer business effects in an arbitrary hostile application. Full scenario/policy/privacy verification remains INT-012–INT-016.
+Supported surface limits: the current adapter targets the known synthetic DOM and same-origin frames. It does not implement full accessible-name computation, arbitrary shadow DOM/cross-origin frames, complex spanned tables, trusted physical input events, or a desktop adapter. Unsupported structures fail closed. Control-name/origin allowlists express the known target contract; they cannot infer business effects in an arbitrary hostile application. Full scenario/policy/privacy verification remains INT-016 and subsequent handoff acceptance.
 
 ## Sessions, cancellation, and restart
 
@@ -112,4 +112,8 @@ The check uses the actual coordinator, PostgreSQL event recorder, executor, and 
 
 The command writes ignored results/events/evidence and uniquely versioned target/policy binding files under `apps/automation/runtime/int-007-008`. Stop the tunnel/target afterward. [Curated live result](evidence/int-007-008/README.md).
 
-Normal API startup defaults to committed target/policy v2 (built portal on port 3002); v1 files remain unchanged. For a reachable browser binding, `AUTOMATION_TARGET_FILE` and `AUTOMATION_POLICY_FILE` can select absolute paths to a paired, validated versioned configuration. Both are required together. Accepted runs retain the exact snapshots/checksums; never edit retained versions to point at a different tunnel. The hosted verifier creates a fresh version for each ephemeral binding.
+Normal API startup defaults to committed target/policy v3 (built portal on port 3002); v1/v2 files remain unchanged. For a reachable browser binding, `AUTOMATION_TARGET_FILE` and `AUTOMATION_POLICY_FILE` can select absolute paths to a paired, validated versioned configuration. Both are required together. Accepted runs retain the exact snapshots/checksums; never edit retained versions to point at a different tunnel. The hosted verifier creates a fresh version for each ephemeral binding.
+
+## Scenario rules and revisions (INT-012/013)
+
+Read-only condition classification can batch target inspection into a single browser turn. Missing optional predicate targets return false; malformed bindings and ambiguity still fail. Rule guards run before terminal outcomes/recovery, with explicit context checks and finite per-step/run budgets. Ordinary actions and uncertain dispatches are never blindly retried. Explicit SDK transport-closed errors become `SESSION_LOST`; the scenario checker verifies real browser destruction separately from synthetic staff expiry. [Rules, provenance, verification, and limits](SCENARIOS.md).

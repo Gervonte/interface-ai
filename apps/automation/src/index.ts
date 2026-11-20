@@ -25,7 +25,7 @@ async function main() {
     if (pool) {
       const configuration = await loadConfigurations(config.AUTOMATION_TARGET_FILE && config.AUTOMATION_POLICY_FILE
         ? { target: pathToFileURL(resolve(config.AUTOMATION_TARGET_FILE)), policy: pathToFileURL(resolve(config.AUTOMATION_POLICY_FILE)) }
-        : { target: new URL('../config/target.v2.json', import.meta.url), policy: new URL('../config/policy.v2.json', import.meta.url) });
+        : { target: new URL('../config/target.v3.json', import.meta.url), policy: new URL('../config/policy.v3.json', import.meta.url) });
       const sessions = config.BROWSERBASE_API_KEY && config.BROWSERBASE_PROJECT_ID ? new BrowserbaseSessions(config.BROWSERBASE_API_KEY, config.BROWSERBASE_PROJECT_ID) : undefined;
       coordinator = new Coordinator(new AutomationRepository(pool, config.REQUEST_FINGERPRINT_KEY!), config.REQUEST_FINGERPRINT_KEY!, configuration,
         new EvidenceStore(resolve(import.meta.dirname, '../runtime/evidence')), sessions, workflowWorker);

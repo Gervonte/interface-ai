@@ -1,3 +1,4 @@
+import type { ScenarioLoader } from './scenarios.js';
 import express from 'express';
 import type { ErrorRequestHandler } from 'express';
 import { join } from 'node:path';
@@ -5,7 +6,7 @@ import { ApiErrorSchema, HealthResponseSchema } from '@interface-ai/contracts';
 import { createStaffRouter } from './staff-router.js';
 import type { MemberStore } from './staff-router.js';
 
-export function createApp(options: { repository?: MemberStore; webDirectory?: string; sessionTtlMs?: number } = {}) {
+export function createApp(options: { repository?: MemberStore; webDirectory?: string; sessionTtlMs?: number; scenario?: ScenarioLoader } = {}) {
   const app = express();
   app.disable('x-powered-by'); app.set('trust proxy', 'loopback');
   app.use((_request, response, next) => {
@@ -17,7 +18,7 @@ export function createApp(options: { repository?: MemberStore; webDirectory?: st
   app.get(['/healthz', '/api/healthz'], (_request, response) => {
     response.json(HealthResponseSchema.parse({ status: 'ok', service: 'demo-target' }));
   });
-  const staff = createStaffRouter(options.repository, options.sessionTtlMs);
+  const staff = createStaffRouter(options.repository, options.sessionTtlMs, options.scenario);
   app.use('/api/staff', staff); app.use('/staff', staff);
   if (options.webDirectory) {
     app.use(express.static(options.webDirectory, { index: false, dotfiles: 'deny' }));

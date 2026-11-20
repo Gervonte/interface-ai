@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+import { fileScenarioLoader } from './scenarios.js';
 import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
 import { createPool } from '@interface-ai/postgres';
@@ -12,6 +14,7 @@ if (!config.success) { console.error('Invalid demo server configuration. Check H
 const { HOST, PORT, DATABASE_URL } = config.data;
 const pool = DATABASE_URL ? createPool(DATABASE_URL) : undefined;
 const server = createApp({ ...(pool ? { repository: new DemoRepository(pool) } : {}),
+  scenario: fileScenarioLoader(resolve(import.meta.dirname,'../runtime/scenario.json')),
   webDirectory: fileURLToPath(new URL('../../demo-web/dist/', import.meta.url)),
 }).listen(PORT, HOST, () => console.info('Demo Credit Union listening on http://' + HOST + ':' + PORT));
 server.on('error', () => { console.error('Server startup failed. Check that the host and port are available.'); void pool?.end(); process.exitCode = 1; });

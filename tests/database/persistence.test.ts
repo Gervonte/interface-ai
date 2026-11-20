@@ -1,3 +1,4 @@
+import { attachBalanceRules } from '../../apps/automation/src/workflows/rule-profile.js';
 import { DemoAccountsSchema, DemoDetailsSchema } from '@interface-ai/contracts';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { randomBytes, randomUUID } from 'node:crypto';
@@ -7,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 import { createPool, migrate, transaction } from '@interface-ai/postgres';
 import type { Pool } from '@interface-ai/postgres';
 import type { Capability } from '@interface-ai/contracts';
-import { AutomationRepository, loadConfigurations, migrateAutomation } from '../../apps/automation/src/db/repository.js';
+import { AutomationRepository, automationMigrations, loadConfigurations, migrateAutomation } from '../../apps/automation/src/db/repository.js';
 import { DemoRepository, migrateDemo, resetDemoFixtures } from '../../apps/demo-api/src/db/repository.js';
 import { databaseSettings, disposeTestDatabases, grantRuntime, provision, readSecrets } from '../../scripts/database-support.js';
 
@@ -39,7 +40,7 @@ describe('real PostgreSQL persistence and isolation', () => {
   beforeAll(async () => {
     await provision(settings);
     automationOwner = createPool(settings.automation.migratorUrl); demoOwner = createPool(settings.demo.migratorUrl);
-    expect(await migrateAutomation(automationOwner)).toBe(2); expect(await migrateDemo(demoOwner)).toBe(1);
+    expect(await migrateAutomation(automationOwner)).toBe(4); expect(await migrateDemo(demoOwner)).toBe(1);
     await grantRuntime(automationOwner, 'automation', settings.automation.app); await grantRuntime(demoOwner, 'demo', settings.demo.app);
     automation = createPool(settings.automation.appUrl); demo = createPool(settings.demo.appUrl);
     repository = new AutomationRepository(automation, secrets.REQUEST_FINGERPRINT_KEY); target = new DemoRepository(demo);
@@ -58,16 +59,14 @@ describe('real PostgreSQL persistence and isolation', () => {
     const version = await automation.query('SHOW server_version'); expect(String(version.rows[0].server_version)).toMatch(/^18\.7/);
     expect((await automation.query('SHOW fsync')).rows[0].fsync).toBe('on');
     expect((await automation.query('SHOW synchronous_commit')).rows[0].synchronous_commit).toBe('on');
-    const history = await automationOwner.query('SELECT count(*)::integer AS count FROM automation.schema_migrations'); expect(history.rows[0].count).toBe(2);
+    const history = await automationOwner.query('SELECT count(*)::integer AS count FROM automation.schema_migrations'); expect(history.rows[0].count).toBe(4);
   });
   it('rejects changed migration history and rolls back failed migration DDL', async () => {
     const directory = await mkdtemp(tmpdir() + '/interface-migration-');
     const changed = pathToFileURL(directory + '/001_initial.sql'); await writeFile(changed, 'SELECT 1;');
     await expect(migrate(automationOwner, 'automation', [changed])).rejects.toThrow('mismatch');
-    const valid = new URL('../../apps/automation/migrations/001_initial.sql', import.meta.url);
-    const runtime = new URL('../../apps/automation/migrations/002_runtime.sql', import.meta.url);
-    const failing = pathToFileURL(directory + '/003_bad.sql'); await writeFile(failing, 'CREATE TABLE automation.should_rollback(id integer); SELECT 1/0;');
-    await expect(migrate(automationOwner, 'automation', [valid, runtime, failing])).rejects.toMatchObject({ code: '22012' });
+    const failing = pathToFileURL(directory + '/005_bad.sql'); await writeFile(failing, 'CREATE TABLE automation.should_rollback(id integer); SELECT 1/0;');
+    await expect(migrate(automationOwner, 'automation', [...automationMigrations, failing])).rejects.toMatchObject({ code: '22012' });
     expect((await automationOwner.query("SELECT to_regclass('automation.should_rollback') AS name")).rows[0].name).toBeNull();
   });
   it('deduplicates concurrent retries and rejects changed payloads before capacity checks', async () => {
@@ -217,6 +216,32 @@ describe('real PostgreSQL persistence and isolation', () => {
     await expect(repository.publishCapability(runId,artifact,outputs,'transient','model-driven')).rejects.toMatchObject({code:'INCOMPLETE_DISCOVERY_HISTORY'});
     await automationOwner.query('DELETE FROM automation.run_events WHERE run_id=$1 AND sequence=$2',[runId,extra]);
     await repository.publishCapability(runId,artifact,outputs,'transient','model-driven');expect((await repository.getRun(runId)).status).toBe('completed');
+  });
+
+  it('publishes an owned immutable rule revision without changing discovered steps or the source result', async () => {
+    const {runId}=await accept();await repository.markRunning(runId);const original=await validArtifact(runId);await repository.publishCapability(runId,original,outputs);
+    const revised=attachBalanceRules(original);revised.version=2;
+    await expect(repository.publishRuleRevision(revised,1,'another-operator')).rejects.toMatchObject({code:'CAPABILITY_NOT_FOUND'});
+    const tampered=structuredClone(revised);tampered.steps[0]!.timeoutMs=200;
+    await expect(repository.publishRuleRevision(tampered,1,'test-operator')).rejects.toMatchObject({code:'INVALID_RULE_REVISION'});
+    await repository.publishRuleRevision(revised,1,'test-operator');
+    expect(await repository.getCapability(original.capabilityId,1)).toEqual(original);
+    expect((await repository.getCapability(original.capabilityId,2)).outcomeRules).toHaveLength(3);
+    expect((await repository.getRun(runId)).capability).toEqual({id:original.capabilityId,version:1});
+    await expect(repository.publishRuleRevision(revised,1,'test-operator')).rejects.toMatchObject({code:'CAPABILITY_VERSION_CONFLICT'});
+  });
+
+  it('validates observed recovery actions and keeps their history intact in later revisions',async()=>{
+    const {runId}=await accept();await repository.markRunning(runId);
+    const artifact=JSON.parse(await readFile(new URL('../../examples/primary-savings.contract.json',import.meta.url),'utf8')) as Capability;
+    artifact.sourceDiscoveryRunId=runId;artifact.capabilityId='recovered-'+randomBytes(4).toString('hex');const rule=artifact.recoveryRules[0]!;rule.dispatchState='settled';
+    await repository.appendEvent(runId,{type:'MODEL_COMPLETED',actor:'automation',stepId:null,details:{code:'proposed',modelName:'openai/gpt-5',modelCalls:1,inputTokens:100,outputTokens:20}});
+    for(const step of artifact.steps){if(step.type==='intervene')throw new Error('Fixture must be unattended');const sequence=await repository.appendEvent(runId,{type:step.type==='capture'?'READ_COMPLETED':'ACTION_COMPLETED',actor:'automation',stepId:step.id,details:{code:'confirmed',operation:step.type}});step.source={kind:'discovery',runId,eventSequence:sequence};if(step.id===rule.appliesToStepIds[0])rule.source.observedEventSequences=[await repository.appendEvent(runId,{type:'ACTION_COMPLETED',actor:'automation',stepId:step.id+'-r1-0',details:{code:'confirmed',operation:'click',targetRef:'acknowledgeNotice'}})];}
+    const invalid=structuredClone(artifact);invalid.recoveryRules[0]!.source.observedEventSequences=[1];await expect(repository.publishCapability(runId,invalid,outputs,'transient','model-driven')).rejects.toMatchObject({code:'UNCONFIRMED_RECOVERY_SOURCE'});
+    await repository.publishCapability(runId,artifact,outputs,'transient','model-driven');
+    const revised=attachBalanceRules(artifact);revised.version=2;const dropped=structuredClone(revised);dropped.recoveryRules=dropped.recoveryRules.filter(item=>item.id!==rule.id);for(const step of dropped.steps)step.recoveryRuleIds=step.recoveryRuleIds.filter(id=>id!==rule.id);
+    await expect(repository.publishRuleRevision(dropped,1,'test-operator')).rejects.toMatchObject({code:'INVALID_RULE_REVISION'});
+    await repository.publishRuleRevision(revised,1,'test-operator');expect((await repository.getCapability(artifact.capabilityId,2)).recoveryRules.find(item=>item.id===rule.id)?.source.observedEventSequences).toEqual(rule.source.observedEventSequences);
   });
 
 });
