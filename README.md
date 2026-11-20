@@ -2,7 +2,7 @@
 
 A TypeScript workspace for the computer-use automation assessment, with a PostgreSQL-backed synthetic credit-union staff portal and separate automation/operator applications.
 
-Implemented through INT-011: typed capability/run contracts, isolated persistence, the staff portal, a policy-checked executor, authenticated run APIs, live model-driven balance discovery, and saved-capability replay in a separate process with inference forbidden. Business outcomes, recovery scenarios, and the complete operator handoff remain later tasks. [Portal setup](PORTAL.md) · [Runtime/API limits](RUNTIME.md) · [Discovery/replay guide and evidence](WORKFLOWS.md).
+Implemented through INT-013: typed capability/run contracts, isolated persistence, the staff portal, a policy-checked executor, authenticated run APIs, live model-driven balance discovery, and saved-capability replay in a separate process with inference forbidden. Repeatable portal scenarios, declared business outcomes, bounded recovery, and safe escalation are implemented. Operator claim/manual actions/hand-back remain INT-014/015. [Portal setup](PORTAL.md) · [Runtime/API limits](RUNTIME.md) · [Discovery/replay guide and evidence](WORKFLOWS.md) · [Scenario and recovery guide](SCENARIOS.md).
 
 
 ## Requirements
@@ -82,6 +82,17 @@ BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm workfl
 ```
 
 This performs real model-driven discovery for M1001, exports the actual capability, restarts the API in another process, and replays that exact saved version for M1002 with a rejecting model callback. Expected balances are $1,250.34 and $87.65; replay must report zero inference. The command writes private ignored reports and closes its browser/API processes. Stop the target and tunnel afterward. [Full setup, data boundary, limits, and troubleshooting](WORKFLOWS.md) · [Real capability and run logs](evidence/int-009-011/README.md).
+
+## Scenario and recovery checks
+
+After a successful persisted balance discovery, with the portal and its current tunnel running and other automation coordinators stopped:
+
+```sh
+BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm scenario:check
+BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm scenario:controls
+```
+
+The first command publishes an immutable authored-rule revision and exercises 19 live cases with zero inference. The second is separate target-control UI QA for restoration/dismissal in the same browser; actual operator takeover follows in INT-014/015. Use `pnpm demo:scenario --list` for setup names and `pnpm demo:scenario baseline` to reset the next staff session. [Setup, scenario table, limits, and verifier resume](SCENARIOS.md) · [Curated live evidence](evidence/int-012-013/README.md).
 
 ## Workspace
 

@@ -21,7 +21,8 @@ const row = { kind: 'tableRow' as const, tableCaption: 'Member accounts', cells:
 const blankOutputs = { memberId: '', accountId: '', accountType: '', currentBalanceMinor: '', currency: '' };
 const goal = 'Find the primary savings account current balance for memberId.';
 const configuration: Configuration = { target: { id: 'demo-credit-union', version: 2, surface: 'browser', applicationFamily: 'demo-credit-union', entryPoint: 'https://portal.example/' }, policy: { id: 'demo-policy', version: 2, allowedOrigins: ['https://portal.example'], allowedClickNames: ['Member Search', 'Search', 'Open', 'Account Inquiry'], allowedFillNames: ['Member ID'], allowedActions: ['navigate','click','fill','capture','wait','intervene'], allowRiskyActions: false, budgets: { ...DEFAULT_RUNTIME_BUDGETS, pollIntervalMs: 1, stepTimeoutMs: 100, activeTimeoutMs: 10_000 } } };
-async function fixture(memberId: string, saved?: Capability, wrongIdentity = false) {
+async function fixture(memberId: string, saved?: Capability, wrongIdentity = false, profile = false) {
+  const config=structuredClone(configuration);if(profile){config.target.version=3;config.policy.allowedClickNames!.push('Acknowledge notice');config.policy.budgets.maxActions=300;}
   let screen = 'Staff workspace'; let location = 'about:blank'; let input = ''; let sequence = 0; let modelCalls = 0; let published: Capability | undefined; let outputs: Values | undefined;
   const accountId = memberId === 'M1001' ? 'S2001' : 'S2002';
   const money = memberId === 'M1001' ? '$1,250.34' : '$87.65';
@@ -41,7 +42,7 @@ async function fixture(memberId: string, saved?: Capability, wrongIdentity = fal
   const surface: BrowserSurface = { location: async () => location, observe,
     navigate: async url => { location = url; actions.push('navigate'); screen = 'Staff workspace'; },
     inspect: async target => {
-      const name = nameOf(target); let count = 1;
+      const name = nameOf(target); let count = target.locator.kind==='attribute'?0:1;
       if (target.locator.kind === 'role' && target.locator.role === 'heading') count = name === screen ? 1 : 0;
       for (const item of target.within) if (item.kind === 'tableRow') for (const cell of item.cells) { if (cell.columnHeader === 'Member ID' && cell.equals !== memberId) count = 0; if (cell.columnHeader === 'Account ID' && cell.equals !== accountId) count = 0; }
       return { count, visible: true, enabled: true, editable: name === 'Member ID' && screen === 'Member Search', text: values[name] ?? name, value: input, checked: false, tag: name === 'Member ID' && screen === 'Member Search' ? 'input' : 'button', name, inputType: 'text' };
@@ -50,9 +51,9 @@ async function fixture(memberId: string, saved?: Capability, wrongIdentity = fal
       else if (name === 'Member Search') screen = 'Member Search'; else if (name === 'Open') screen = screen === 'Member Search' ? 'Member Overview' : 'Account Details'; else if (name === 'Account Inquiry') screen = 'Account Inquiry'; },
     snapshot: async () => ({}) };
   const folder = await mkdtemp(tmpdir() + '/workflows-');
-  const context: WorkerContext = { runId: randomUUID(), signal: new AbortController().signal, configuration,
+  const context: WorkerContext = { runId: randomUUID(), signal: new AbortController().signal, configuration:config,
     record: async event => { events.push(event); return ++sequence; }, capability: async () => { if (!saved) throw new Error('Missing artifact'); return saved; },
-    executor: async (targets, variables) => new Executor({ runId: randomUUID(), entryPoint: configuration.target.entryPoint, policy: { ...configuration.policy, allowedFillNames: configuration.policy.allowedFillNames!, allowedClickNames: configuration.policy.allowedClickNames! }, targets, inputs: { memberId }, ...(variables ? { variables } : {}), surface, gate: new DispatchGate(2), revision: 2, signal: new AbortController().signal, routes: { 'fresh-session': 'about:blank', 'target-entry': configuration.target.entryPoint }, authorize: async () => {}, record: async event => { events.push(event); return ++sequence; }, evidence: new EvidenceStore(folder) }),
+    executor: async (targets, variables) => new Executor({ runId: randomUUID(), entryPoint: config.target.entryPoint, policy: { ...config.policy, allowedFillNames: config.policy.allowedFillNames!, allowedClickNames: config.policy.allowedClickNames! }, targets, inputs: { memberId }, ...(variables ? { variables } : {}), surface, gate: new DispatchGate(2), revision: 2, signal: new AbortController().signal, routes: { 'fresh-session': 'about:blank', 'target-entry': config.target.entryPoint }, authorize: async () => {}, record: async event => { events.push(event); return ++sequence; }, evidence: new EvidenceStore(folder) }),
     plan: async ({ observation }) => {
       if (saved) throw new Error('Replay called the model'); modelCalls++;
       if (screen === 'Account Details') return DecisionSchema.parse({ observationId: observation.observationId, action: 'finish', controlRef: '', inputName: '', outputs: Object.fromEntries(Object.entries(outputLabels).map(([name,label]) => [name, observation.fields.find(field => field.label === label)!.ref])), reason: 'goal_complete' });
@@ -79,4 +80,22 @@ describe('model-selected discovery and deterministic capability replay', () => {
   it('rejects a proposal for another observation before dispatch',async()=>{const f=await fixture('M1001');f.context.plan=async()=>({observationId:randomUUID(),action:'click',controlRef:'c1',inputName:'',outputs:blankOutputs,reason:'continue'});await expect(f.discover()).rejects.toMatchObject({message:'HUMAN_HELP_REQUIRED'});expect(f.actions).toEqual(['navigate']);});
   it('requires supported input bindings before creating a browser',async()=>{const f=await fixture('M1001');await expect(workflowWorker({mode:'discovery',targetId:'demo-credit-union',goal,inputs:{memberId:'invalid'}},f.context)).rejects.toMatchObject({code:'INVALID_BINDING'});expect(f.actions).toEqual([]);});
   it('fails unsupported goals without creating a browser or calling the planner',async()=>{const f=await fixture('M1001');await expect(workflowWorker({mode:'discovery',targetId:'demo-credit-union',goal:'Send a wire transfer.',inputs:{memberId:'M1001'}},f.context)).rejects.toMatchObject({code:'UNSUPPORTED_GOAL'});expect(f.actions).toEqual([]);expect(f.calls()).toBe(0);});
+  it('attaches authored scenario rules to a newly discovered capability',async()=>{
+    const f=await fixture('M1001',undefined,false,true);await f.discover();expect(f.artifact().outcomeRules).toHaveLength(3);expect(f.artifact().runtimeGuards!.some(rule=>rule.id==='account-identity')).toBe(true);
+  });
+  it('returns a record-qualified negative discovery outcome without fabricating a capability',async()=>{
+    const f=await fixture('M1001',undefined,false,true);const inspect=f.surface.inspect;
+    f.surface.inspect=async(target,policy)=>{const state=await inspect(target,policy);if(f.actions.includes('Search')){
+      if(target.locator.kind==='attribute'&&target.locator.value==='No matching member')return{...state,count:1,visible:true};
+      if(target.locator.kind==='field'&&target.locator.label==='Searched Member ID')return{...state,count:1,visible:true,text:'M1001'};
+      if(target.locator.kind==='role'&&target.locator.name==='Open'&&target.within.some(scope=>scope.kind==='tableRow'&&scope.tableCaption==='Member search results'))return{...state,count:0};
+    }return state;};
+    expect(await f.discover()).toMatchObject({kind:'business_outcome',code:'MEMBER_NOT_FOUND'});expect(f.artifact()).toBeUndefined();expect(f.actions.filter(action=>action==='Search')).toHaveLength(1);
+  });
+  it('retains the actual recovery action as declared-rule provenance during discovery',async()=>{
+    const f=await fixture('M1001',undefined,false,true);const inspect=f.surface.inspect;
+    f.surface.inspect=async(target,policy)=>{const state=await inspect(target,policy);if(target.locator.kind==='attribute'&&['Servicing notice','true'].includes(target.locator.value)&&f.actions.includes('Account Inquiry')&&!f.actions.includes('Acknowledge notice'))return{...state,count:1,visible:true};return state;};
+    await f.discover();const rule=f.artifact().recoveryRules.find(rule=>rule.id==='acknowledge-notice')!;expect(rule.source.observedEventSequences).toHaveLength(1);const sequence=rule.source.observedEventSequences![0]!;expect(f.events[sequence-1]).toMatchObject({type:'ACTION_COMPLETED',details:{operation:'click',targetRef:'ruleAcknowledge'}});expect(f.actions.filter(action=>action==='Acknowledge notice')).toHaveLength(1);
+  });
+
 });

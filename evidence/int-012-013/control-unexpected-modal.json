@@ -1,0 +1,664 @@
+{
+  "kind": "authored-target-control-qa",
+  "scenario": "unexpected-modal",
+  "sessionCreations": 1,
+  "sessionMarker": "6ac5395e8cbbabdf6993e2a2c3d8966a3f6bb19b7aa94b99f2804713869b4165",
+  "sameSession": true,
+  "output": {
+    "memberId": "M1002",
+    "accountId": "S2002",
+    "currentBalanceMinor": 8765
+  },
+  "metrics": {
+    "mode": "replay",
+    "modelCalls": 0,
+    "inferenceAttempts": 0,
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "finalStatus": "COMPLETED"
+  },
+  "browserClosed": true,
+  "before": {
+    "evidenceId": "573da2e1-83a3-4a8d-b2be-e8f060fdf54a",
+    "runId": "2b249945-fb46-4aca-9fd5-029362cdf3f1",
+    "stepId": null,
+    "capturedAt": "2026-11-19T23:29:57.193Z",
+    "expiresAt": "2026-11-20T23:29:57.193Z",
+    "sanitizationVersion": 1,
+    "snapshot": {
+      "schemaVersion": 1,
+      "kind": "structural-snapshot",
+      "redactedValues": true,
+      "omittedFrames": 0,
+      "documents": [
+        {
+          "depth": 0,
+          "headings": [],
+          "controls": [
+            {
+              "kind": "button",
+              "label": "Staff workspace",
+              "enabled": true
+            },
+            {
+              "kind": "button",
+              "label": "Member Search",
+              "enabled": true
+            },
+            {
+              "kind": "button",
+              "label": "Member Overview",
+              "enabled": true
+            },
+            {
+              "kind": "button",
+              "label": "Account Inquiry",
+              "enabled": true
+            }
+          ],
+          "tables": []
+        },
+        {
+          "depth": 1,
+          "headings": [
+            {
+              "kind": "h1",
+              "label": "Account Details"
+            },
+            {
+              "kind": "h2",
+              "label": "Servicing review required"
+            }
+          ],
+          "controls": [
+            {
+              "kind": "button",
+              "label": "New member search",
+              "enabled": true
+            },
+            {
+              "kind": "button",
+              "label": "Dismiss servicing review",
+              "enabled": true
+            }
+          ],
+          "tables": []
+        }
+      ]
+    }
+  },
+  "events": [
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-1",
+      "details": {
+        "code": "admitted",
+        "operation": "navigate"
+      }
+    },
+    {
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "qa-1",
+      "details": {
+        "code": "dispatching"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-1",
+      "details": {
+        "code": "confirmed",
+        "operation": "navigate"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-2",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-2",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-3",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-3",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-4",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "start"
+      }
+    },
+    {
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "qa-4",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "start"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-4",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "start"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-5",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-5",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-6",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-6",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-7",
+      "details": {
+        "code": "admitted",
+        "operation": "fill",
+        "targetRef": "member"
+      }
+    },
+    {
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "qa-7",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "member"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-7",
+      "details": {
+        "code": "confirmed",
+        "operation": "fill",
+        "targetRef": "member"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-8",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-8",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-9",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "search"
+      }
+    },
+    {
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "qa-9",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "search"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-9",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "search"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-10",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-10",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-11",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-11",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-12",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "memberOpen"
+      }
+    },
+    {
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "qa-12",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "memberOpen"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-12",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "memberOpen"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-13",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-13",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-14",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-14",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-15",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "inquiry"
+      }
+    },
+    {
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "qa-15",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "inquiry"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-15",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "inquiry"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-16",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-16",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-17",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-17",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-18",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "primary"
+      }
+    },
+    {
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "qa-18",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "primary"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-18",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "primary"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-19",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-19",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-20",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-20",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-21",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "dismiss"
+      }
+    },
+    {
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "qa-21",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "dismiss"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-21",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "dismiss"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-22",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-22",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-23",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-23",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-24",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-24",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-25",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      }
+    },
+    {
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-25",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-26",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      }
+    },
+    {
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-26",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      }
+    },
+    {
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "qa-27",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      }
+    },
+    {
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "qa-27",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      }
+    }
+  ],
+  "success": true
+}

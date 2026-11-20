@@ -1,0 +1,45 @@
+{
+  "id": "demo-policy",
+  "version": 3,
+  "allowedOrigins": [
+    "http://127.0.0.1:3002"
+  ],
+  "allowedActions": [
+    "navigate",
+    "fill",
+    "click",
+    "wait",
+    "capture",
+    "intervene"
+  ],
+  "allowRiskyActions": false,
+  "budgets": {
+    "maxActions": 300,
+    "maxModelCalls": 30,
+    "activeTimeoutMs": 300000,
+    "stepTimeoutMs": 10000,
+    "pollIntervalMs": 250,
+    "maxRecoveryAttempts": 3,
+    "interventionTimeoutMs": 600000,
+    "overallTimeoutMs": 900000
+  },
+  "allowedClickNames": [
+    "Staff workspace",
+    "Start Member Search",
+    "Member Search",
+    "Search",
+    "Clear",
+    "Open",
+    "Account Inquiry",
+    "Member Overview",
+    "New member search",
+    "Start a new search",
+    "Back to Accounts",
+    "Back to Member Overview",
+    "Try again",
+    "Acknowledge notice"
+  ],
+  "allowedFillNames": [
+    "Member ID"
+  ]
+}

@@ -1,0 +1,558 @@
+{
+  "tasks": [
+    "INT-012",
+    "INT-013"
+  ],
+  "finishedAt": "2026-11-19T22:47:36.326Z",
+  "capability": {
+    "id": "balance-0f6a7df9b43f44aeb45fad5ad53ca6d1",
+    "version": 3
+  },
+  "lineage": {
+    "baseVersion": 2,
+    "sourceDiscoveryRunId": "96c165d4-4b17-46d7-88c8-ebfbd25839e6"
+  },
+  "configurationVersion": 1795127269,
+  "discoveredActionsPreserved": true,
+  "cases": [
+    {
+      "scenario": "baseline",
+      "delayMs": 0,
+      "runId": "f6f7cb5f-58f1-4711-9609-60ff4c7b3fab",
+      "expected": "success",
+      "actual": "success",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "baseline-0-f6f7cb5f-58f1-4711-9609-60ff4c7b3fab.json",
+      "status": "completed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "3536dc8fde95be49c2c33c9b9b20e855d38f18cfb04a36c5895792ca7ad13d40",
+      "output": {
+        "availability": "available",
+        "values": {
+          "currency": "USD",
+          "memberId": "M1002",
+          "accountId": "S2002",
+          "accountType": "savings",
+          "currentBalanceMinor": 8765
+        }
+      }
+    },
+    {
+      "scenario": "member-not-found",
+      "delayMs": 0,
+      "runId": "7c24edbb-a538-4535-9b25-47a4a8ca5594",
+      "expected": "MEMBER_NOT_FOUND",
+      "actual": "MEMBER_NOT_FOUND",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "member-not-found-0-7c24edbb-a538-4535-9b25-47a4a8ca5594.json",
+      "status": "completed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "8891d8eecd186c7576fb1a5a30809655b8dcd0ee8b7ac01b0a156baf7ad309d7"
+    },
+    {
+      "scenario": "no-primary-savings",
+      "delayMs": 0,
+      "runId": "5ea504bf-20db-4796-8b7d-62791e90b3e2",
+      "expected": "NO_PRIMARY_SAVINGS_ACCOUNT",
+      "actual": "NO_PRIMARY_SAVINGS_ACCOUNT",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "no-primary-savings-0-5ea504bf-20db-4796-8b7d-62791e90b3e2.json",
+      "status": "completed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "0bc9db6aa07b719393f6debc7e134f20265408152915a3f663d10fe39cf49c69"
+    },
+    {
+      "scenario": "access-denied",
+      "delayMs": 0,
+      "runId": "53ff761e-3d2d-43f5-83bb-219bed393616",
+      "expected": "ACCESS_DENIED",
+      "actual": "ACCESS_DENIED",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "access-denied-0-53ff761e-3d2d-43f5-83bb-219bed393616.json",
+      "status": "completed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "854666f716e34e0e9e5a8a2f5e45778afc1cd107acc17659d95dd389d43ed754"
+    },
+    {
+      "scenario": "slow-search",
+      "delayMs": 1200,
+      "runId": "7d53f911-1ad9-4ea0-90b3-46a1087c1d47",
+      "expected": "success",
+      "actual": "success",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "slow-search-1200-7d53f911-1ad9-4ea0-90b3-46a1087c1d47.json",
+      "status": "completed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "901f3179def42730c9263092af61cc34518b2d629c0c15edd982e3087499e60d",
+      "output": {
+        "availability": "available",
+        "values": {
+          "currency": "USD",
+          "memberId": "M1002",
+          "accountId": "S2002",
+          "accountType": "savings",
+          "currentBalanceMinor": 8765
+        }
+      }
+    },
+    {
+      "scenario": "slow-inquiry",
+      "delayMs": 1200,
+      "runId": "dfa9d0cd-d17d-4388-9a60-99a4307703c6",
+      "expected": "success",
+      "actual": "success",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "slow-inquiry-1200-dfa9d0cd-d17d-4388-9a60-99a4307703c6.json",
+      "status": "completed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "949b098c9b7088ff43589dd2b85f73c08966aa62bd93def9f9f7f26a73696887",
+      "output": {
+        "availability": "available",
+        "values": {
+          "currency": "USD",
+          "memberId": "M1002",
+          "accountId": "S2002",
+          "accountType": "savings",
+          "currentBalanceMinor": 8765
+        }
+      }
+    },
+    {
+      "scenario": "servicing-notice",
+      "delayMs": 0,
+      "runId": "a26c4778-a7f9-41ba-8907-2e8dd6d5b99d",
+      "expected": "success",
+      "actual": "success",
+      "recoveryAttempts": 1,
+      "passed": true,
+      "file": "servicing-notice-0-a26c4778-a7f9-41ba-8907-2e8dd6d5b99d.json",
+      "status": "completed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "a8c1117d85cf41f283b2ef41cbdd9773f19e6d5f25f6cdbfd946671bf510d454",
+      "output": {
+        "availability": "available",
+        "values": {
+          "currency": "USD",
+          "memberId": "M1002",
+          "accountId": "S2002",
+          "accountType": "savings",
+          "currentBalanceMinor": 8765
+        }
+      }
+    },
+    {
+      "scenario": "transient-inquiry",
+      "delayMs": 0,
+      "runId": "d81fc3e9-3ecd-4993-b92d-83abfa82290a",
+      "expected": "success",
+      "actual": "success",
+      "recoveryAttempts": 1,
+      "passed": true,
+      "file": "transient-inquiry-0-d81fc3e9-3ecd-4993-b92d-83abfa82290a.json",
+      "status": "completed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "7235d6d81805d65ee1509af63f044546c89a7cad70b606254f41160cef8fa520",
+      "output": {
+        "availability": "available",
+        "values": {
+          "currency": "USD",
+          "memberId": "M1002",
+          "accountId": "S2002",
+          "accountType": "savings",
+          "currentBalanceMinor": 8765
+        }
+      }
+    },
+    {
+      "scenario": "persistent-notice",
+      "delayMs": 0,
+      "runId": "ad8333e9-2409-4c39-a3b2-ccbe0b1243e1",
+      "expected": "RECOVERY_EXHAUSTED",
+      "actual": "RECOVERY_EXHAUSTED",
+      "recoveryAttempts": 2,
+      "passed": true,
+      "file": "persistent-notice-0-ad8333e9-2409-4c39-a3b2-ccbe0b1243e1.json",
+      "status": "failed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "2ad35a1cc0a553b898773129a04482bf69dc35ca32a387cc10dedba53317015a"
+    },
+    {
+      "scenario": "failed-inquiry",
+      "delayMs": 0,
+      "runId": "6145e551-4c23-42b5-ac10-1175e709026b",
+      "expected": "RECOVERY_EXHAUSTED",
+      "actual": "RECOVERY_EXHAUSTED",
+      "recoveryAttempts": 2,
+      "passed": true,
+      "file": "failed-inquiry-0-6145e551-4c23-42b5-ac10-1175e709026b.json",
+      "status": "failed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "a07aef8aeca1e3a9439bc592cfde732a6f186677d71394f0dedd8cee928239a9"
+    },
+    {
+      "scenario": "validation-error",
+      "delayMs": 0,
+      "runId": "80ec12d7-2941-459f-a648-510f42a427d9",
+      "expected": "TARGET_VALIDATION_ERROR",
+      "actual": "TARGET_VALIDATION_ERROR",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "validation-error-0-80ec12d7-2941-459f-a648-510f42a427d9.json",
+      "status": "failed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "259c73d82a347cee3efdf973b8d4b141126d38ea077372706e3c34161f16d55f"
+    },
+    {
+      "scenario": "wrong-member",
+      "delayMs": 0,
+      "runId": "48d7c49c-4deb-4641-96e8-fe8673eb5b64",
+      "expected": "IDENTITY_MISMATCH",
+      "actual": "IDENTITY_MISMATCH",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "wrong-member-0-48d7c49c-4deb-4641-96e8-fe8673eb5b64.json",
+      "status": "failed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "cb546bc2df07260d116ea36a0c7e5bc623519d1161bc987fcafd05cbcfe62b9b"
+    },
+    {
+      "scenario": "wrong-account",
+      "delayMs": 0,
+      "runId": "7840d5f3-efd0-48d0-b1b0-146f0527758c",
+      "expected": "IDENTITY_MISMATCH",
+      "actual": "IDENTITY_MISMATCH",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "wrong-account-0-7840d5f3-efd0-48d0-b1b0-146f0527758c.json",
+      "status": "failed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "43d62a8aad26c8358a2723550cfe410c6ef7325483f9b3dd5b9f78ff34c5909c"
+    },
+    {
+      "scenario": "duplicate-account",
+      "delayMs": 0,
+      "runId": "0b705dfc-4442-4e52-a7bb-a20c0e3adebd",
+      "expected": "AMBIGUOUS_TARGET",
+      "actual": "AMBIGUOUS_TARGET",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "duplicate-account-0-0b705dfc-4442-4e52-a7bb-a20c0e3adebd.json",
+      "status": "failed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "d89d9874a4ea9c1ea83543a44dec8c27badeb8ed7521ca1de7d22a3288ff8ef3"
+    },
+    {
+      "scenario": "conflicting-outcomes",
+      "delayMs": 0,
+      "runId": "7f9ea2ad-b60e-4f2d-b64b-147a5e5517aa",
+      "expected": "CONFLICTING_SIGNALS",
+      "actual": "CONFLICTING_SIGNALS",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "conflicting-outcomes-0-7f9ea2ad-b60e-4f2d-b64b-147a5e5517aa.json",
+      "status": "failed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "0393222ba3903695d41d901ecab302d1b2bd29ec875c7d72be591e7dc063534e"
+    },
+    {
+      "scenario": "browser-destroyed",
+      "delayMs": 0,
+      "runId": "fd6e9e18-89b6-4941-84f5-53e8de93bc86",
+      "expected": "SESSION_LOST",
+      "actual": "SESSION_LOST",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "browser-destroyed-0-fd6e9e18-89b6-4941-84f5-53e8de93bc86.json",
+      "status": "failed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 0,
+      "reportSha256": "0c506a39385e218062f7cd64ec94c2523df0e11b01bf8b8e1182e6ddf05948b6"
+    },
+    {
+      "scenario": "unexpected-modal",
+      "delayMs": 0,
+      "runId": "62832a91-38f8-4e8d-8e2a-afe89b86d7de",
+      "expected": "UNEXPECTED_DIALOG",
+      "actual": "UNEXPECTED_DIALOG",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "unexpected-modal-0-62832a91-38f8-4e8d-8e2a-afe89b86d7de.json",
+      "status": "cancelled",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "2cbcf4fab18488e93018800b58938a3b7a90a7588aec8393aaf694807a5abbad",
+      "intervention": {
+        "interventionId": "e4ebebd3-1743-4c5d-9a3a-82292ee44233",
+        "runId": "62832a91-38f8-4e8d-8e2a-afe89b86d7de",
+        "status": "open",
+        "controlRevision": 3,
+        "sessionRef": "76037114-6fd9-43a8-93a8-d6a48b2b04d3",
+        "blocked": {
+          "stepId": "step-009",
+          "actionIndex": null,
+          "reason": "UNEXPECTED_DIALOG",
+          "dispatchState": "not_sent",
+          "effectState": "not_checked",
+          "checkpointId": "step-009",
+          "expected": {
+            "code": "RECORDED_UI_CONDITION",
+            "description": "The recorded UI condition and record identity must hold."
+          },
+          "observed": {
+            "code": "UNEXPECTED_DIALOG",
+            "description": "The live UI requires manual resolution before continuing."
+          },
+          "evidenceIds": [
+            "01b6671b-d528-4f9f-b6fa-a4095a466ef2"
+          ]
+        },
+        "createdAt": "2026-11-19T22:47:01.564Z",
+        "expiresAt": "2026-11-19T22:57:01.587Z"
+      }
+    },
+    {
+      "scenario": "session-expired",
+      "delayMs": 0,
+      "runId": "727cca6a-d524-4b28-8d57-1720acad83de",
+      "expected": "SESSION_EXPIRED",
+      "actual": "SESSION_EXPIRED",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "session-expired-0-727cca6a-d524-4b28-8d57-1720acad83de.json",
+      "status": "cancelled",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "7f72959a224eab64204c5a71c807fab3f2e8ee41f68f0aa68336bd23b35cc2b4",
+      "intervention": {
+        "interventionId": "578f7c5b-90aa-4fe3-ac66-82f6621b4357",
+        "runId": "727cca6a-d524-4b28-8d57-1720acad83de",
+        "status": "open",
+        "controlRevision": 3,
+        "sessionRef": "bbf5ce74-dc3d-4c07-aa6c-6445550e6e7d",
+        "blocked": {
+          "stepId": "step-006",
+          "actionIndex": null,
+          "reason": "SESSION_EXPIRED",
+          "dispatchState": "not_sent",
+          "effectState": "not_checked",
+          "checkpointId": "step-006",
+          "expected": {
+            "code": "RECORDED_UI_CONDITION",
+            "description": "The recorded UI condition and record identity must hold."
+          },
+          "observed": {
+            "code": "SESSION_EXPIRED",
+            "description": "The live UI requires manual resolution before continuing."
+          },
+          "evidenceIds": [
+            "89467896-a1fe-47b1-a9d5-f5f6b1d33b62"
+          ]
+        },
+        "createdAt": "2026-11-19T22:47:14.316Z",
+        "expiresAt": "2026-11-19T22:57:14.339Z"
+      }
+    },
+    {
+      "scenario": "slow-inquiry",
+      "delayMs": 15000,
+      "runId": "5e53b809-61b7-4448-99a2-4a7ceb4cf500",
+      "expected": "STATE_TIMEOUT",
+      "actual": "STATE_TIMEOUT",
+      "recoveryAttempts": 0,
+      "passed": true,
+      "file": "slow-inquiry-15000-5e53b809-61b7-4448-99a2-4a7ceb4cf500.json",
+      "status": "failed",
+      "sessionClosed": true,
+      "sameSession": true,
+      "inference": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "maximumOrdinaryStepDispatches": 1,
+      "reportSha256": "61935545d40f4f41c44a0ac7cee533630c2b73424d8f921ba9670440cf44b389"
+    }
+  ],
+  "targetControlChecks": [
+    {
+      "scenario": "session-expired",
+      "sameSession": true,
+      "browserClosed": true,
+      "success": true
+    },
+    {
+      "scenario": "unexpected-modal",
+      "sameSession": true,
+      "browserClosed": true,
+      "success": true
+    }
+  ],
+  "success": true
+}

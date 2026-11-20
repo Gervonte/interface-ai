@@ -4,7 +4,7 @@ import { TargetSchema } from '@interface-ai/contracts';
 export const safeLabels = ['Staff workspace', 'Member Search', 'Member Overview', 'Account Inquiry', 'Account Details', 'Member servicing workspace', 'Active member',
   'Start Member Search', 'Search', 'Clear', 'Open', 'New member search', 'Start a new search', 'Back to Accounts', 'Back to Member Overview', 'Try again',
   'Member search results', 'Member accounts', 'Search results', 'Member ID', 'Member Name', 'Membership Status', 'Account ID', 'Account Type', 'Designation', 'Status',
-  'Current Balance', 'Available Balance', 'Currency', 'Action', 'No matching member', 'No primary savings account', 'Access denied'] as const;
+  'Servicing notice', 'Servicing review required', 'Staff session expired', 'Acknowledge notice', 'Dismiss servicing review', 'Restore staff session', 'Account inquiry unavailable', 'Member search validation error', 'Loading servicing screen', 'Searched Member ID', 'Current Balance', 'Available Balance', 'Currency', 'Action', 'No matching member', 'No primary savings account', 'Access denied'] as const;
 export const staticValues = ['Primary Savings', 'Savings', 'Checking', 'Primary', 'Standard', 'Active', 'Closed', 'USD'] as const;
 const safeText = z.enum(safeLabels);
 const ref = z.string().regex(/^[cf]\d{1,3}$/);

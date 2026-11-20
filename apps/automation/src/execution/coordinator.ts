@@ -147,7 +147,11 @@ export class Coordinator {
       const work = this.worker(request, context);
       const aborted = new Promise<never>((_resolve, reject) => { abortListener = () => reject(new ExecutionError('CANCELLED')); if (job.abort.signal.aborted) abortListener(); else job.abort.signal.addEventListener('abort', abortListener, { once: true }); });
       const output = await Promise.race([work, aborted, new Promise<never>((_resolve, reject) => { timeout = setTimeout(() => reject(new ExecutionError('BUDGET_EXHAUSTED')), Math.min(budgets.activeTimeoutMs, budgets.overallTimeoutMs)); })]);
-      if (output?.kind === 'success' || output?.kind === 'business_outcome') {
+      if(output?.kind==='business_outcome' && request.mode==='discovery'){
+        const recorded=await this.base.pool.query("SELECT 1 FROM automation.run_events WHERE run_id=$1 AND event_type='BUSINESS_OUTCOME' AND details->>'code'=$2",[job.runId,output.code]);
+        if(!['MEMBER_NOT_FOUND','NO_PRIMARY_SAVINGS_ACCOUNT','ACCESS_DENIED'].includes(output.code)||!recorded.rowCount)throw new RepositoryError('INVALID_OUTPUT');
+        result={...output,summary:'A declared business outcome was verified in the live UI.'};
+      } else if (output?.kind === 'success' || output?.kind === 'business_outcome') {
         if (request.mode !== 'replay') throw new RepositoryError('RUN_STATE_CONFLICT');
         const capability = await this.repository.capability(request.capability.id, request.capability.version, (await this.base.pool.query('SELECT principal_ref FROM automation.runs WHERE run_id=$1', [job.runId])).rows[0].principal_ref);
         if (output.kind === 'success' && output.output.availability !== 'available') throw new RepositoryError('INVALID_OUTPUT');

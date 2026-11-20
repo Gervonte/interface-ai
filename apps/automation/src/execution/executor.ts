@@ -38,6 +38,7 @@ export function transform(value: string | boolean, name: Extraction['transform']
 export class Executor {
   private readonly startedAt: number;
   private admissions = 0;
+  private conditionStates:Record<string,TargetState>|undefined;
   lastEventSequence: number | undefined;
   lastFailure: { stepId: string; code: string; evidenceIds: string[]; dispatchState: 'not_sent' | 'sent' | 'settled' | 'unknown'; effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' } | undefined;
   lastState: { dispatchState: 'not_sent' | 'sent' | 'settled' | 'unknown'; effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' } = { dispatchState: 'not_sent', effectState: 'not_checked' };
@@ -77,12 +78,12 @@ export class Executor {
     try { return resolveTarget(TargetSchema.parse(target), this.options.inputs, this.options.variables ?? {}); }
     catch { throw new ExecutionError('INVALID_BINDING'); }
   }
-  private async inspect(id: string) { return this.options.surface.inspect(this.definition(id), this.options.policy); }
+  private async inspect(id: string) { if(this.conditionStates?.[id])return this.conditionStates[id]!; return this.options.surface.inspect(this.definition(id), this.options.policy); }
   private unique(state: TargetState) {
     if (state.count !== 1) throw new ExecutionError(state.count ? 'AMBIGUOUS_TARGET' : 'TARGET_NOT_FOUND');
   }
-  private async extract(source: Extraction) {
-    const state = await this.inspect(source.target); this.unique(state);
+  private async extract(source: Extraction, allowAbsent = false) {
+    const state = await this.inspect(source.target); if(allowAbsent && state.count===0)return undefined; this.unique(state);
     if (!state.visible || ['password', 'hidden', 'file'].includes(state.inputType)) throw new ExecutionError('POLICY_BLOCKED');
     if (source.read === 'checked' && state.inputType !== 'checkbox') throw new ExecutionError('INVALID_EXTRACTION');
     if (source.read === 'value' && !['input', 'textarea', 'select'].includes(state.tag)) throw new ExecutionError('INVALID_EXTRACTION');
@@ -102,7 +103,7 @@ export class Executor {
     if (condition.kind === 'equals') {
       const ref = condition.value; const value = ref.kind === 'literal' ? ref.value : (ref.kind === 'input' ? this.options.inputs : this.options.variables ?? {})[ref.name];
       if (value === undefined) throw new ExecutionError('INVALID_BINDING');
-      return await this.extract(condition.source) === value;
+      return await this.extract(condition.source, true) === value;
     }
     if (!('target' in condition)) throw new ExecutionError('INVALID_BINDING');
     const state = await this.inspect(condition.target);
@@ -111,9 +112,20 @@ export class Executor {
     if (condition.kind === 'present') return state.count === 1;
     return state.count === 1 && (condition.kind === 'visible' ? state.visible : condition.kind === 'enabled' ? state.enabled : state.editable);
   }
-  async execute(operation: ExecutorOperation, stepId: string, requestedTimeoutMs = this.options.policy.budgets.stepTimeoutMs) {
+  async reject(code: import('./errors.js').FailureCode, stepId:string, dispatchState:'not_sent'|'settled'='not_sent'):Promise<never> {
+    this.options.gate.close();let evidenceId:string|undefined;
+    try{evidenceId=await Promise.race([this.options.evidence.capture(this.options.runId,stepId,this.options.surface,this.options.policy),delay(2000).then(()=>undefined)]);}catch{}
+    this.lastFailure={stepId,code,evidenceIds:evidenceId?[evidenceId]:[],dispatchState,effectState:'not_checked'};
+    await this.options.record({type:'ACTION_FAILED',actor:'automation',stepId,details:{code,dispatchState,effectState:'not_checked',...(evidenceId?{evidenceId}:{})}});
+    throw new ExecutionError(code,dispatchState);
+  }
+  checkConditions(conditions:Predicate[],stepId:string,timeoutMs?:number){return this.execute({type:'check',conditions},stepId,timeoutMs);}
+  execute(operation:{type:'check';conditions:Predicate[]},stepId:string,requestedTimeoutMs?:number):Promise<boolean[]>;
+  execute(operation:ExecutorOperation,stepId:string,requestedTimeoutMs?:number):Promise<string|number|boolean|undefined>;
+  async execute(operation: ExecutorOperation | {type:'check';conditions:Predicate[]}, stepId: string, requestedTimeoutMs = this.options.policy.budgets.stepTimeoutMs) {
     IdentifierSchema.parse(stepId);
-    if (!this.options.policy.allowedActions.includes(operation.type)) throw new ExecutionError('POLICY_BLOCKED');
+    const eventOperation=operation.type==='check'?'wait':operation.type;
+    if (!this.options.policy.allowedActions.includes(eventOperation)) throw new ExecutionError('POLICY_BLOCKED');
     if (++this.admissions > this.options.policy.budgets.maxActions) throw new ExecutionError('BUDGET_EXHAUSTED');
     this.check();
     if (!Number.isFinite(requestedTimeoutMs) || requestedTimeoutMs < 1) throw new ExecutionError('BUDGET_EXHAUSTED');
@@ -123,9 +135,9 @@ export class Executor {
     this.lastState = { dispatchState: 'not_sent', effectState: 'not_checked' };
     const work = this.options.gate.dispatch(this.options.revision, async () => {
       this.check(); await this.options.authorize(); this.check(); await this.origin(operation.type === 'navigate' || (operation.type === 'wait' && this.locationsOnly(operation.condition)));
-      await this.options.record({ type: 'ACTION_INTENT', actor: 'automation', stepId, details: { code: 'admitted', operation: operation.type, ...('target' in operation ? { targetRef: operation.target } : {}) } });
+      await this.options.record({ type: 'ACTION_INTENT', actor: 'automation', stepId, details: { code: 'admitted', operation: eventOperation, ...('target' in operation ? { targetRef: operation.target } : {}) } });
       this.check();
-      let output: string | number | boolean | undefined;
+      let output: string | number | boolean | boolean[] | undefined;
       if (operation.type === 'click' || operation.type === 'fill') {
         const target = this.definition(operation.target); const state = await this.options.surface.inspect(target, this.options.policy); this.unique(state);
         if (!state.visible || !state.enabled || (operation.type === 'fill' && !state.editable)) throw new ExecutionError('TARGET_NOT_ACTIONABLE');
@@ -145,7 +157,13 @@ export class Executor {
         this.check(); sent = true; this.lastState = { dispatchState: 'sent', effectState: 'not_checked' };
         await this.options.surface.navigate(this.options.entryPoint, timeout); await this.origin();
         this.lastState = { dispatchState: 'settled', effectState: 'not_checked' };
-      } else if (operation.type === 'capture') output = await this.extract(operation.sourceValue);
+      } else if(operation.type==='check'){
+        const references=new Set<string>();const collect=(condition:Predicate):void=>{if(condition.kind==='all'||condition.kind==='any')condition.conditions.forEach(collect);else if(condition.kind==='equals')references.add(condition.source.target);else if('target'in condition)references.add(condition.target);};operation.conditions.forEach(collect);
+        try{if(this.options.surface.inspectMany)this.conditionStates=await this.options.surface.inspectMany(Object.fromEntries([...references].map(id=>[id,this.definition(id)])),this.options.policy);
+          output=[];for(const condition of operation.conditions)output.push(await this.predicate(condition));
+        }finally{this.conditionStates=undefined;}
+      }
+      else if (operation.type === 'capture') output = await this.extract(operation.sourceValue);
       else {
         const deadline = Date.now() + timeout;
         while (!await this.predicate(operation.condition)) {
@@ -155,7 +173,7 @@ export class Executor {
         }
       }
       this.check();
-      const sequence = await this.options.record({ type: operation.type === 'capture' ? 'READ_COMPLETED' : 'ACTION_COMPLETED', actor: 'automation', stepId, details: { code: 'confirmed', operation: operation.type, ...('target' in operation ? { targetRef: operation.target } : {}) } });
+      const sequence = await this.options.record({ type: operation.type === 'capture' ? 'READ_COMPLETED' : 'ACTION_COMPLETED', actor: 'automation', stepId, details: { code: 'confirmed', operation: eventOperation, ...('target' in operation ? { targetRef: operation.target } : {}) } });
       this.lastEventSequence = typeof sequence === 'number' && Number.isInteger(sequence) && sequence > 0 ? sequence : undefined;
       return output;
     });

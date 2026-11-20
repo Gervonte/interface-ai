@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: INT-001 through INT-011 are implemented and verified at their stated scope. INT-009/010/011 form the first live discovery, saved-artifact, and fresh-process replay milestone. Scenario recovery and full operator handoff remain INT-012 onward. Completion details are linked below. This plan does not authorize publishing/submission.
+Status: INT-001 through INT-013 are implemented and verified at their stated scope. INT-009/010/011 form the first live discovery, saved-artifact, and fresh-process replay milestone. Repeatable scenarios and bounded recovery are verified; exclusive operator transfer/resume and the handoff console remain INT-014/015. Completion details are linked below. This plan does not authorize publishing/submission.
 
 Selected stack: TypeScript/Node.js, Express, Zod, PostgreSQL, React + Vite + Mantine, and Browserbase/Stagehand. See [STACK.md](STACK.md), [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md), [DEMO_WORKFLOW.md](DEMO_WORKFLOW.md), and [ACCEPTANCE.md](ACCEPTANCE.md).
 
@@ -112,11 +112,15 @@ Execution order follows the dependencies and sections below, not the numeric ID.
 
     **Done when:** each scenario resets predictably at a defined portal transition, exposes explicit visible state/context, and has the required permitted manual resolution where applicable. Baseline fixtures still work; role/member denial cannot be mistaken for a missing record. Browser destruction and synthetic staff-session expiry are tested separately. **Depends on:** INT-006, INT-011. **Acceptance:** REP-05, REP-06, REP-08, HUM-01.
 
+    **Verified:** Setup-only per-session scenarios cover the normal portal transitions, explicit negatives, slow/failed loads, known notice, unexpected modal, synthetic staff expiry/restoration, target validation, wrong identities, duplicates, and contradictory cues. Browser destruction is tested independently. Target-control UI QA verifies real dismissal/restoration in the same browser; it does not claim operator handoff. [Scenario guide](SCENARIOS.md) · [Live evidence](evidence/int-012-013/README.md). Typechecking, 195 default tests, 30 PostgreSQL tests, and production builds pass at this milestone. Assessment-wide privacy/handoff acceptance remains incomplete.
+
 13. **INT-013 — Implement declared business outcomes and bounded recovery.**
 
     Attach and validate the scenario detectors/rules in capability versions. Handle legitimate negatives, known recoveries, exhausted deadlines, ambiguity, and session loss explicitly. Define outcome precedence/conflict handling and preserve the failed step/expected/observed context. Do not label missing automation controls as a business no-match result.
 
     **Done when:** applicable scenarios produce the documented structured result; a known notice recovers, persistent failure stops, conflicting signals never produce false success, and action-dispatch assertions show no duplicate submits/clicks. **Depends on:** INT-007, INT-010, INT-012. **Acceptance:** REP-05, REP-06, REP-07, REP-08, OBS-02.
+
+    **Verified:** A rule-enhanced immutable revision of the genuine discovered capability passes the 19-case hosted replay matrix with zero inference, exact outcomes, finite recovery, no duplicate ordinary-step dispatch, structured pauses, and verified cleanup. Discovery tests cover negative results, rule attachment, and executed-recovery provenance. Original artifacts/results remain intact. Full claim/manual-action/resume support remains later work. [Scenario guide](SCENARIOS.md) · [Live evidence](evidence/int-012-013/README.md). Typechecking, 195 default tests, 30 PostgreSQL tests, and production builds pass at this milestone. Assessment-wide privacy/handoff acceptance remains incomplete.
 
 14. **INT-014 — Implement intervention state and exclusive control transfer.**
 

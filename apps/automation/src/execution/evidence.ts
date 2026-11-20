@@ -17,7 +17,7 @@ const envelope = z.strictObject({ evidenceId: z.uuid(), runId: z.uuid(), stepId:
   capturedAt: z.iso.datetime(), expiresAt: z.iso.datetime(), sanitizationVersion: z.literal(1), snapshot: snapshotSchema });
 const staticLabels = ['Staff workspace', 'Member Search', 'Member Overview', 'Account Inquiry', 'Account Details', 'No matching member',
   'No primary savings account', 'Access denied', 'Unable to continue', 'Member ID', 'Account ID', 'Account Type', 'Designation', 'Status',
-  'Current Balance', 'Available Balance', 'Currency', 'Action', 'Member Name', 'Membership Status'];
+  'Servicing notice', 'Servicing review required', 'Staff session expired', 'Acknowledge notice', 'Dismiss servicing review', 'Restore staff session', 'Account inquiry unavailable', 'Member search validation error', 'Loading servicing screen', 'Searched Member ID', 'Current Balance', 'Available Balance', 'Currency', 'Action', 'Member Name', 'Membership Status'];
 export class EvidenceStore {
   constructor(private readonly directory: string, private readonly now: () => number = Date.now) {}
   async capture(runId: string, stepId: string | null, surface: Pick<BrowserSurface, 'snapshot'>, policy: SurfacePolicy) {

@@ -1,6 +1,6 @@
 # Demo Workflow
 
-Status: the target is a fictional credit-union staff servicing console. Balance lookup is the agreed assessment baseline; preferred-email maintenance remains planned follow-on work. INT-006 implements the connected staff shell, framed search/overview/inquiry/details, baseline records, and ordinary loading/validation/negative states. Full controlled exception injection is INT-012 and contact maintenance is INT-018. The separate INT-002/INT-003 compatibility fixture remains for SDK validation. See [portal setup and verification](PORTAL.md).
+Status: the target is a fictional credit-union staff servicing console. Balance lookup is the agreed assessment baseline; preferred-email maintenance remains planned follow-on work. INT-006 implements the connected staff shell, framed search/overview/inquiry/details, baseline records, and ordinary loading/validation/negative states. Controlled exception injection and bounded runtime handling are implemented in INT-012/013 and contact maintenance is INT-018. The separate INT-002/INT-003 compatibility fixture remains for SDK validation. See [portal setup and verification](PORTAL.md).
 
 ## Target purpose and assessment fit
 
@@ -114,7 +114,7 @@ The implementation can stage these scenarios, with happy path, changed-input rep
 
 ## Portal completion checks
 
-INT-006 supplies the staff shell, connected balance screens, baseline fixture-backed transitions, and ordinary loading/empty/validation states. INT-012 adds controlled exception injection and restoration behaviors; INT-013–INT-016 verify automation responses. Contact Maintenance belongs to INT-018 and does not gate the balance baseline.
+INT-006 supplies the staff shell, connected balance screens, baseline fixture-backed transitions, and ordinary loading/empty/validation states. INT-012/013 add controlled injection, real restoration/dismissal controls, typed business outcomes, finite recovery, and safe stopping/escalation. [Scenario setup and evidence](SCENARIOS.md). INT-014–INT-016 complete operator handoff and broader privacy acceptance. Contact Maintenance belongs to INT-018 and does not gate the balance baseline.
 
 A generic single search card or a page containing expected test outputs is not a completed portal. Before calling INT-006 complete, a person must navigate the full staff workflow for both baseline members, see their consistent member/account context, distinguish current from available balances, and return/search again without stale data. INT-001 remains a completed scaffold task and supplies no proof that these portal checks pass.
 

@@ -15,7 +15,7 @@ export const LocatorSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('label'), text, exact: z.literal(true) }),
   z.strictObject({ kind: z.literal('role'), role, name: text, exact: z.literal(true) }),
   z.strictObject({ kind: z.literal('text'), text, element: z.enum(['button', 'link', 'heading', 'text']), exact: z.literal(true) }),
-  z.strictObject({ kind: z.literal('attribute'), name: z.enum(['name', 'title', 'aria-label']), value: text }),
+  z.strictObject({ kind: z.literal('attribute'), name: z.enum(['name', 'title', 'aria-label', 'aria-modal']), value: text }),
   z.strictObject({ kind: z.literal('caption'), text, exact: z.literal(true) }),
   z.strictObject({ kind: z.literal('cell'), columnHeader: text }),
   z.strictObject({ kind: z.literal('field'), label: text }),
@@ -80,7 +80,11 @@ const RecoveryRule = z.strictObject({ id: Id, when: PredicateSchema, appliesToSt
   actions: z.array(z.discriminatedUnion('type', [
     z.strictObject({ type: z.literal('click'), target: Id }),
     z.strictObject({ type: z.literal('wait'), condition: PredicateSchema }),
-  ])).min(1).max(3), after: PredicateSchema, source: RuleSource });
+  ])).min(1).max(3), after: PredicateSchema, source: RuleSource.extend({ observedEventSequences: z.array(z.number().int().positive()).max(128).optional() }) });
+const RuntimeGuard = z.strictObject({ id: Id, when: PredicateSchema, require: PredicateSchema.optional(),
+  handling: z.enum(['failure','intervention']), code: z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/),
+  reason: z.enum(['UNEXPECTED_DIALOG','SESSION_EXPIRED','STATE_TIMEOUT','POLICY_BLOCKED','AMBIGUOUS_TARGET']), appliesToStepIds:z.array(Id).min(1).max(128),
+  source:RuleSource });
 const ManualContribution = z.discriminatedUnion('handling', [
   z.strictObject({ handling: z.literal('included'), interventionId: z.uuid(), eventSequences: z.array(z.number().int().positive()).min(1).max(128), stepIds: z.array(Id).min(1).max(128) }),
   z.strictObject({ handling: z.literal('required_intervention'), interventionId: z.uuid(), eventSequences: z.array(z.number().int().positive()).min(1).max(128), stepId: Id }),
@@ -99,7 +103,7 @@ const structure = z.strictObject({
   successCondition: z.strictObject({ conditions: z.array(PredicateSchema).min(1).max(16),
     identity: z.array(z.strictObject({ target: Id, input: Id })).min(1).max(8) }),
   outcomeRules: z.array(OutcomeRule).max(16), recoveryRules: z.array(RecoveryRule).max(8),
-  manualContributions: z.array(ManualContribution).max(32),
+  manualContributions: z.array(ManualContribution).max(32), runtimeGuards:z.array(RuntimeGuard).max(16).optional(),
 });
 export type Capability = z.infer<typeof structure>;
 
@@ -114,6 +118,7 @@ function semanticValidation(cap: Capability, ctx: z.RefinementCtx) {
   unique(cap.outcomeRules.map((rule) => rule.id), 'outcome rule ID');
   unique(cap.outcomeRules.map((rule) => rule.code), 'outcome code');
   unique(cap.recoveryRules.map((rule) => rule.id), 'recovery rule ID');
+  unique((cap.runtimeGuards??[]).map(rule=>rule.id),'runtime guard ID');
   unique(cap.surfaceRequirements.compatibleTargetVersions, 'target version');
   unique(cap.surfaceRequirements.features, 'surface feature');
   const stepIds = new Set(cap.steps.map((step) => step.id));
@@ -179,6 +184,7 @@ function semanticValidation(cap: Capability, ctx: z.RefinementCtx) {
         for (const action of rule.actions) action.type === 'click' ? target(action.target, initialized) : predicate(action.condition, initialized);
       }
     }
+    for(const guard of cap.runtimeGuards??[]) if(guard.appliesToStepIds.includes(step.id)){predicate(guard.when,initialized);if(guard.require)predicate(guard.require,initialized);}
     if (step.type === 'capture') {
       const field = cap.variables[step.variable];
       if (!field || field.type !== extraction(step.sourceValue, initialized)) issue('Capture variable type mismatch.');
@@ -189,6 +195,7 @@ function semanticValidation(cap: Capability, ctx: z.RefinementCtx) {
     predicate(step.after, initialized);
   }
   for (const name of Object.keys(cap.variables)) if (!initialized.has(name)) issue('Variable declared without capture.');
+  for (const guard of cap.runtimeGuards??[]) { unique(guard.appliesToStepIds,'guard scope');for(const id of guard.appliesToStepIds)if(!stepIds.has(id))issue('Unresolved guard step.'); }
   for (const rule of [...cap.outcomeRules, ...cap.recoveryRules]) {
     unique(rule.appliesToStepIds, 'rule scope');
     for (const id of rule.appliesToStepIds) {

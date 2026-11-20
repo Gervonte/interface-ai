@@ -76,3 +76,7 @@ This is target UI verification. It does not save a discovered capability or esta
 ## Verification
 
 `pnpm check:db` covers default HTTP/context-race checks and real PostgreSQL integration, including changed database values reaching the UI API. The hosted check traverses only the rendered UI and reads DOM fields; it imports no target repository or seed. Local browser inspection additionally checked desktop/narrow layout, normal browser Back, stale-history rejection after clearing context, and an error-free console on the normal flow.
+
+## Repeatable scenarios (INT-012)
+
+Run `pnpm demo:scenario --list` for the setup-only scenario names. Configuration is validated from ignored `apps/demo-api/runtime/scenario.json` and snapshotted for each new staff session. There is no scenario HTTP endpoint or automation input; existing sessions retain their configuration. Scenarios appear inside the normal search/inquiry/details flow, with manual dismissal/restoration controls for the blocked cases. [Setup, reset behavior, and complete scenario table](SCENARIOS.md).
