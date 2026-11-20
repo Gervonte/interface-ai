@@ -6,9 +6,9 @@ import { api, PortalError } from './api';
 export type Screen = 'workspace' | 'search' | 'overview' | 'accounts' | 'details';
 export interface Route { screen: Screen; memberId?: string; accountId?: string }
 export interface View { route: Route; member: DemoMember | null; accounts: DemoAccount[]; account: DemoAccount | null;
-  overview: DemoOverview | null; result: DemoSearch | null; loading: boolean; error: string; errorCode: string; inputError: string; input: string }
+  conflictingSignals: boolean; overview: DemoOverview | null; result: DemoSearch | null; loading: boolean; error: string; errorCode: string; inputError: string; input: string }
 const initial: View = { route: { screen: 'workspace' }, member: null, accounts: [], account: null, overview: null, result: null,
-  loading: true, error: '', errorCode: '', inputError: '', input: '' };
+  conflictingSignals:false, loading: true, error: '', errorCode: '', inputError: '', input: '' };
 const screens = ['workspace', 'search', 'overview', 'accounts', 'details'];
 const notify = (type: 'context-changing' | 'context-changed') => window.parent.postMessage({ channel: 'demo-staff', type }, window.location.origin);
 export function usePortal() {
@@ -24,7 +24,8 @@ export function usePortal() {
   }, []);
   const failure = (error: unknown, token: { current(): boolean }) => {
     if (!token.current()) return;
-    setView((value) => ({ ...value, member: error instanceof PortalError && error.code === 'ACCESS_DENIED' ? value.member : null, accounts: [], account: null, overview: null, loading: false, error: error instanceof PortalError ? error.message : 'Member services are temporarily unavailable. Try again.', errorCode: error instanceof PortalError ? error.code : 'UNAVAILABLE' }));
+    if(error instanceof PortalError&&error.code==='STAFF_SESSION_EXPIRED')window.parent.postMessage({channel:'demo-staff',type:'staff-expired'},window.location.origin);
+    setView((value) => ({ ...value, member: error instanceof PortalError && ['ACCESS_DENIED','INQUIRY_UNAVAILABLE','SERVICING_NOTICE_REQUIRED','MANUAL_REVIEW_REQUIRED','STAFF_SESSION_EXPIRED'].includes(error.code) ? value.member : null, accounts: [], account: null, overview: null, loading: false, error: error instanceof PortalError ? error.message : 'Member services are temporarily unavailable. Try again.', errorCode: error instanceof PortalError ? error.code : 'UNAVAILABLE' }));
   };
   const navigate = useCallback(async (next: Route, historyMode: 'push' | 'replace' | 'none' = 'push') => {
     const token = begin(next);
@@ -46,7 +47,7 @@ export function usePortal() {
           setView({ ...initial, route: next, loading: false, member: data.member, overview: data });
         } else if (next.screen === 'accounts') {
           const data = await api.accounts(member.id, token.signal); if (!token.current()) return;
-          setView({ ...initial, route: next, loading: false, member: data.member, accounts: data.accounts });
+          setView({ ...initial, route: next, loading: false, member: data.member, accounts: data.accounts, conflictingSignals:data.conflictingSignals ?? false });
         } else {
           if (!next.accountId) throw new PortalError('ACCOUNT_NOT_FOUND', 'Choose an account from Account Inquiry.');
           const data = await api.details(member.id, next.accountId, token.signal); if (!token.current()) return;
@@ -100,5 +101,8 @@ export function usePortal() {
       notify('context-changed'); await navigate({ screen: 'overview', memberId: member.id });
     } catch (error) { failure(error, token); }
   }
-  return { view, input, search, select, navigate, retry: () => view.route.screen === 'search' ? search() : navigate(route.current, 'replace') };
+  async function resolve(kind:'acknowledge'|'dismissReview'|'restore') {
+    const token=begin(route.current);try{await api[kind]();if(kind==='restore')window.parent.postMessage({channel:'demo-staff',type:'staff-restored'},window.location.origin);if(token.current())await navigate(route.current,'replace');}catch(error){failure(error,token);}
+  }
+  return { view, input, search, select, navigate, resolve, retry: () => view.route.screen === 'search' ? search() : navigate(route.current, 'replace') };
 }

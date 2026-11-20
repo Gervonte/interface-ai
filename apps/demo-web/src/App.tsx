@@ -28,10 +28,18 @@ function Workspace() {
     <div className="page-heading"><div><Text size="xs" c="dimmed" fw={600}>MEMBER SERVICES / {view.route.screen === 'workspace' ? 'WORKSPACE' : 'SERVICING'}</Text><Title order={1}>{title[view.route.screen]}</Title></div>
       {member && <Button size="xs" variant="default" onClick={() => void portal.navigate({ screen: 'search' })}>New member search</Button>}</div>
     {member && <MemberContext member={member} />}
-    {view.error && <Alert color={view.errorCode === 'ACCESS_DENIED' ? 'orange' : 'red'} title={view.errorCode === 'ACCESS_DENIED' ? 'Access denied' : 'Unable to continue'} role="alert" mb="md">
-      {view.error}<Group mt="sm"><Button size="xs" variant="default" onClick={() => void portal.navigate({ screen: 'search' })}>Start a new search</Button>
-      {view.errorCode !== 'ACCESS_DENIED' && <Button size="xs" variant="light" onClick={() => void portal.retry()}>Try again</Button>}</Group></Alert>}
-    {view.loading && <Paper withBorder p="xl" role="status" aria-live="polite"><Group><Loader size="sm" /><Text>Loading {title[view.route.screen]}…</Text></Group></Paper>}
+    {view.error && ['SERVICING_NOTICE_REQUIRED','MANUAL_REVIEW_REQUIRED','STAFF_SESSION_EXPIRED'].includes(view.errorCode) && <Paper withBorder p="xl" mb="md" role="dialog" aria-modal="true"
+      aria-label={view.errorCode==='SERVICING_NOTICE_REQUIRED'?'Servicing notice':view.errorCode==='MANUAL_REVIEW_REQUIRED'?'Servicing review required':'Staff session expired'}>
+      <Title order={2}>{view.errorCode==='SERVICING_NOTICE_REQUIRED'?'Servicing notice':view.errorCode==='MANUAL_REVIEW_REQUIRED'?'Servicing review required':'Staff session expired'}</Title>
+      <Text mt="sm">{view.error}</Text><Button mt="md" onClick={()=>void portal.resolve(view.errorCode==='SERVICING_NOTICE_REQUIRED'?'acknowledge':view.errorCode==='MANUAL_REVIEW_REQUIRED'?'dismissReview':'restore')}>
+        {view.errorCode==='SERVICING_NOTICE_REQUIRED'?'Acknowledge notice':view.errorCode==='MANUAL_REVIEW_REQUIRED'?'Dismiss servicing review':'Restore staff session'}</Button>
+    </Paper>}
+    {view.error && !['SERVICING_NOTICE_REQUIRED','MANUAL_REVIEW_REQUIRED','STAFF_SESSION_EXPIRED'].includes(view.errorCode) && <Alert
+      color={view.errorCode==='ACCESS_DENIED'?'orange':'red'} title={view.errorCode==='ACCESS_DENIED'?'Access denied':view.errorCode==='INQUIRY_UNAVAILABLE'?'Account inquiry unavailable':view.errorCode==='MEMBER_SEARCH_VALIDATION'?'Member search validation error':'Unable to continue'}
+      aria-label={view.errorCode==='ACCESS_DENIED'?'Access denied':view.errorCode==='INQUIRY_UNAVAILABLE'?'Account inquiry unavailable':view.errorCode==='MEMBER_SEARCH_VALIDATION'?'Member search validation error':'Unable to continue'} role="alert" mb="md">
+      {view.error}<Group mt="sm"><Button size="xs" variant="default" onClick={()=>void portal.navigate({screen:'search'})}>Start a new search</Button>
+      {!['ACCESS_DENIED','MEMBER_SEARCH_VALIDATION'].includes(view.errorCode)&&<Button size="xs" variant="light" onClick={()=>void portal.retry()}>Try again</Button>}</Group></Alert>}
+    {view.loading && <Paper withBorder p="xl" role="status" aria-label="Loading servicing screen" aria-live="polite"><Group><Loader size="sm" /><Text>Loading {title[view.route.screen]}…</Text></Group></Paper>}
     {!view.loading && !view.error && view.route.screen === 'workspace' && <div className="workspace-grid">
       <Paper withBorder className="start-card" p="xl"><div className="service-icon" aria-hidden="true">⌕</div><Title order={2}>Member servicing</Title>
         <Text c="dimmed" my="sm">Find a member, review their accounts, and inspect current and available balances.</Text>
@@ -49,7 +57,7 @@ function Workspace() {
         {view.result ? <><dl className="searched-id"><Field label="Searched Member ID">{view.result.memberId}</Field></dl>
           {view.result.member ? <Paper withBorder className="table-panel"><Table highlightOnHover verticalSpacing="sm"><caption>Member search results</caption><Table.Thead><Table.Tr><Table.Th scope="col">Member ID</Table.Th><Table.Th scope="col">Member Name</Table.Th><Table.Th scope="col">Membership Status</Table.Th><Table.Th scope="col">Action</Table.Th></Table.Tr></Table.Thead>
             <Table.Tbody><Table.Tr><Table.Th scope="row">{view.result.member.id}</Table.Th><Table.Td>{view.result.member.name}</Table.Td><Table.Td><Status value={view.result.member.status} /></Table.Td><Table.Td><Button size="xs" variant="light" onClick={() => void portal.select()}>Open</Button></Table.Td></Table.Tr></Table.Tbody></Table></Paper>
-            : <Paper withBorder p="xl" role="status"><Title order={3} size="h4">No matching member</Title><Text size="sm" c="dimmed" mt="xs">Check the member ID and search again.</Text></Paper>}</>
+            : <Paper withBorder p="xl" role="status" aria-label="No matching member"><Title order={3} size="h4">No matching member</Title><Text size="sm" c="dimmed" mt="xs">Check the member ID and search again.</Text></Paper>}</>
           : <Paper withBorder p="xl" className="empty-state"><Text c="dimmed" size="sm">Enter a Member ID to search. Select a result to open the member record.</Text></Paper>}
       </section>}
     </>}
@@ -64,10 +72,11 @@ function Workspace() {
     </section>}
     {!view.loading && !view.error && view.route.screen === 'accounts' && member && <section aria-label="Account Inquiry">
       <Group justify="space-between" mb="sm"><Text size="sm" c="dimmed">{view.accounts.length} accounts · USD</Text><Button variant="default" size="xs" onClick={() => void portal.navigate({ screen: 'overview' })}>Back to Member Overview</Button></Group>
-      {!view.accounts.some((account) => account.type === 'savings' && account.isPrimary) && <Alert color="orange" title="No primary savings account" role="status" mb="md">This member has no designated primary savings account.</Alert>}
+      {(view.conflictingSignals || !view.accounts.some((account) => account.type === 'savings' && account.isPrimary)) && <Alert color="orange" title="No primary savings account" aria-label="No primary savings account" role="status" mb="md">This member has no designated primary savings account.</Alert>}
+      {view.conflictingSignals && <Alert color="orange" title="Access denied" aria-label="Access denied" role="alert" mb="md">Account access is restricted for this member.</Alert>}
       <Paper withBorder className="table-panel"><Table.ScrollContainer minWidth={780}><Table highlightOnHover verticalSpacing="sm"><caption>Member accounts</caption><Table.Thead><Table.Tr>
         {['Account ID', 'Account Type', 'Designation', 'Status', 'Current Balance', 'Available Balance', 'Currency', 'Action'].map((header) => <Table.Th scope="col" key={header}>{header}</Table.Th>)}
-      </Table.Tr></Table.Thead><Table.Tbody>{view.accounts.map((account) => <Table.Tr key={account.id}>
+      </Table.Tr></Table.Thead><Table.Tbody>{view.accounts.map((account,index) => <Table.Tr key={account.id+'-'+index}>
         <Table.Th scope="row">{account.id}</Table.Th><Table.Td>{product(account)}</Table.Td><Table.Td>{account.isPrimary ? 'Primary' : 'Standard'}</Table.Td><Table.Td><Status value={account.status} /></Table.Td>
         <Table.Td className="money">{money(account.currentBalanceMinor)}</Table.Td><Table.Td className="money available">{money(account.availableBalanceMinor)}</Table.Td><Table.Td>{account.currency}</Table.Td>
         <Table.Td><Button variant="light" size="xs" onClick={() => void portal.navigate({ screen: 'details', accountId: account.id })}>Open</Button></Table.Td>
@@ -85,13 +94,14 @@ function Workspace() {
 }
 function BankMark() { return <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 10 16 3l13 7v3H3zm3 6h4v10H6zm8 0h4v10h-4zm8 0h4v10h-4zM3 28h26v3H3z" fill="currentColor" /></svg>; }
 function StaffShell() {
-  const [session, setSession] = useState<DemoSession | null>(null); const [error, setError] = useState(false);
+  const [session, setSession] = useState<DemoSession | null>(null); const [error, setError] = useState(false); const [expired,setExpired]=useState(false);
   const iframe = useRef<HTMLIFrameElement>(null); const request = useRef(0);
   useEffect(() => {
     let live = true;
     void bootstrapSession().then((value) => { if (live) setSession(value); }).catch(() => { if (live) setError(true); });
     const message = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== iframe.current?.contentWindow || event.data?.channel !== 'demo-staff') return;
+      if(event.data.type==='staff-expired')setExpired(true);if(event.data.type==='staff-restored')setExpired(false);
       if (event.data.type === 'context-changing') { request.current++; setSession((value) => value ? { ...value, activeMember: null } : value); }
       if (event.data.type === 'context-changed') {
         const version = ++request.current;
@@ -104,7 +114,7 @@ function StaffShell() {
   const navigate = (screen: Screen) => iframe.current?.contentWindow?.postMessage({ channel: 'demo-staff', type: 'navigate', screen }, window.location.origin);
   return <div className="staff-shell">
     <header className="staff-header"><div className="institution"><span className="bank-mark"><BankMark /></span><div><Text fw={700} size="lg">Demo Credit Union</Text><Text size="xs" className="brand-subtitle">STAFF SERVICES</Text></div></div>
-      <div className="operator-summary"><Badge variant="light" color="teal">Active staff session</Badge><div><Text size="sm" fw={650}>{session?.operator.name ?? 'Staff Services'}</Text><Text size="xs">{session?.operator.id ?? 'Opening workspace'}</Text></div><span className="operator-avatar" aria-hidden="true">AC</span></div>
+      <div className="operator-summary"><Badge variant="light" color={expired?"orange":"teal"}>{expired?"Staff session expired":"Active staff session"}</Badge><div><Text size="sm" fw={650}>{session?.operator.name ?? 'Staff Services'}</Text><Text size="xs">{session?.operator.id ?? 'Opening workspace'}</Text></div><span className="operator-avatar" aria-hidden="true">AC</span></div>
     </header>
     <aside className="staff-sidebar"><Text className="nav-section" size="xs" fw={700}>WORKSPACE</Text><nav aria-label="Staff navigation">
       <UnstyledButton className="staff-nav" onClick={() => navigate('workspace')}>Staff workspace</UnstyledButton><UnstyledButton className="staff-nav" onClick={() => navigate('search')}>Member Search</UnstyledButton>

@@ -1,9 +1,10 @@
+import type { ScenarioLoader } from '../../apps/demo-api/src/scenarios.js';
 import { once } from 'node:events';
 import { createApp } from '../../apps/demo-api/src/app.js';
 import type { MemberStore } from '../../apps/demo-api/src/staff-router.js';
 
-export async function staffServer(repository: MemberStore, sessionTtlMs?: number) {
-  const server = createApp({ repository, ...(sessionTtlMs ? { sessionTtlMs } : {}) }).listen(0, '127.0.0.1');
+export async function staffServer(repository: MemberStore, sessionTtlMs?: number, scenario?: ScenarioLoader) {
+  const server = createApp({ repository, ...(scenario ? {scenario} : {}), ...(sessionTtlMs ? { sessionTtlMs } : {}) }).listen(0, '127.0.0.1');
   await once(server, 'listening');
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('Missing HTTP address');
