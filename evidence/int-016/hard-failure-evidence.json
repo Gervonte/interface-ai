@@ -1,0 +1,89 @@
+{
+  "evidenceId": "8b9e4aca-4890-4ddd-b53a-d56d4c0c896f",
+  "runId": "0f61315c-ef34-4caf-b808-7b9757f9a508",
+  "stepId": "step-006",
+  "capturedAt": "2026-11-22T18:37:52.108Z",
+  "expiresAt": "2026-11-23T18:37:52.108Z",
+  "sanitizationVersion": 1,
+  "snapshot": {
+    "schemaVersion": 1,
+    "kind": "structural-snapshot",
+    "redactedValues": true,
+    "omittedFrames": 0,
+    "documents": [
+      {
+        "depth": 0,
+        "headings": [],
+        "controls": [
+          {
+            "kind": "button",
+            "label": "Staff workspace",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Member Search",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Member Overview",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Account Inquiry",
+            "enabled": true
+          }
+        ],
+        "tables": []
+      },
+      {
+        "depth": 1,
+        "headings": [
+          {
+            "kind": "h1",
+            "label": "Account Inquiry"
+          }
+        ],
+        "controls": [
+          {
+            "kind": "button",
+            "label": "New member search",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Back to Member Overview",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Open",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Open",
+            "enabled": true
+          }
+        ],
+        "tables": [
+          {
+            "columns": [
+              "Account ID",
+              "Account Type",
+              "Designation",
+              "Status",
+              "Current Balance",
+              "Available Balance",
+              "Currency",
+              "Action"
+            ],
+            "rowCount": 2
+          }
+        ]
+      }
+    ]
+  }
+}

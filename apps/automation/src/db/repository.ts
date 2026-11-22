@@ -6,6 +6,7 @@ import { IdentifierSchema, MutationMetadataSchema, parseCapability, RunRequestSc
 import type { Capability, RunRequest, Values } from '@interface-ai/contracts';
 import { migrate, transaction } from '@interface-ai/postgres';
 import type { Pool, PoolClient } from '@interface-ai/postgres';
+import { startCategories } from '../execution/diagnostics.js';
 
 export const automationMigrations = [new URL('../../migrations/001_initial.sql', import.meta.url), new URL('../../migrations/002_runtime.sql', import.meta.url), new URL('../../migrations/003_rule_revisions.sql', import.meta.url), new URL('../../migrations/004_revision_trigger.sql', import.meta.url)];
 export const migrateAutomation = (pool: Pool) => migrate(pool, 'automation', automationMigrations);
@@ -19,7 +20,18 @@ export const targetSchema = z.strictObject({ id: IdentifierSchema, version: z.nu
 export const policySchema = z.strictObject({ id: IdentifierSchema, version: z.number().int().positive(),
   allowedOrigins: z.array(z.url().refine((value) => new URL(value).origin === value)).min(1).max(16),
   allowedActions: z.array(z.enum(['navigate', 'fill', 'click', 'wait', 'capture', 'intervene'])).min(1),
-  allowRiskyActions: z.literal(false), manualClickNames: z.array(z.string().min(1).max(500)).max(16).optional(), allowedClickNames: z.array(z.string().min(1).max(500)).max(64).optional(), allowedFillNames: z.array(z.string().min(1).max(500)).max(32).optional(), budgets: RuntimeBudgetsSchema });
+  allowRiskyActions: z.literal(false), manualClickNames: z.array(z.string().min(1).max(500)).max(16).optional(), allowedClickNames: z.array(z.string().min(1).max(500)).max(64).optional(), allowedFillNames: z.array(z.string().min(1).max(500)).max(32).optional(),
+  // Deliberately classified controls. A generic label such as "Submit" is not classified by heuristics; risk is declared here.
+  // allowRiskyActions=false fixes the baseline treatment: a risky control is blocked before dispatch on every path.
+  riskyControls: z.array(z.strictObject({ name: z.string().min(1).max(500), effect: z.enum(['irreversible', 'financial', 'destructive']), treatment: z.literal('block') })).max(32).optional(),
+  budgets: RuntimeBudgetsSchema }).superRefine((policy, ctx) => {
+  const risky = new Set(riskyControlNames(policy));
+  for (const [key, names] of [['allowedClickNames', policy.allowedClickNames], ['allowedFillNames', policy.allowedFillNames], ['manualClickNames', policy.manualClickNames]] as const)
+    for (const name of names ?? []) if (risky.has(normalizeControlName(name))) ctx.addIssue({ code: 'custom', path: [key], message: 'A risky control cannot also be permitted.' });
+});
+/** Comparison form for control names: whitespace-collapsed and case-insensitive, so a casing variant cannot bypass a risky classification. */
+export function normalizeControlName(name: string) { return name.replace(/\s+/g, ' ').trim().toLowerCase(); }
+export function riskyControlNames(policy: { riskyControls?: ReadonlyArray<{ name: string }> | undefined }) { return (policy.riskyControls ?? []).map(control => normalizeControlName(control.name)); }
 export async function loadConfigurations(files?: { target: URL; policy: URL }) {
   const target = targetSchema.parse(JSON.parse(await readFile(files?.target ?? new URL('../../config/target.v1.json', import.meta.url), 'utf8')));
   const policy = policySchema.parse(JSON.parse(await readFile(files?.policy ?? new URL('../../config/policy.v1.json', import.meta.url), 'utf8')));
@@ -37,7 +49,7 @@ export class RepositoryError extends Error {
 const eventSchema = z.strictObject({
   type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_DISPATCHED', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'RUN_FAILED', 'RUN_CANCELLED', 'CANCEL_REQUESTED', 'INTERVENTION_OPENED', 'MODEL_REQUESTED', 'MODEL_COMPLETED', 'MODEL_DECISION_STALE', 'SESSION_FINISHED','RULE_MATCHED','RECOVERY_STARTED','RECOVERY_COMPLETED','RECOVERY_EXHAUSTED','BUSINESS_OUTCOME','CAPABILITY_REVISED','CONTROL_CLAIMED','RESUME_STARTED','RESUME_REJECTED','CONTROL_RETURNED']),
   actor: z.enum(['system', 'caller', 'automation', 'human']), stepId: IdentifierSchema.nullable(), interventionId: z.uuid().optional(),
-  details: z.strictObject({ code: IdentifierSchema, operatorId: IdentifierSchema.optional(), controlName:IdentifierSchema.optional(), controlRevision: z.number().int().positive().optional(), ruleId:IdentifierSchema.optional(), attempt:z.number().int().min(0).max(10).optional(), operation: z.enum(['navigate','click','fill','wait','capture']).optional(), inputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), outputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), modelCalls: z.number().int().min(0).max(100).optional(), inferenceAttempts: z.number().int().min(0).max(100).optional(), modelName: z.enum(['openai/gpt-5','openai/gpt-4.1']).optional(), targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
+  details: z.strictObject({ code: IdentifierSchema, category: z.enum(startCategories).optional(), operatorId: IdentifierSchema.optional(), controlName:IdentifierSchema.optional(), controlRevision: z.number().int().positive().optional(), ruleId:IdentifierSchema.optional(), attempt:z.number().int().min(0).max(10).optional(), operation: z.enum(['navigate','click','fill','wait','capture']).optional(), inputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), outputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), modelCalls: z.number().int().min(0).max(100).optional(), inferenceAttempts: z.number().int().min(0).max(100).optional(), modelName: z.enum(['openai/gpt-5','openai/gpt-4.1']).optional(), targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
 }).superRefine((event, ctx) => {
   if (event.actor === 'human' && !event.interventionId) ctx.addIssue({ code: 'custom', message: 'Human events require their intervention reference.' });
 });

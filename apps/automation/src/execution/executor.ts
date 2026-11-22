@@ -46,7 +46,7 @@ export class Executor {
   private remaining() { const b=this.options.policy.budgets; return Math.min(b.activeTimeoutMs-(Date.now()-this.startedAt-this.pausedMs), b.overallTimeoutMs-(Date.now()-this.startedAt)); }
   private conditionStates:Record<string,TargetState>|undefined;
   lastEventSequence: number | undefined;
-  lastFailure: { stepId: string; code: string; evidenceIds: string[]; dispatchState: 'not_sent' | 'sent' | 'settled' | 'unknown'; effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' } | undefined;
+  lastFailure: { stepId: string; code: string; ruleId?: string; evidenceIds: string[]; dispatchState: 'not_sent' | 'sent' | 'settled' | 'unknown'; effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' } | undefined;
   lastState: { dispatchState: 'not_sent' | 'sent' | 'settled' | 'unknown'; effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' } = { dispatchState: 'not_sent', effectState: 'not_checked' };
   constructor(private readonly options: ExecutorOptions) { this.startedAt = options.startedAt ?? Date.now(); }
   private check() {
@@ -117,11 +117,11 @@ export class Executor {
     if (condition.kind === 'present') return state.count === 1;
     return state.count === 1 && (condition.kind === 'visible' ? state.visible : condition.kind === 'enabled' ? state.enabled : state.editable);
   }
-  async reject(code: import('./errors.js').FailureCode, stepId:string, dispatchState:'not_sent'|'settled'='not_sent'):Promise<never> {
+  async reject(code: import('./errors.js').FailureCode, stepId:string, dispatchState:'not_sent'|'settled'='not_sent', ruleId?:string):Promise<never> {
     this.options.gate.close();let evidenceId:string|undefined;
     try{evidenceId=await Promise.race([this.options.evidence.capture(this.options.runId,stepId,this.options.surface,this.options.policy),delay(2000).then(()=>undefined)]);}catch{}
-    this.lastFailure={stepId,code,evidenceIds:evidenceId?[evidenceId]:[],dispatchState,effectState:'not_checked'};
-    await this.options.record({type:'ACTION_FAILED',actor:'automation',stepId,details:{code,dispatchState,effectState:'not_checked',...(evidenceId?{evidenceId}:{})}});
+    this.lastFailure={stepId,code,...(ruleId?{ruleId}:{}),evidenceIds:evidenceId?[evidenceId]:[],dispatchState,effectState:'not_checked'};
+    await this.options.record({type:'ACTION_FAILED',actor:'automation',stepId,details:{code,dispatchState,effectState:'not_checked',...(ruleId?{ruleId}:{}),...(evidenceId?{evidenceId}:{})}});
     throw new ExecutionError(code,dispatchState);
   }
   checkConditions(conditions:Predicate[],stepId:string,timeoutMs?:number){return this.execute({type:'check',conditions},stepId,timeoutMs);}
@@ -147,6 +147,8 @@ export class Executor {
       if (operation.type === 'click' || operation.type === 'fill') {
         const target = this.definition(operation.target); const state = await this.options.surface.inspect(target, this.options.policy); this.unique(state);
         if (!state.visible || !state.enabled || (operation.type === 'fill' && !state.editable)) throw new ExecutionError('TARGET_NOT_ACTIONABLE');
+        // Risk classification is checked first and independently of the allowlists, so a misconfigured allowlist cannot permit it.
+        if ((this.options.policy.riskyControlNames ?? []).includes(state.name.replace(/\s+/g, ' ').trim().toLowerCase())) throw new ExecutionError('RISKY_ACTION_BLOCKED');
         if (!(operation.type === 'click' ? this.options.policy.allowedClickNames : this.options.policy.allowedFillNames).includes(state.name)) throw new ExecutionError('POLICY_BLOCKED');
         const value = operation.type === 'fill' ? this.options.inputs[operation.value.name] : undefined;
         if (operation.type === 'fill' && (typeof value !== 'string' || operation.value.kind !== 'input')) throw new ExecutionError('INVALID_BINDING');

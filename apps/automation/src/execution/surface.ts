@@ -8,7 +8,7 @@ export interface ResolvedTarget extends Omit<Target, 'within'> {
 export const TargetStateSchema = z.strictObject({ count: z.number().int().min(0), visible: z.boolean(), enabled: z.boolean(), editable: z.boolean(),
   text: z.string().max(16_384), value: z.string().max(4096), checked: z.boolean(), tag: z.string().max(20), name: z.string().max(500), inputType: z.string().max(30) });
 export type TargetState = z.infer<typeof TargetStateSchema>;
-export interface SurfacePolicy { allowedOrigins: readonly string[]; allowedClickNames: readonly string[]; allowedFillNames: readonly string[] }
+export interface SurfacePolicy { allowedOrigins: readonly string[]; allowedClickNames: readonly string[]; allowedFillNames: readonly string[]; /** Normalized names of controls classified as risky; always blocked. */ riskyControlNames?: readonly string[] }
 export interface BrowserSurface {
   location(): Promise<string>;
   observe?(inputs: Values, policy: SurfacePolicy): Promise<Observation>;

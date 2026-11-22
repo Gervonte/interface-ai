@@ -16,6 +16,7 @@ import { Executor } from '../apps/automation/src/execution/executor.js';
 import { DispatchGate } from '../apps/automation/src/execution/gate.js';
 import { EvidenceStore } from '../apps/automation/src/execution/evidence.js';
 import type { StoredEventInput } from '../apps/automation/src/db/repository.js';
+import { riskyControlNames } from '../apps/automation/src/db/repository.js';
 
 const scope = { kind: 'frame' as const, frames: [{ attribute: 'title' as const, value: 'Member servicing workspace' }] };
 const role = (name: string, role = 'button'): Target => ({ scope, within: [], locator: { kind: 'role', role: role as 'button', name, exact: true }, expectedMatches: 1 });
@@ -25,7 +26,7 @@ const blankOutputs = { memberId: '', accountId: '', accountType: '', currentBala
 const goal = 'Find the primary savings account current balance for memberId.';
 const configuration: Configuration = { target: { id: 'demo-credit-union', version: 2, surface: 'browser', applicationFamily: 'demo-credit-union', entryPoint: 'https://portal.example/' }, policy: { id: 'demo-policy', version: 2, allowedOrigins: ['https://portal.example'], allowedClickNames: ['Member Search', 'Search', 'Open', 'Account Inquiry'], allowedFillNames: ['Member ID'], allowedActions: ['navigate','click','fill','capture','wait','intervene'], allowRiskyActions: false, budgets: { ...DEFAULT_RUNTIME_BUDGETS, pollIntervalMs: 1, stepTimeoutMs: 100, activeTimeoutMs: 10_000 } } };
 async function fixture(memberId: string, saved?: Capability, wrongIdentity = false, profile = false, requested: Extract<RunRequest,{mode:'discovery'}> = currentBalanceRequest) {
-  const config=structuredClone(configuration);if(profile){config.target.version=3;config.policy.allowedClickNames!.push('Acknowledge notice');config.policy.budgets.maxActions=300;}
+  const config=structuredClone(configuration);config.policy.riskyControls=[{name:'Close account',effect:'irreversible',treatment:'block'}];if(profile){config.target.version=3;config.policy.allowedClickNames!.push('Acknowledge notice');config.policy.budgets.maxActions=300;}
   let screen = 'Staff workspace'; let location = 'about:blank'; let input = ''; let sequence = 0; let modelCalls = 0; let published: Capability | undefined; let outputs: Values | undefined;
   const selectedType=requested.outputContract.account.type==='checking'?'Checking':'Primary Savings';
   const accountId = (selectedType==='Checking'?'C':'S')+(memberId==='M1001'?'2001':'2002');
@@ -58,7 +59,7 @@ async function fixture(memberId: string, saved?: Capability, wrongIdentity = fal
   const folder = await mkdtemp(tmpdir() + '/workflows-');
   const context: WorkerContext = { runId: randomUUID(), signal: new AbortController().signal, configuration:config,
     record: async event => { events.push(event); return ++sequence; }, capability: async () => { if (!saved) throw new Error('Missing artifact'); return saved; },
-    executor: async (targets, variables) => new Executor({ runId: randomUUID(), entryPoint: config.target.entryPoint, policy: { ...config.policy, allowedFillNames: config.policy.allowedFillNames!, allowedClickNames: config.policy.allowedClickNames! }, targets, inputs: { memberId }, ...(variables ? { variables } : {}), surface, gate: new DispatchGate(2), revision: 2, signal: new AbortController().signal, routes: { 'fresh-session': 'about:blank', 'target-entry': config.target.entryPoint }, authorize: async () => {}, record: async event => { events.push(event); return ++sequence; }, evidence: new EvidenceStore(folder) }),
+    executor: async (targets, variables) => new Executor({ runId: randomUUID(), entryPoint: config.target.entryPoint, policy: { ...config.policy, allowedFillNames: config.policy.allowedFillNames!, allowedClickNames: config.policy.allowedClickNames!, riskyControlNames: riskyControlNames(config.policy) }, targets, inputs: { memberId }, ...(variables ? { variables } : {}), surface, gate: new DispatchGate(2), revision: 2, signal: new AbortController().signal, routes: { 'fresh-session': 'about:blank', 'target-entry': config.target.entryPoint }, authorize: async () => {}, record: async event => { events.push(event); return ++sequence; }, evidence: new EvidenceStore(folder) }),
     plan: async ({ observation, outputContract }) => {
       if (saved) throw new Error('Replay called the model'); modelCalls++;
       if (screen === 'Account Details') return DecisionSchema.parse({ observationId: observation.observationId, action: 'finish', controlRef: '', inputName: '', outputs: Object.fromEntries(Object.entries(outputContract.fields).map(([name,field]) => [name, observation.fields.find(item => item.label === meaningLabels[field.meaning])!.ref])), reason: 'goal_complete' });
@@ -133,6 +134,32 @@ describe('model-selected discovery and deterministic capability replay', () => {
     const f=await fixture('M1001',undefined,false,false,availableBalanceRequest);const plan=f.context.plan;
     f.context.plan=async data=>{const decision=await plan(data);if(decision.action==='finish'){const {availableBalanceMinor:_omitted,...rest}=decision.outputs;return {...decision,outputs:rest};}return decision;};
     await expect(f.discover()).rejects.toMatchObject({code:'ARTIFACT_INVALID'});expect(f.artifact()).toBeUndefined();
+  });
+  it('replaces input values and credential-shaped tokens in the goal before it reaches the planner',async()=>{
+    const f=await fixture('M1001');const plan=f.context.plan;const seen:unknown[]=[];
+    f.context.plan=async data=>{seen.push(data);return plan(data);};
+    await workflowWorker({...currentBalanceRequest,goal:'Read M1001 savings balance. Token sk-syntheticSecretMarker123 Bearer bb_live_syntheticMarker4567',inputs:{memberId:'M1001'}},f.context);
+    const sent=JSON.stringify(seen);
+    expect(sent).toContain('{{input.memberId}}');expect(sent).toContain('[REDACTED]');
+    expect(sent).not.toMatch(/M1001|syntheticSecretMarker|syntheticMarker4567|\$1,250\.34/);
+  });
+  it('blocks a planner-selected risky control during discovery without dispatching it',async()=>{
+    const f=await fixture('M1001');const observe=f.surface.observe!;
+    f.surface.observe=async(inputs,policy)=>{const o=await observe(inputs,policy);if(o.headings.some(h=>h.label==='Account Details'))o.controls.push({ref:'cx',kind:'click',label:'Close account' as 'Open',target:role('Close account'),enabled:true,filled:false,row:{},matchesInputs:[]});return o;};
+    const plan=f.context.plan;
+    f.context.plan=async data=>data.observation.controls.some(c=>c.ref==='cx')?{observationId:data.observation.observationId,action:'click',controlRef:'cx',inputName:'',outputs:Object.fromEntries(Object.keys(data.outputContract.fields).map(n=>[n,''])),reason:'continue'}:plan(data);
+    await expect(f.discover()).rejects.toMatchObject({code:'RISKY_ACTION_BLOCKED'});
+    expect(f.actions).not.toContain('Close account');expect(f.artifact()).toBeUndefined();
+    expect(f.events.find(e=>e.type==='ACTION_FAILED')?.details).toMatchObject({code:'RISKY_ACTION_BLOCKED',dispatchState:'not_sent'});
+  });
+  it('blocks a saved step retargeted to a risky control during model-free replay',async()=>{
+    const discovery=await fixture('M1001');await discovery.discover();const artifact=structuredClone(discovery.artifact());
+    const click=artifact.steps.find(step=>step.type==='click'&&artifact.targets[step.target]?.locator.kind==='role'&&(artifact.targets[step.target]!.locator as {name:string}).name==='Account Inquiry');
+    if(click?.type!=='click')throw new Error('Missing Account Inquiry step');
+    (artifact.targets[click.target]!.locator as {name:string}).name='Close account';
+    const replay=await fixture('M1002',artifact);
+    await expect(workflowWorker({mode:'replay',targetId:'demo-credit-union',capability:{id:artifact.capabilityId,version:artifact.version},inputs:{memberId:'M1002'}},replay.context)).rejects.toMatchObject({code:'RISKY_ACTION_BLOCKED'});
+    expect(replay.actions).not.toContain('Close account');expect(replay.calls()).toBe(0);
   });
   it('attaches authored scenario rules to a newly discovered capability',async()=>{
     const f=await fixture('M1001',undefined,false,true);await f.discover();expect(f.artifact().outcomeRules).toHaveLength(3);expect(f.artifact().runtimeGuards!.some(rule=>rule.id==='account-identity')).toBe(true);

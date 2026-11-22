@@ -97,6 +97,8 @@ export function operateDom(request: { target: ResolvedTarget; policy: SurfacePol
     if (dialogs.some(dialog => !dialog.contains(element))) return fail('TARGET_NOT_ACTIONABLE');
     if (!state.visible || !state.enabled || (request.mode === 'fill' && !state.editable)) return fail('TARGET_NOT_ACTIONABLE');
     // These checks and dispatch share one browser turn: no first-match/ordinal fallback or DOM mutation to tag targets.
+    // Same-turn backstop for the executor's risky-control check.
+    if ((request.policy.riskyControlNames ?? []).includes(state.name.replace(/\s+/g, ' ').trim().toLowerCase())) return fail('POLICY_BLOCKED');
     if (request.mode === 'click') {
       if (!request.policy.allowedClickNames.includes(state.name) || !['button', 'link', 'checkbox'].includes(role(element))) return fail('POLICY_BLOCKED');
       const anchor = element.closest('a[href]');

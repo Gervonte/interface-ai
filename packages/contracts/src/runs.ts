@@ -43,7 +43,8 @@ export const EffectStateSchema = z.enum(['not_checked', 'confirmed', 'not_applie
 const summary = z.strictObject({ code, description: z.string().max(500) });
 export const BlockedContextSchema = z.strictObject({
   stepId: Id.nullable(), actionIndex: z.number().int().min(0).nullable(), reason: z.enum(['UNEXPECTED_DIALOG', 'SESSION_EXPIRED', 'TARGET_NOT_FOUND', 'AMBIGUOUS_TARGET',
-    'STATE_TIMEOUT', 'ACTION_OUTCOME_UNKNOWN', 'MANUAL_PREREQUISITE', 'SESSION_LOST', 'POLICY_BLOCKED']),
+    'STATE_TIMEOUT', 'ACTION_OUTCOME_UNKNOWN', 'MANUAL_PREREQUISITE', 'SESSION_LOST', 'POLICY_BLOCKED',
+    'IDENTITY_MISMATCH', 'RECOVERY_EXHAUSTED', 'CONFLICTING_SIGNALS', 'STEP_FAILED']),
   dispatchState: DispatchStateSchema, effectState: EffectStateSchema, checkpointId: Id.nullable(),
   expected: summary, observed: summary, evidenceIds: z.array(z.uuid()).max(16),
 });

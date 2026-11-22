@@ -16,14 +16,14 @@ const target: Target = { scope: { kind: 'document' }, within: [], locator: { kin
 const validState: TargetState = { count: 1, visible: true, enabled: true, editable: true, text: 'M1001', value: '', checked: false, tag: 'input', name: 'Member ID', inputType: 'text' };
 const snapshot = { schemaVersion: 1, kind: 'structural-snapshot', redactedValues: true, omittedFrames: 0,
   documents: [{ depth: 0, headings: [{ kind: 'h1', label: 'Member Search' }], controls: [{ kind: 'input', label: 'Member ID', enabled: true }], tables: [] }] };
-async function fixture(overrides: Partial<BrowserSurface> = {}, maxActions = 100) {
+async function fixture(overrides: Partial<BrowserSurface> = {}, maxActions = 100, policyOverrides: { allowedClickNames?: string[]; riskyControlNames?: string[] } = {}) {
   let dispatched = 0; const events: StoredEventInput[] = []; const gate = new DispatchGate(2); const abort = new AbortController();
   const folder = await mkdtemp(tmpdir() + '/executor-evidence-'); const runId = randomUUID();
   const surface: BrowserSurface = { location: async () => 'https://portal.example/', inspect: async () => validState,
     dispatch: async () => { dispatched++; }, navigate: async () => { dispatched++; }, snapshot: async () => snapshot, ...overrides };
   const executor = new Executor({ runId, entryPoint: 'https://portal.example/', surface, gate, signal: abort.signal, revision: 2,
-    policy: { allowedOrigins: ['https://portal.example'], allowedClickNames: ['Open'], allowedFillNames: ['Member ID'], allowedActions: ['navigate', 'click', 'fill', 'wait', 'capture'], budgets: { ...DEFAULT_RUNTIME_BUDGETS, maxActions } },
-    targets: { member: target }, inputs: { memberId: 'synthetic-private-marker' }, authorize: async () => {}, record: async event => { events.push(event); }, evidence: new EvidenceStore(folder) });
+    policy: { allowedOrigins: ['https://portal.example'], allowedClickNames: ['Open'], allowedFillNames: ['Member ID'], allowedActions: ['navigate', 'click', 'fill', 'wait', 'capture'], budgets: { ...DEFAULT_RUNTIME_BUDGETS, maxActions }, ...policyOverrides },
+    targets: { member: target, button: { ...target, locator: { kind: 'role', role: 'button', name: 'Close account', exact: true } } }, inputs: { memberId: 'synthetic-private-marker' }, authorize: async () => {}, record: async event => { events.push(event); }, evidence: new EvidenceStore(folder) });
   return { executor, gate, abort, events, folder, runId, dispatched: () => dispatched };
 }
 describe('shared executor dispatch boundary', () => {
@@ -32,6 +32,16 @@ describe('shared executor dispatch boundary', () => {
     await fixtureValue.executor.execute({ type: 'fill', target: 'member', value: { kind: 'input', name: 'memberId' } }, 'fill-member');
     expect(value).toBe('synthetic-private-marker'); expect(fixtureValue.events.map(event => event.type)).toEqual(['ACTION_INTENT', 'ACTION_DISPATCHED', 'ACTION_COMPLETED']);
     expect(JSON.stringify(fixtureValue.events)).not.toContain('synthetic-private-marker');
+  });
+  it.each(['Close account', '  close   ACCOUNT '])('blocks a declared risky control (%j) before dispatch even if an allowlist names it', async name => {
+    const f = await fixture({ inspect: async () => ({ ...validState, tag: 'button', name, inputType: '' }) }, 100, { allowedClickNames: ['Open', 'Close account', name], riskyControlNames: ['close account'] });
+    await expect(f.executor.execute({ type: 'click', target: 'button' }, 'close')).rejects.toMatchObject({ code: 'RISKY_ACTION_BLOCKED', dispatchState: 'not_sent' });
+    expect(f.dispatched()).toBe(0); expect(f.events.map(event => event.type)).toEqual(['ACTION_INTENT', 'ACTION_FAILED']);
+    expect(f.events.at(-1)?.details).toMatchObject({ code: 'RISKY_ACTION_BLOCKED' });
+  });
+  it('still dispatches a permitted reversible control under the same risky-control policy', async () => {
+    const f = await fixture({ inspect: async () => ({ ...validState, tag: 'button', name: 'Open', inputType: '' }) }, 100, { riskyControlNames: ['close account'] });
+    await f.executor.execute({ type: 'click', target: 'button' }, 'open'); expect(f.dispatched()).toBe(1);
   });
   it.each([0, 2])('dispatches nothing with %i target matches', async count => {
     const f = await fixture({ inspect: async () => ({ ...validState, count }) });

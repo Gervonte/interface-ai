@@ -5,9 +5,9 @@ import { api, PortalError } from './api';
 
 export type Screen = 'workspace' | 'search' | 'overview' | 'accounts' | 'details';
 export interface Route { screen: Screen; memberId?: string; accountId?: string }
-export interface View { route: Route; member: DemoMember | null; accounts: DemoAccount[]; account: DemoAccount | null;
+export interface View { route: Route; member: DemoMember | null; accounts: DemoAccount[]; account: DemoAccount | null; notice: string;
   conflictingSignals: boolean; overview: DemoOverview | null; result: DemoSearch | null; loading: boolean; error: string; errorCode: string; inputError: string; input: string }
-const initial: View = { route: { screen: 'workspace' }, member: null, accounts: [], account: null, overview: null, result: null,
+const initial: View = { route: { screen: 'workspace' }, member: null, accounts: [], account: null, notice: '', overview: null, result: null,
   conflictingSignals:false, loading: true, error: '', errorCode: '', inputError: '', input: '' };
 const screens = ['workspace', 'search', 'overview', 'accounts', 'details'];
 const notify = (type: 'context-changing' | 'context-changed') => window.parent.postMessage({ channel: 'demo-staff', type }, window.location.origin);
@@ -51,7 +51,7 @@ export function usePortal() {
         } else {
           if (!next.accountId) throw new PortalError('ACCOUNT_NOT_FOUND', 'Choose an account from Account Inquiry.');
           const data = await api.details(member.id, next.accountId, token.signal); if (!token.current()) return;
-          setView({ ...initial, route: next, loading: false, member: data.member, account: data.account });
+          setView({ ...initial, route: next, loading: false, member: data.member, account: data.account, notice: data.notice ?? '' });
         }
       }
       if (historyMode !== 'none') window.history[historyMode === 'push' ? 'pushState' : 'replaceState'](next, '', '/servicing#' + next.screen);
