@@ -16,7 +16,7 @@ This checklist defines observable outcomes independently of implementation choic
 ## 1. Live discovery — required implementation
 
 - [x] **DISC-01 — Goal and target input.** Accept a natural-language goal and a target application or entry point. **Verify:** supply both through the documented interface. (§3.1)
-  **Evidence:** Goal, output contract, target and inputs through `POST /v1/runs` or `pnpm demo:e2e --request`: [request](../evidence/request.json), [README demo](../README.md#demo-goal--discovery--saved-capability--replay).
+  **Evidence:** Goal, output contract, target and inputs through `POST /v1/runs` or `pnpm demo:e2e --request`: [request](../evidence/request.json), [README demo](../README.md#full-demo-goal--discovery--capability--replay).
 - [x] **DISC-02 — Genuine model-driven interaction.** An LLM observes the live UI, chooses actions, and actually operates it through a non-trivial multi-step flow. **Verify:** capture at least one successful live discovery run with evidence connecting observations, decisions, actions, and the resulting UI state. A scripted or mocked model run alone does not qualify. (§3.1, §4)
   **Evidence:** [Discovery run](../evidence/discovery.json): seven `gpt-4.1` decisions, each followed by the dispatched action and confirmed UI state; more in [int-023](../evidence/int-023/README.md) and [int-014-015](../evidence/int-014-015/README.md).
 - [x] **DISC-03 — Bounded execution.** Discovery stops when the goal is met or a defined limit/dead-end is reached. **Verify:** demonstrate success and a stopping condition; inspect configured step/time limits and dead-end handling. (§3.1)
