@@ -11,4 +11,4 @@ Verified on 2026-11-16 using Node 26.2.0, pnpm 10.32.1, Stagehand 4.4.0, and clo
 
 The curated JSON was checked against the local credential values before retaining it. It contains no API key, project ID, authenticated connection URL, provider response body, recording, or browser profile. Raw runtime output stays ignored. Only synthetic data is served by the fixture.
 
-Reproduce with [BROWSERBASE_SETUP.md](../../BROWSERBASE_SETUP.md). The complete target portal and automation acceptance checks remain future tasks.
+Reproduce with [BROWSERBASE_SETUP.md](../../docs/BROWSERBASE_SETUP.md). The complete target portal and automation acceptance checks remain future tasks.

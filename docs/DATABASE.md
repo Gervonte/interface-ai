@@ -1,6 +1,6 @@
 # PostgreSQL persistence (INT-005)
 
-The workspace uses **PostgreSQL 18.7**, the pinned official Bookworm image, **pg 8.23.1**, and explicit SQL migrations. The image digest is recorded in [compose.database.yaml](compose.database.yaml); dependency versions are in the workspace catalog and lockfile. The shared `@interface-ai/postgres` package contains connection, transaction, and migration helpers only. Target business data stays in the demo app.
+The workspace uses **PostgreSQL 18.7**, the pinned official Bookworm image, **pg 8.23.1**, and explicit SQL migrations. The image digest is recorded in [compose.database.yaml](../compose.database.yaml); dependency versions are in the workspace catalog and lockfile. The shared `@interface-ai/postgres` package contains connection, transaction, and migration helpers only. Target business data stays in the demo app.
 
 ## Start and initialize
 

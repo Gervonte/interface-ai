@@ -51,4 +51,4 @@ The exact capability from B was replayed for M1001 while the portal ran the `wro
 
 [Runner result](result.json) summarizes all four runs. Files were scanned for credentials, bearer tokens, cookies, the invalid test key, provider URLs and tunnel hostnames; none are present. The only scanner matches were the step IDs `risk-NN`. The frozen target and policy files are not included, because they contain the temporary tunnel hostname. The run views contain run B's own transient output once, in its result; those synthetic values are intended demo data.
 
-`pnpm check:db` on this code: 258 default tests, 42 PostgreSQL tests, typechecking and production builds pass, including the synthetic-marker sweep, session-start classification and risk-policy tests described in [SAFETY.md](../../SAFETY.md).
+`pnpm check:db` on this code: 258 default tests, 42 PostgreSQL tests, typechecking and production builds pass, including the synthetic-marker sweep, session-start classification and risk-policy tests described in [SAFETY.md](../../docs/SAFETY.md).

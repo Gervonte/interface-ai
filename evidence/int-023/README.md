@@ -21,4 +21,4 @@ Local checks at the time of the live runs: 218 default tests, 37 PostgreSQL test
 
 [Earlier blocked attempt](blocked-attempt/verification-blocked.json): before these runs, Browserbase session creation returned HTTP 402 (usage/plan restriction) before any model call or UI action. That attempt published nothing and is kept for the record; its run reported the misleading code `SESSION_CLEANUP_UNCONFIRMED`, which is tracked under INT-016.
 
-[Request contract, supported meanings and how to rerun](../../GOAL_OUTPUTS.md).
+[Request contract, supported meanings and how to rerun](../../docs/GOAL_OUTPUTS.md).

@@ -16,7 +16,7 @@ Get the key and project ID from your Browserbase project settings. Node loads `.
 
 ## Start the fixture and tunnel
 
-Install dependencies as described in [README](README.md). Install the `cloudflared` command using [Cloudflare's installation instructions](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/downloads/). On macOS, `brew install cloudflared` is sufficient. The live check used cloudflared 2026.11.0.
+Install dependencies as described in [README](../README.md). Install the `cloudflared` command using [Cloudflare's installation instructions](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/downloads/). On macOS, `brew install cloudflared` is sufficient. The live check used cloudflared 2026.11.0.
 
 In terminal 1, from the repo root:
 
@@ -88,11 +88,11 @@ After the check, use Ctrl+C in terminal 2 to stop the tunnel and in terminal 1 t
 
 The fixture uses ordinary HTML forms and semantic table headings inside a real iframe. M1001 and M1002 have different primary-savings values and reordered account rows. “Open” navigates to the selected account's details. This provides SDK control patterns for INT-003, not the complete member-search/overview/inquiry workflow required in INT-006.
 
-See [the recorded live result](evidence/int-002/README.md). Automated tests use fake provider dependencies to check cleanup, health, termination confirmation, and safe configuration failures; HTTP tests check the public fixture boundary. Those tests do not replace the live Browserbase result and are not discovery/replay assessment evidence.
+See [the recorded live result](../evidence/int-002/README.md). Automated tests use fake provider dependencies to check cleanup, health, termination confirmation, and safe configuration failures; HTTP tests check the public fixture boundary. Those tests do not replace the live Browserbase result and are not discovery/replay assessment evidence.
 
 ## Connected staff portal (INT-006)
 
-The compatibility fixture above remains isolated on port 3003. To test the full PostgreSQL-backed portal, use `pnpm demo:serve`, tunnel only port 3002, and run `BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm browserbase:portal-check`. Use the HTTPS root, without `/compatibility`. This separate authored UI check verifies both members, repeated controls and negative states without inference; it does not discover/save a capability. Its provider session timeout is 300 seconds. [Full start/stop instructions](PORTAL.md); [verified evidence](evidence/int-006/README.md).
+The compatibility fixture above remains isolated on port 3003. To test the full PostgreSQL-backed portal, use `pnpm demo:serve`, tunnel only port 3002, and run `BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm browserbase:portal-check`. Use the HTTPS root, without `/compatibility`. This separate authored UI check verifies both members, repeated controls and negative states without inference; it does not discover/save a capability. Its provider session timeout is 300 seconds. [Full start/stop instructions](PORTAL.md); [verified evidence](../evidence/int-006/README.md).
 
 ## Shared executor verification (INT-007/008)
 

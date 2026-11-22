@@ -32,7 +32,7 @@ BROWSERBASE_PORTAL_URL=https://your-current-tunnel.trycloudflare.com pnpm workfl
 
 This makes real paid browser/model requests. It launches an authenticated loopback automation API child, discovers for M1001, exports the capability through its authorized API, and waits for confirmed browser closure. It stops that process, starts another API process, loads the exact saved capability version from PostgreSQL, and replays for M1002. The second member has a different balance and account order. The command checks process IDs, exact capability references, typed UI outputs, model metrics, and session cleanup; any discrepancy exits nonzero. No automation code imports target fixtures or calls target business APIs.
 
-Expected results: M1001/S2001 returns `currentBalanceMinor: 125034`; replay for M1002/S2002 returns `8765`. Both return savings/USD. The runner's assertions use these synthetic QA expectations; those values are never planner inputs or replay steps. Successful replay has zero model calls, tokens, and forbidden-inference attempts. [Actual exported evidence](evidence/int-009-011/README.md).
+Expected results: M1001/S2001 returns `currentBalanceMinor: 125034`; replay for M1002/S2002 returns `8765`. Both return savings/USD. The runner's assertions use these synthetic QA expectations; those values are never planner inputs or replay steps. Successful replay has zero model calls, tokens, and forbidden-inference attempts. [Actual exported evidence](../evidence/int-009-011/README.md).
 
 To repeat only replay while the original tunnel/binding remains available:
 
@@ -76,4 +76,4 @@ Offline tests use injected planners/surfaces to exercise construction, changed-i
 
 The default runtime now uses committed target v3 and policy v5 (v4 plus declared risky controls). Earlier bindings and saved artifacts remain unchanged. Existing capabilities need an explicit immutable rule revision to gain the new declarations; the scenario verifier creates one without inventing another discovery.
 
-Integrated operator claim, manual actions, and validated resume are documented in [HANDOFF.md](HANDOFF.md). Real discovery and exact-artifact replay handoffs are verified in [evidence/int-014-015](evidence/int-014-015/README.md), including explicit human contribution provenance and zero replay inference. Use `handoff:demo` for operator verification; this baseline `workflow:demo` verifier still cancels unexpected interventions for cleanup.
+Integrated operator claim, manual actions, and validated resume are documented in [HANDOFF.md](HANDOFF.md). Real discovery and exact-artifact replay handoffs are verified in [evidence/int-014-015](../evidence/int-014-015/README.md), including explicit human contribution provenance and zero replay inference. Use `handoff:demo` for operator verification; this baseline `workflow:demo` verifier still cancels unexpected interventions for cleanup.

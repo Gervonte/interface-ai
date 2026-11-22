@@ -310,7 +310,7 @@ In the minimal demo, the operator watches a run and follows its `activeIntervent
 
 ### Start discovery
 
-Implementation note (INT-023): the current account-inquiry API additionally requires an explicit typed `outputContract` and uses the `memberId` binding. Complete runnable requests are in [current balance](examples/discovery-current.json) and [available balance](examples/discovery-available.json); see [contract and limits](GOAL_OUTPUTS.md). The domain-neutral record/status example below illustrates the broader design, not an accepted request for the implemented portal.
+Implementation note (INT-023): the current account-inquiry API additionally requires an explicit typed `outputContract` and uses the `memberId` binding. Complete runnable requests are in [current balance](../examples/discovery-current.json) and [available balance](../examples/discovery-available.json); see [contract and limits](GOAL_OUTPUTS.md). The domain-neutral record/status example below illustrates the broader design, not an accepted request for the implemented portal.
 
 `POST /v1/runs`
 
@@ -580,7 +580,7 @@ The next stage should resolve these risks against concrete scenarios before expa
 
 ### 6.1 Capability artifact and discovery-to-replay conversion
 
-**INT-004 implementation:** [CONTRACTS.md](CONTRACTS.md) and `packages/contracts` define the validated format-v1 shapes, semantic reference/type checks, constrained embedded schemas, and initial finite budgets. The illustrative excerpt below remains incomplete; the [complete authored contract fixture](examples/README.md) is validation data, not a real discovery artifact. Runtime target evaluation, actual source-event verification, and interpretation remain their later implementation tasks.
+**INT-004 implementation:** [CONTRACTS.md](CONTRACTS.md) and `packages/contracts` define the validated format-v1 shapes, semantic reference/type checks, constrained embedded schemas, and initial finite budgets. The illustrative excerpt below remains incomplete; the [complete authored contract fixture](../examples/README.md) is validation data, not a real discovery artifact. Runtime target evaluation, actual source-event verification, and interpretation remain their later implementation tasks.
 
 **Design question:** how do we turn one real model-driven execution into a typed, parameterized workflow that can run again without the model?
 

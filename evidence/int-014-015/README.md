@@ -41,4 +41,4 @@ Two historical diagnostics remain separate: [an earlier failed discovery](histor
 
 `pnpm check:db` passes typechecking, 200 default tests, 36 PostgreSQL tests, and production builds. Checks include competing/stale claims, failed validation/reclaim, cancellation during manual dispatch, a shorter declared intervention deadline, explicit planner-help boundaries, guarded discovery/replay, and publication refusing omitted human mutations.
 
-INT-014/015 are complete at this stated scope. Goal-driven output contracts, full safety/redaction and precise failure verification, and submission packaging remain later baseline tasks. [Setup, API, deadlines, and limits](../../HANDOFF.md).
+INT-014/015 are complete at this stated scope. Goal-driven output contracts, full safety/redaction and precise failure verification, and submission packaging remain later baseline tasks. [Setup, API, deadlines, and limits](../../docs/HANDOFF.md).

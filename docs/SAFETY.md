@@ -1,10 +1,10 @@
 # Safety policy and failure diagnostics (INT-016)
 
-Status: implemented and verified, including live runs on 2026-11-22 (provider refusal, risky block, embedded instructions, hard failure). [Live evidence](evidence/int-016/README.md).
+Status: implemented and verified, including live runs on 2026-11-22 (provider refusal, risky block, embedded instructions, hard failure). [Live evidence](../evidence/int-016/README.md).
 
 ## Permitted operations
 
-The versioned policy ([policy.v5.json](apps/automation/config/policy.v5.json), the runtime default) is enforced by the shared executor on every path: model-driven discovery, model-free replay, and operator manual control.
+The versioned policy ([policy.v5.json](../apps/automation/config/policy.v5.json), the runtime default) is enforced by the shared executor on every path: model-driven discovery, model-free replay, and operator manual control.
 
 | Check | Where | Result when violated |
 | --- | --- | --- |
