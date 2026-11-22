@@ -4,7 +4,7 @@ Everything here comes from real runs: Browserbase-hosted browsers operating the 
 
 ## End-to-end demonstration (start here)
 
-Produced on 2026-11-22 by `pnpm demo:e2e` (the [README demo path](../README.md#demo-goal--discovery--saved-capability--replay)) on the final code. One discovery produced one capability; both replays consumed that exact version. Each run used its own automation API process and browser session, and every session reports `closed`.
+Produced on 2026-11-22 by `pnpm demo:e2e` (the [README demo path](../README.md#full-demo-goal--discovery--capability--replay)) on the final code. One discovery produced one capability; both replays consumed that exact version. Each run used its own automation API process and browser session, and every session reports `closed`.
 
 | File | What it is |
 | --- | --- |
