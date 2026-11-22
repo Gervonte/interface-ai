@@ -1,15 +1,15 @@
 {
-  "processId": 9394,
+  "processId": 28525,
   "run": {
-    "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+    "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
     "mode": "discovery",
     "target": {
       "id": "demo-credit-union",
-      "version": 1795373262
+      "version": 1795375545
     },
     "policy": {
       "id": "demo-policy",
-      "version": 1795373262
+      "version": 1795375545
     },
     "status": "completed",
     "control": {
@@ -17,7 +17,7 @@
       "revision": 3
     },
     "capability": {
-      "id": "account-read-236d0fa56936446887d29fbe0f393114",
+      "id": "account-read-b6ae807acd5544879a2b59ef60439aab",
       "version": 1
     },
     "currentStepId": "verify-captured-identity",
@@ -25,7 +25,7 @@
     "result": {
       "kind": "success",
       "capability": {
-        "id": "account-read-236d0fa56936446887d29fbe0f393114",
+        "id": "account-read-b6ae807acd5544879a2b59ef60439aab",
         "version": 1
       },
       "output": {
@@ -39,12 +39,12 @@
         }
       }
     },
-    "createdAt": "2026-11-22T18:47:43.335Z",
-    "updatedAt": "2026-11-22T18:49:02.627Z"
+    "createdAt": "2026-11-22T19:25:46.398Z",
+    "updatedAt": "2026-11-22T19:27:06.437Z"
   },
   "events": [
     {
-      "eventId": "4a32655f-e6a6-44aa-ac57-fc0c70fc1dc5",
+      "eventId": "864a7114-6d80-49f1-85f3-9b7371028b2d",
       "sequence": 1,
       "type": "RUN_ACCEPTED",
       "actor": "caller",
@@ -55,10 +55,10 @@
           "memberId"
         ]
       },
-      "createdAt": "2026-11-22T18:47:43.335Z"
+      "createdAt": "2026-11-22T19:25:46.398Z"
     },
     {
-      "eventId": "6e2c5cca-a992-4d80-b5a1-600cdc36e92e",
+      "eventId": "36be1df2-8285-4198-af60-6b02ef93ecfd",
       "sequence": 2,
       "type": "RUN_STARTED",
       "actor": "system",
@@ -66,10 +66,10 @@
       "details": {
         "code": "started"
       },
-      "createdAt": "2026-11-22T18:47:43.359Z"
+      "createdAt": "2026-11-22T19:25:46.452Z"
     },
     {
-      "eventId": "cfde74e6-2010-437c-9ede-3ed455ae022c",
+      "eventId": "9021841d-b057-4aaa-a925-593a135cdf74",
       "sequence": 3,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -78,10 +78,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:47:47.851Z"
+      "createdAt": "2026-11-22T19:25:50.834Z"
     },
     {
-      "eventId": "7e9c27f8-383d-4dbf-b65b-74c6a32b148a",
+      "eventId": "2a2db008-d17b-4827-ba03-90c581086dee",
       "sequence": 4,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -90,10 +90,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:47:47.981Z"
+      "createdAt": "2026-11-22T19:25:50.958Z"
     },
     {
-      "eventId": "d43ffebf-204b-442a-9eb0-3c4d14feae68",
+      "eventId": "7a9777d3-80c0-4da4-be89-fd113c7b9189",
       "sequence": 5,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -102,10 +102,10 @@
         "code": "admitted",
         "operation": "navigate"
       },
-      "createdAt": "2026-11-22T18:47:48.109Z"
+      "createdAt": "2026-11-22T19:25:51.082Z"
     },
     {
-      "eventId": "84f4c21b-7888-48a3-81bc-69f9a45926af",
+      "eventId": "f55f5023-e33f-4c58-88a6-469bcbdee1cb",
       "sequence": 6,
       "type": "ACTION_DISPATCHED",
       "actor": "automation",
@@ -113,10 +113,10 @@
       "details": {
         "code": "dispatching"
       },
-      "createdAt": "2026-11-22T18:47:48.123Z"
+      "createdAt": "2026-11-22T19:25:51.091Z"
     },
     {
-      "eventId": "f461ec3c-7a41-4379-b1ca-effa7e7fd67a",
+      "eventId": "76e89f38-e89e-43fc-9352-53c607b42e4b",
       "sequence": 7,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -125,10 +125,10 @@
         "code": "confirmed",
         "operation": "navigate"
       },
-      "createdAt": "2026-11-22T18:47:48.819Z"
+      "createdAt": "2026-11-22T19:25:51.988Z"
     },
     {
-      "eventId": "07063402-61bc-449c-bb66-2fb5a77ac84c",
+      "eventId": "a9cf101a-a6f8-40fd-a516-3452889acf56",
       "sequence": 8,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -137,10 +137,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:47:51.667Z"
+      "createdAt": "2026-11-22T19:25:54.391Z"
     },
     {
-      "eventId": "ae1807c0-88df-487d-a61a-48f1cb639d2b",
+      "eventId": "168b14a9-8c6a-44ca-bcb8-0f6848ed9bb8",
       "sequence": 9,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -149,10 +149,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:47:51.819Z"
+      "createdAt": "2026-11-22T19:25:54.533Z"
     },
     {
-      "eventId": "b585e7a3-c1b3-4820-a8f2-a6f3cd0ee544",
+      "eventId": "ca611244-58ee-4ae1-b427-f6b7c2a7203f",
       "sequence": 10,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -161,10 +161,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:47:53.377Z"
+      "createdAt": "2026-11-22T19:25:56.101Z"
     },
     {
-      "eventId": "e9f47140-8380-462d-8c3b-d85bd3e53402",
+      "eventId": "610ad613-9de3-40f5-b3c7-1966e34d902e",
       "sequence": 11,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -173,10 +173,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:47:53.517Z"
+      "createdAt": "2026-11-22T19:25:56.257Z"
     },
     {
-      "eventId": "a6132332-36a1-4857-b8cc-87e4c7389915",
+      "eventId": "de56a23e-b2bd-442a-b8a0-c3220eda89cf",
       "sequence": 12,
       "type": "MODEL_REQUESTED",
       "actor": "automation",
@@ -186,25 +186,28 @@
         "modelName": "openai/gpt-4.1",
         "modelCalls": 1
       },
-      "createdAt": "2026-11-22T18:47:53.529Z"
+      "createdAt": "2026-11-22T19:25:56.276Z"
     },
     {
-      "eventId": "e2ed4e6a-b647-4766-9d6a-570fa7ee70a4",
+      "eventId": "353f629a-d66e-402c-8165-a649683f7d2e",
       "sequence": 13,
       "type": "MODEL_COMPLETED",
       "actor": "automation",
       "stepId": null,
       "details": {
         "code": "proposed",
+        "action": "click",
         "modelName": "openai/gpt-4.1",
         "modelCalls": 1,
         "inputTokens": 1443,
-        "outputTokens": 88
+        "controlLabel": "Member Search",
+        "outputTokens": 89,
+        "decisionReason": "continue"
       },
-      "createdAt": "2026-11-22T18:47:57.864Z"
+      "createdAt": "2026-11-22T19:26:00.503Z"
     },
     {
-      "eventId": "9829cf42-3b92-462f-8d49-ca9916953952",
+      "eventId": "a800cd94-3894-4f89-bf71-526599594a6b",
       "sequence": 14,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -213,10 +216,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:47:58.707Z"
+      "createdAt": "2026-11-22T19:26:01.349Z"
     },
     {
-      "eventId": "eefd80b1-db3b-4b2a-add4-4842f6fe9559",
+      "eventId": "2d4f61d8-2886-4bb7-a019-cfc55f8e3ed5",
       "sequence": 15,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -225,10 +228,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:47:58.845Z"
+      "createdAt": "2026-11-22T19:26:01.587Z"
     },
     {
-      "eventId": "f37af6cd-55b4-41fe-a97a-d34b4df1c2a4",
+      "eventId": "e5aa4475-8a62-461c-9813-e2addb19fc7d",
       "sequence": 16,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -238,10 +241,10 @@
         "operation": "click",
         "targetRef": "target2"
       },
-      "createdAt": "2026-11-22T18:47:58.970Z"
+      "createdAt": "2026-11-22T19:26:01.703Z"
     },
     {
-      "eventId": "d9a379fc-4a27-4694-8359-84f05cda43cb",
+      "eventId": "e7cb2c4f-c273-4533-b27d-7631d76efa20",
       "sequence": 17,
       "type": "ACTION_DISPATCHED",
       "actor": "automation",
@@ -250,10 +253,10 @@
         "code": "dispatching",
         "targetRef": "target2"
       },
-      "createdAt": "2026-11-22T18:47:59.119Z"
+      "createdAt": "2026-11-22T19:26:01.840Z"
     },
     {
-      "eventId": "d524aa50-7995-4400-978d-18486748fe15",
+      "eventId": "5ef6e477-41f9-4031-b0d0-86c81627331b",
       "sequence": 18,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -263,10 +266,10 @@
         "operation": "click",
         "targetRef": "target2"
       },
-      "createdAt": "2026-11-22T18:47:59.381Z"
+      "createdAt": "2026-11-22T19:26:02.083Z"
     },
     {
-      "eventId": "d01f991e-1626-4c3b-aed1-32f662b6eda3",
+      "eventId": "442064f4-2bbb-4d79-9d0c-5c21b642c388",
       "sequence": 19,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -275,10 +278,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:00.339Z"
+      "createdAt": "2026-11-22T19:26:02.934Z"
     },
     {
-      "eventId": "60a2f38b-9116-4fe6-acee-89fd2f6301d7",
+      "eventId": "1a736505-7b0e-4f1f-9393-efe3241cfd4f",
       "sequence": 20,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -287,10 +290,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:00.699Z"
+      "createdAt": "2026-11-22T19:26:03.090Z"
     },
     {
-      "eventId": "12ecc7df-36e3-4799-bb02-217545094b8a",
+      "eventId": "1b45f88a-3d12-48b7-be87-4a6463aa3a42",
       "sequence": 21,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -299,10 +302,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:02.293Z"
+      "createdAt": "2026-11-22T19:26:04.650Z"
     },
     {
-      "eventId": "23d5253b-1c5b-41ff-8980-d29dfc6fd134",
+      "eventId": "432a3add-67f8-45db-a1de-cdd1ee993c32",
       "sequence": 22,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -311,10 +314,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:02.436Z"
+      "createdAt": "2026-11-22T19:26:04.787Z"
     },
     {
-      "eventId": "3d4c1978-2f1a-4353-b536-c7689209b3e3",
+      "eventId": "a9fae0d5-44d9-4c23-aa73-178aecf3c7c8",
       "sequence": 23,
       "type": "MODEL_REQUESTED",
       "actor": "automation",
@@ -324,25 +327,29 @@
         "modelName": "openai/gpt-4.1",
         "modelCalls": 2
       },
-      "createdAt": "2026-11-22T18:48:02.450Z"
+      "createdAt": "2026-11-22T19:26:04.807Z"
     },
     {
-      "eventId": "23a7b1c9-ce05-4376-b1b7-467f0631a9af",
+      "eventId": "40618dae-2596-43c4-999a-8fea5f06c02e",
       "sequence": 24,
       "type": "MODEL_COMPLETED",
       "actor": "automation",
       "stepId": null,
       "details": {
         "code": "proposed",
+        "action": "fill",
+        "inputName": "memberId",
         "modelName": "openai/gpt-4.1",
         "modelCalls": 2,
-        "inputTokens": 1527,
-        "outputTokens": 95
+        "inputTokens": 1519,
+        "controlLabel": "Member ID",
+        "outputTokens": 119,
+        "decisionReason": "continue"
       },
-      "createdAt": "2026-11-22T18:48:05.625Z"
+      "createdAt": "2026-11-22T19:26:08.209Z"
     },
     {
-      "eventId": "9668bc79-36c2-4770-8a9b-f6e7e9174053",
+      "eventId": "19441531-b19d-417b-8e35-07155ed68efe",
       "sequence": 25,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -351,10 +358,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:06.497Z"
+      "createdAt": "2026-11-22T19:26:09.052Z"
     },
     {
-      "eventId": "ce69a266-0647-4ead-9a38-7313615b6e2a",
+      "eventId": "bbc4b6b3-26bf-47b2-a2f9-d7b610c364fb",
       "sequence": 26,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -363,10 +370,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:06.649Z"
+      "createdAt": "2026-11-22T19:26:09.196Z"
     },
     {
-      "eventId": "36d90629-bffd-4c42-b050-73de907e296d",
+      "eventId": "cdb825a7-7d88-45e9-a320-1b4231f1b2ad",
       "sequence": 27,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -376,10 +383,10 @@
         "operation": "fill",
         "targetRef": "target4"
       },
-      "createdAt": "2026-11-22T18:48:06.781Z"
+      "createdAt": "2026-11-22T19:26:09.319Z"
     },
     {
-      "eventId": "96c506fc-c8d4-4c0a-be0c-a6a0af34afee",
+      "eventId": "f7557b79-e0e0-4550-ad8f-bea1900f872d",
       "sequence": 28,
       "type": "ACTION_DISPATCHED",
       "actor": "automation",
@@ -388,10 +395,10 @@
         "code": "dispatching",
         "targetRef": "target4"
       },
-      "createdAt": "2026-11-22T18:48:06.925Z"
+      "createdAt": "2026-11-22T19:26:09.452Z"
     },
     {
-      "eventId": "c4bb9cb0-b5d5-4d20-9d87-37fd32e8823c",
+      "eventId": "acc3fd76-f6ef-48bc-8182-9b6bc1704922",
       "sequence": 29,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -401,10 +408,10 @@
         "operation": "fill",
         "targetRef": "target4"
       },
-      "createdAt": "2026-11-22T18:48:07.170Z"
+      "createdAt": "2026-11-22T19:26:09.703Z"
     },
     {
-      "eventId": "5e16d92b-7f8b-42a8-84db-f33f15adeb6a",
+      "eventId": "057f9620-bcc3-47c2-8722-8927d7d66718",
       "sequence": 30,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -413,10 +420,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:07.289Z"
+      "createdAt": "2026-11-22T19:26:09.826Z"
     },
     {
-      "eventId": "5e4a35a7-8b40-476b-8888-aa3c56a9c076",
+      "eventId": "36596a45-ee28-4d3a-8911-7d5d377ea390",
       "sequence": 31,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -425,10 +432,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:07.423Z"
+      "createdAt": "2026-11-22T19:26:09.975Z"
     },
     {
-      "eventId": "8050424a-16a8-4252-83ae-158a1472a424",
+      "eventId": "9d3612ac-799a-49c6-a64a-371dbd82ad27",
       "sequence": 32,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -437,10 +444,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:08.261Z"
+      "createdAt": "2026-11-22T19:26:10.835Z"
     },
     {
-      "eventId": "58258414-09a1-425d-a1fe-796a20d10e3d",
+      "eventId": "83556eb3-461e-4d6a-b097-e2ce745fda9b",
       "sequence": 33,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -449,10 +456,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:08.400Z"
+      "createdAt": "2026-11-22T19:26:10.982Z"
     },
     {
-      "eventId": "76f29ee5-6098-48be-a51b-c2e6d090efaf",
+      "eventId": "de7e5605-f9fc-4f13-b843-9d51b0bf452b",
       "sequence": 34,
       "type": "MODEL_REQUESTED",
       "actor": "automation",
@@ -462,25 +469,28 @@
         "modelName": "openai/gpt-4.1",
         "modelCalls": 3
       },
-      "createdAt": "2026-11-22T18:48:08.414Z"
+      "createdAt": "2026-11-22T19:26:10.994Z"
     },
     {
-      "eventId": "43f15e5b-7c28-4f9c-8f6e-c4040057530f",
+      "eventId": "1781c18f-9c21-4cc1-aa7f-9d14c1498032",
       "sequence": 35,
       "type": "MODEL_COMPLETED",
       "actor": "automation",
       "stepId": null,
       "details": {
         "code": "proposed",
+        "action": "click",
         "modelName": "openai/gpt-4.1",
         "modelCalls": 3,
-        "inputTokens": 1535,
-        "outputTokens": 91
+        "inputTokens": 1525,
+        "controlLabel": "Search",
+        "outputTokens": 89,
+        "decisionReason": "continue"
       },
-      "createdAt": "2026-11-22T18:48:11.225Z"
+      "createdAt": "2026-11-22T19:26:13.862Z"
     },
     {
-      "eventId": "846831a0-5be4-46b3-b9d7-cb4d001ed941",
+      "eventId": "15b3da02-943b-4bf2-8e0f-5b9cadef65c5",
       "sequence": 36,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -489,10 +499,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:12.067Z"
+      "createdAt": "2026-11-22T19:26:14.716Z"
     },
     {
-      "eventId": "50356b46-fee9-4a6f-88a4-4bc29097ede6",
+      "eventId": "5a25949b-5b39-4c1d-8a6e-7a7f7d431b30",
       "sequence": 37,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -501,10 +511,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:12.208Z"
+      "createdAt": "2026-11-22T19:26:14.855Z"
     },
     {
-      "eventId": "16eec620-e304-4aca-ae57-111d31a40d91",
+      "eventId": "bfeb1276-e942-471b-9e05-4bac67aa6249",
       "sequence": 38,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -514,10 +524,10 @@
         "operation": "click",
         "targetRef": "target5"
       },
-      "createdAt": "2026-11-22T18:48:12.323Z"
+      "createdAt": "2026-11-22T19:26:14.979Z"
     },
     {
-      "eventId": "3879155e-5953-44b9-92a2-11b1e4f4744f",
+      "eventId": "8124c13d-67af-4939-b2d7-869a9d7c3ce3",
       "sequence": 39,
       "type": "ACTION_DISPATCHED",
       "actor": "automation",
@@ -526,10 +536,10 @@
         "code": "dispatching",
         "targetRef": "target5"
       },
-      "createdAt": "2026-11-22T18:48:12.458Z"
+      "createdAt": "2026-11-22T19:26:15.115Z"
     },
     {
-      "eventId": "7b2c80cd-e192-4a57-8a97-47f9cb800c81",
+      "eventId": "cfaa8cc2-9483-4751-94d5-497cbaa954b1",
       "sequence": 40,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -539,10 +549,10 @@
         "operation": "click",
         "targetRef": "target5"
       },
-      "createdAt": "2026-11-22T18:48:12.707Z"
+      "createdAt": "2026-11-22T19:26:15.368Z"
     },
     {
-      "eventId": "bf1eb738-6b03-4deb-9768-491e149e9f60",
+      "eventId": "ad08fe90-ec73-48b6-a917-bd3845f5c03b",
       "sequence": 41,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -551,10 +561,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:13.564Z"
+      "createdAt": "2026-11-22T19:26:16.237Z"
     },
     {
-      "eventId": "34e347c3-9069-4dac-afeb-c0fdbf8538b7",
+      "eventId": "03421d27-e654-4e1f-a09d-5efce527a924",
       "sequence": 42,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -563,10 +573,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:13.702Z"
+      "createdAt": "2026-11-22T19:26:16.378Z"
     },
     {
-      "eventId": "325f1289-b25b-4ba2-8469-c159f2356301",
+      "eventId": "e02cd971-928a-40f0-8c4e-5ba72009e050",
       "sequence": 43,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -575,10 +585,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:15.288Z"
+      "createdAt": "2026-11-22T19:26:17.957Z"
     },
     {
-      "eventId": "3347f9e8-98d4-4b04-b5d4-fec80ef8d6ed",
+      "eventId": "c52587c2-c4c4-47cf-b4c1-5ec9cda0496c",
       "sequence": 44,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -587,10 +597,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:15.439Z"
+      "createdAt": "2026-11-22T19:26:18.100Z"
     },
     {
-      "eventId": "1dfdf467-8b0d-4cfa-b3ad-7931a864c95c",
+      "eventId": "08f416b2-b79e-435e-9d7b-0d26229d2fc2",
       "sequence": 45,
       "type": "MODEL_REQUESTED",
       "actor": "automation",
@@ -600,25 +610,28 @@
         "modelName": "openai/gpt-4.1",
         "modelCalls": 4
       },
-      "createdAt": "2026-11-22T18:48:15.454Z"
+      "createdAt": "2026-11-22T19:26:18.113Z"
     },
     {
-      "eventId": "1dc3aef8-9229-4d29-877d-e8118af7f89b",
+      "eventId": "546777cd-dd25-4b1c-9d80-54096d29b4b1",
       "sequence": 46,
       "type": "MODEL_COMPLETED",
       "actor": "automation",
       "stepId": null,
       "details": {
         "code": "proposed",
+        "action": "click",
         "modelName": "openai/gpt-4.1",
         "modelCalls": 4,
-        "inputTokens": 1587,
-        "outputTokens": 99
+        "inputTokens": 1577,
+        "controlLabel": "Open",
+        "outputTokens": 88,
+        "decisionReason": "continue"
       },
-      "createdAt": "2026-11-22T18:48:18.526Z"
+      "createdAt": "2026-11-22T19:26:21.090Z"
     },
     {
-      "eventId": "9e148b8f-8a2b-4d12-b967-642119417acf",
+      "eventId": "9a9a33e7-d7fa-48fd-95d5-5b76e5ffc8a6",
       "sequence": 47,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -627,10 +640,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:19.385Z"
+      "createdAt": "2026-11-22T19:26:21.947Z"
     },
     {
-      "eventId": "b27b36bd-697a-453b-b1ea-dc91001b1681",
+      "eventId": "55844d60-a47c-4979-ae77-958bab77dbb4",
       "sequence": 48,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -639,10 +652,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:19.526Z"
+      "createdAt": "2026-11-22T19:26:22.078Z"
     },
     {
-      "eventId": "a1f2da68-8d0a-4efb-ad57-46a8ed00fe7f",
+      "eventId": "68e55d83-e57c-42fe-b432-535bf87d68bf",
       "sequence": 49,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -652,10 +665,10 @@
         "operation": "click",
         "targetRef": "target7"
       },
-      "createdAt": "2026-11-22T18:48:19.647Z"
+      "createdAt": "2026-11-22T19:26:22.200Z"
     },
     {
-      "eventId": "8e77e4cf-4c10-4c87-8091-f22c152c899a",
+      "eventId": "df28e882-5660-4f04-a5da-ab87bf084632",
       "sequence": 50,
       "type": "ACTION_DISPATCHED",
       "actor": "automation",
@@ -664,10 +677,10 @@
         "code": "dispatching",
         "targetRef": "target7"
       },
-      "createdAt": "2026-11-22T18:48:19.783Z"
+      "createdAt": "2026-11-22T19:26:22.341Z"
     },
     {
-      "eventId": "70ab44ef-d425-4c55-aa89-2f70b467e2a3",
+      "eventId": "1930a561-7c3a-4e65-83ab-64e14ba94939",
       "sequence": 51,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -677,10 +690,10 @@
         "operation": "click",
         "targetRef": "target7"
       },
-      "createdAt": "2026-11-22T18:48:20.024Z"
+      "createdAt": "2026-11-22T19:26:22.613Z"
     },
     {
-      "eventId": "106764ce-68fc-4277-807f-833d2bc4bc44",
+      "eventId": "48fb5e56-e9df-4f77-b338-a3f518278d7b",
       "sequence": 52,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -689,10 +702,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:21.382Z"
+      "createdAt": "2026-11-22T19:26:23.981Z"
     },
     {
-      "eventId": "80014af3-eabb-4948-9693-5bcabdc2efba",
+      "eventId": "a4b8ca53-d870-41a8-aa35-5f8a21ad699d",
       "sequence": 53,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -701,10 +714,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:21.526Z"
+      "createdAt": "2026-11-22T19:26:24.115Z"
     },
     {
-      "eventId": "4b77b859-c362-4135-b5eb-3bbb58728e7c",
+      "eventId": "dc0ebf76-65a8-4c39-93b9-2dee0f58108f",
       "sequence": 54,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -713,10 +726,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:21.643Z"
+      "createdAt": "2026-11-22T19:26:24.234Z"
     },
     {
-      "eventId": "55faf8b4-10c2-4aa4-af94-818a7c0f6532",
+      "eventId": "2b4bdc9e-776d-473e-952e-805fa98e5b0e",
       "sequence": 55,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -725,10 +738,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:21.776Z"
+      "createdAt": "2026-11-22T19:26:24.368Z"
     },
     {
-      "eventId": "b1269ddb-4379-49c2-9ebb-61f0abd6d56f",
+      "eventId": "b31e4e05-4d12-44e9-8e5a-eee53709b212",
       "sequence": 56,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -737,10 +750,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:21.895Z"
+      "createdAt": "2026-11-22T19:26:24.490Z"
     },
     {
-      "eventId": "a5ee42cf-b619-4150-b5e7-9972b73473cc",
+      "eventId": "01a6f311-12fe-41d6-be09-fdc7021b6487",
       "sequence": 57,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -749,10 +762,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:22.027Z"
+      "createdAt": "2026-11-22T19:26:24.625Z"
     },
     {
-      "eventId": "468f2591-5ed1-4795-b334-054548d3703b",
+      "eventId": "a26e73b6-339c-49d3-9352-4a88534725ff",
       "sequence": 58,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -761,10 +774,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:23.615Z"
+      "createdAt": "2026-11-22T19:26:26.211Z"
     },
     {
-      "eventId": "60296ca5-59cb-4f8b-8ead-e30055b10419",
+      "eventId": "6a6d2a43-99b0-47df-8fe5-73da68e27e71",
       "sequence": 59,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -773,10 +786,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:23.755Z"
+      "createdAt": "2026-11-22T19:26:26.365Z"
     },
     {
-      "eventId": "5ced5518-5069-4511-9ceb-6a344ef5e9d5",
+      "eventId": "bba408de-c384-49a4-9065-3e966706cd82",
       "sequence": 60,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -785,10 +798,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:23.879Z"
+      "createdAt": "2026-11-22T19:26:26.492Z"
     },
     {
-      "eventId": "948bd9f2-9810-4e3c-ad23-6452e0b4cd5c",
+      "eventId": "846d6e03-d5da-4d75-9eb5-936a3eb2b021",
       "sequence": 61,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -797,10 +810,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:24.006Z"
+      "createdAt": "2026-11-22T19:26:26.625Z"
     },
     {
-      "eventId": "1e72ddab-2632-4e70-a394-808f3e45ea8c",
+      "eventId": "14b6978c-b1b1-44df-91c7-13352379ae58",
       "sequence": 62,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -809,10 +822,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:24.125Z"
+      "createdAt": "2026-11-22T19:26:26.743Z"
     },
     {
-      "eventId": "b14fffa2-0fd9-41ca-a191-a518ff4c8842",
+      "eventId": "94446f8b-e6cc-495c-942b-baa5da11edfe",
       "sequence": 63,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -821,10 +834,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:24.261Z"
+      "createdAt": "2026-11-22T19:26:26.878Z"
     },
     {
-      "eventId": "b2408bf6-e4bd-431d-b68a-b1e59e1086f5",
+      "eventId": "4d1a43b2-c0aa-40eb-a819-f3014bb188af",
       "sequence": 64,
       "type": "MODEL_REQUESTED",
       "actor": "automation",
@@ -834,25 +847,28 @@
         "modelName": "openai/gpt-4.1",
         "modelCalls": 5
       },
-      "createdAt": "2026-11-22T18:48:24.275Z"
+      "createdAt": "2026-11-22T19:26:26.886Z"
     },
     {
-      "eventId": "8ecd1c0f-d82a-4616-9d96-33d5261018f7",
+      "eventId": "43d1c660-f0da-4c01-86a0-33488f1178d0",
       "sequence": 65,
       "type": "MODEL_COMPLETED",
       "actor": "automation",
       "stepId": null,
       "details": {
         "code": "proposed",
+        "action": "click",
         "modelName": "openai/gpt-4.1",
         "modelCalls": 5,
-        "inputTokens": 1685,
-        "outputTokens": 96
+        "inputTokens": 1681,
+        "controlLabel": "Account Inquiry",
+        "outputTokens": 89,
+        "decisionReason": "continue"
       },
-      "createdAt": "2026-11-22T18:48:27.244Z"
+      "createdAt": "2026-11-22T19:26:29.850Z"
     },
     {
-      "eventId": "d318290c-93f0-43e0-a113-98edfb61149b",
+      "eventId": "928b8b2d-bd78-4fad-9a89-30ef56c0878b",
       "sequence": 66,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -861,10 +877,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:28.093Z"
+      "createdAt": "2026-11-22T19:26:30.706Z"
     },
     {
-      "eventId": "de2fc6f5-751b-4811-9abc-5dd4a0a9ffbd",
+      "eventId": "651639b9-c846-41cb-853a-5b800ebecd0e",
       "sequence": 67,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -873,10 +889,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:28.230Z"
+      "createdAt": "2026-11-22T19:26:30.845Z"
     },
     {
-      "eventId": "caddba6b-ee2b-4d2a-9987-437bd7e6fb80",
+      "eventId": "dadb4c18-f988-4396-a0ec-2072ad3ebc6f",
       "sequence": 68,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -885,10 +901,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:28.347Z"
+      "createdAt": "2026-11-22T19:26:30.966Z"
     },
     {
-      "eventId": "dd7728b5-9291-4a82-b79d-d3d4b7f234f0",
+      "eventId": "fe2ea7b6-7ba5-460f-b596-04414f1d5a3c",
       "sequence": 69,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -897,10 +913,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:28.480Z"
+      "createdAt": "2026-11-22T19:26:31.101Z"
     },
     {
-      "eventId": "c5e53394-3c59-4e7f-be20-5dcc337985f5",
+      "eventId": "997df364-1887-4991-b9ff-1118eef4bab8",
       "sequence": 70,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -909,10 +925,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:28.601Z"
+      "createdAt": "2026-11-22T19:26:31.226Z"
     },
     {
-      "eventId": "f4baa92d-2de4-4f4f-8b51-f066d97b119a",
+      "eventId": "f3591cab-d0a9-40ad-a240-6a3d32927cea",
       "sequence": 71,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -921,10 +937,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:28.733Z"
+      "createdAt": "2026-11-22T19:26:31.360Z"
     },
     {
-      "eventId": "a0295ec3-1e05-43ca-83a6-d47ff384bf21",
+      "eventId": "75909d34-e2c2-433d-98b8-6ed3e4769a9e",
       "sequence": 72,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -934,10 +950,10 @@
         "operation": "click",
         "targetRef": "target9"
       },
-      "createdAt": "2026-11-22T18:48:28.855Z"
+      "createdAt": "2026-11-22T19:26:31.487Z"
     },
     {
-      "eventId": "de483ce5-3b1d-4920-9dff-7c2653edabbb",
+      "eventId": "09925af0-324c-4848-b067-3bf53c8a80c2",
       "sequence": 73,
       "type": "ACTION_DISPATCHED",
       "actor": "automation",
@@ -946,10 +962,10 @@
         "code": "dispatching",
         "targetRef": "target9"
       },
-      "createdAt": "2026-11-22T18:48:28.989Z"
+      "createdAt": "2026-11-22T19:26:31.621Z"
     },
     {
-      "eventId": "83b0644f-708e-4ee1-9f86-58a60c21510b",
+      "eventId": "8df82e62-c363-4bd9-a726-f4d9dd06c936",
       "sequence": 74,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -959,10 +975,10 @@
         "operation": "click",
         "targetRef": "target9"
       },
-      "createdAt": "2026-11-22T18:48:29.235Z"
+      "createdAt": "2026-11-22T19:26:31.877Z"
     },
     {
-      "eventId": "15c09c4d-4062-4963-a617-0803689911e1",
+      "eventId": "4cc80a8e-aad7-431f-8d30-f7ec5ecc055c",
       "sequence": 75,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -971,10 +987,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:30.574Z"
+      "createdAt": "2026-11-22T19:26:33.221Z"
     },
     {
-      "eventId": "528611bb-91c5-43b1-9f0d-1bed9ead0f97",
+      "eventId": "21fe0e68-eb71-4fba-b9b0-634d518cf9c1",
       "sequence": 76,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -983,10 +999,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:30.710Z"
+      "createdAt": "2026-11-22T19:26:33.372Z"
     },
     {
-      "eventId": "92abc514-5418-4c58-98ea-dbecaf015797",
+      "eventId": "22e01ca0-242d-4915-bc6d-9a72e93f9bd5",
       "sequence": 77,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -995,10 +1011,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:30.827Z"
+      "createdAt": "2026-11-22T19:26:33.490Z"
     },
     {
-      "eventId": "d161c38b-2650-45e7-bf36-477363c1da83",
+      "eventId": "82d20899-a26a-4996-b337-f1df4d49a1e6",
       "sequence": 78,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1007,10 +1023,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:30.965Z"
+      "createdAt": "2026-11-22T19:26:33.630Z"
     },
     {
-      "eventId": "c00e3894-5ae9-443f-81d1-49974357f0de",
+      "eventId": "011a15c1-f44f-4ac1-826f-aeff840f38a4",
       "sequence": 79,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1019,10 +1035,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:31.091Z"
+      "createdAt": "2026-11-22T19:26:33.753Z"
     },
     {
-      "eventId": "56310427-fdcb-4dc9-9188-6f39dfe510a9",
+      "eventId": "e90084da-5f4a-43c3-bd3e-0547a8ae74a6",
       "sequence": 80,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1031,10 +1047,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:31.228Z"
+      "createdAt": "2026-11-22T19:26:33.882Z"
     },
     {
-      "eventId": "0d48dcee-15ff-4281-a4e4-5aa61a756f53",
+      "eventId": "ba1377a0-f049-4384-a61f-fd7422f3c2a7",
       "sequence": 81,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1043,10 +1059,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:32.801Z"
+      "createdAt": "2026-11-22T19:26:35.466Z"
     },
     {
-      "eventId": "00ad8f98-29bb-49fa-bda8-c0ecd34c1ffd",
+      "eventId": "12d7338a-2419-4afd-aee2-084e76cfd2d3",
       "sequence": 82,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1055,10 +1071,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:32.935Z"
+      "createdAt": "2026-11-22T19:26:35.604Z"
     },
     {
-      "eventId": "eb46d7b2-f4af-4f53-a253-38ae058583a7",
+      "eventId": "e593c2e6-a57e-4969-9a36-7a49a6a33f0e",
       "sequence": 83,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1067,10 +1083,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:33.062Z"
+      "createdAt": "2026-11-22T19:26:35.726Z"
     },
     {
-      "eventId": "5a20e1d3-6685-48ca-acfb-1c2f36486b70",
+      "eventId": "743ac0c1-310f-4ce0-b83c-40e310fcdad5",
       "sequence": 84,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1079,10 +1095,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:33.207Z"
+      "createdAt": "2026-11-22T19:26:35.862Z"
     },
     {
-      "eventId": "2d0eb7e9-268c-49e1-bbb0-7805d369c48f",
+      "eventId": "55b9eac2-52f0-45c6-91c8-634e74fd5b7f",
       "sequence": 85,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1091,10 +1107,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:33.337Z"
+      "createdAt": "2026-11-22T19:26:35.987Z"
     },
     {
-      "eventId": "94489331-2d7c-47a2-9e39-356441c8b622",
+      "eventId": "bf8ce891-f1e2-4ce3-9b39-42abcc511bfd",
       "sequence": 86,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1103,10 +1119,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:33.471Z"
+      "createdAt": "2026-11-22T19:26:36.115Z"
     },
     {
-      "eventId": "a4df95b4-0276-44d4-bad7-506bef5b6c1d",
+      "eventId": "50a30f3b-cb85-457a-ba90-06f5a152256e",
       "sequence": 87,
       "type": "MODEL_REQUESTED",
       "actor": "automation",
@@ -1116,25 +1132,28 @@
         "modelName": "openai/gpt-4.1",
         "modelCalls": 6
       },
-      "createdAt": "2026-11-22T18:48:33.486Z"
+      "createdAt": "2026-11-22T19:26:36.132Z"
     },
     {
-      "eventId": "e208c3af-55b6-411d-9067-8fa1bb734d58",
+      "eventId": "5883c675-b6da-4fa2-abe6-c13320892b9d",
       "sequence": 88,
       "type": "MODEL_COMPLETED",
       "actor": "automation",
       "stepId": null,
       "details": {
         "code": "proposed",
+        "action": "click",
         "modelName": "openai/gpt-4.1",
         "modelCalls": 6,
-        "inputTokens": 1725,
-        "outputTokens": 94
+        "inputTokens": 1723,
+        "controlLabel": "Open",
+        "outputTokens": 88,
+        "decisionReason": "continue"
       },
-      "createdAt": "2026-11-22T18:48:36.312Z"
+      "createdAt": "2026-11-22T19:26:39.158Z"
     },
     {
-      "eventId": "dc09be5b-9009-405c-94a9-569d1b489a3d",
+      "eventId": "603b652a-79cd-43c8-867a-cf0aaa48c3f4",
       "sequence": 89,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1143,10 +1162,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:37.162Z"
+      "createdAt": "2026-11-22T19:26:40.019Z"
     },
     {
-      "eventId": "0fffc958-05f3-4083-b3c4-481d1260770d",
+      "eventId": "d254c8f9-add5-457f-907e-89aaba027248",
       "sequence": 90,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1155,10 +1174,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:37.302Z"
+      "createdAt": "2026-11-22T19:26:40.160Z"
     },
     {
-      "eventId": "7562746a-6b3b-4e39-a859-17301427f883",
+      "eventId": "f5449708-bb2b-4d8d-baaf-0321267556c5",
       "sequence": 91,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1167,10 +1186,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:37.423Z"
+      "createdAt": "2026-11-22T19:26:40.284Z"
     },
     {
-      "eventId": "ff949161-5f7c-473c-b015-a89ea9e29602",
+      "eventId": "129e1317-9798-44fa-bbb1-4c26987819bf",
       "sequence": 92,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1179,10 +1198,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:37.565Z"
+      "createdAt": "2026-11-22T19:26:40.416Z"
     },
     {
-      "eventId": "3c51d02b-8870-447f-902f-a08002548c87",
+      "eventId": "48d5d1dc-0e4a-4308-be96-406da278cad0",
       "sequence": 93,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1191,10 +1210,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:37.687Z"
+      "createdAt": "2026-11-22T19:26:40.536Z"
     },
     {
-      "eventId": "5ceb6731-0489-4938-a6cc-74ca9c3f0c79",
+      "eventId": "cecdda12-cd07-4a90-8124-d434c9c7e866",
       "sequence": 94,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1203,10 +1222,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:37.826Z"
+      "createdAt": "2026-11-22T19:26:40.668Z"
     },
     {
-      "eventId": "00323a72-031f-4e80-a5e5-e67a7ffaaa62",
+      "eventId": "44fe2a9f-946e-4ace-8e9c-cb07f48c524c",
       "sequence": 95,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1215,10 +1234,10 @@
         "code": "admitted",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:37.948Z"
+      "createdAt": "2026-11-22T19:26:40.802Z"
     },
     {
-      "eventId": "7bf911ae-1c85-4588-8819-5585c0aaacf3",
+      "eventId": "b7c00f96-3347-4aa5-8629-305c8bfb948e",
       "sequence": 96,
       "type": "READ_COMPLETED",
       "actor": "automation",
@@ -1227,10 +1246,10 @@
         "code": "confirmed",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:38.080Z"
+      "createdAt": "2026-11-22T19:26:40.950Z"
     },
     {
-      "eventId": "ac71968e-1214-43d4-8e5e-f0ef357f3c7a",
+      "eventId": "8431406c-745e-436f-b0fd-44a343b28325",
       "sequence": 97,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1239,10 +1258,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:38.200Z"
+      "createdAt": "2026-11-22T19:26:41.073Z"
     },
     {
-      "eventId": "53feb204-436e-4cff-9afa-015f6926cffe",
+      "eventId": "eea9f398-14d6-4fc9-ab5a-695325628976",
       "sequence": 98,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1251,10 +1270,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:38.343Z"
+      "createdAt": "2026-11-22T19:26:41.210Z"
     },
     {
-      "eventId": "b3f81f29-a661-41f1-8d7a-df5d48f5e832",
+      "eventId": "dfa634b0-23f2-4b1a-a9cc-f08767df53dc",
       "sequence": 99,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1263,10 +1282,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:38.466Z"
+      "createdAt": "2026-11-22T19:26:41.328Z"
     },
     {
-      "eventId": "a47fef71-f160-4014-90bd-69b42ec05734",
+      "eventId": "cd031aeb-7c17-43a3-afe1-c3a039bebbc1",
       "sequence": 100,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1275,10 +1294,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:38.601Z"
+      "createdAt": "2026-11-22T19:26:41.462Z"
     },
     {
-      "eventId": "f8f9d33d-5d8f-44da-9a8e-686e54bd8e3d",
+      "eventId": "c2565a6d-3c91-48ec-bee1-2d5c029ba7b0",
       "sequence": 101,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1287,10 +1306,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:38.720Z"
+      "createdAt": "2026-11-22T19:26:41.582Z"
     },
     {
-      "eventId": "cbc29ae0-9f3c-4f95-a2db-f7cd4d85de48",
+      "eventId": "36038146-3d60-47d3-a5f0-11d52ccfe7f5",
       "sequence": 102,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1299,10 +1318,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:38.848Z"
+      "createdAt": "2026-11-22T19:26:41.718Z"
     },
     {
-      "eventId": "b2ae56b2-62eb-4479-8992-49e3edc9a1b4",
+      "eventId": "8cf91a2c-d401-439c-9627-2c92e76d1478",
       "sequence": 103,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1311,10 +1330,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:38.966Z"
+      "createdAt": "2026-11-22T19:26:41.843Z"
     },
     {
-      "eventId": "302ba51e-bca5-4b45-adc4-2c9edf56c29a",
+      "eventId": "516d2fa7-bbd8-43fb-9ef3-1b5e60e70f0f",
       "sequence": 104,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1323,10 +1342,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:39.112Z"
+      "createdAt": "2026-11-22T19:26:41.985Z"
     },
     {
-      "eventId": "cb7f5d9e-9f66-47dc-aa26-df7f4ee06684",
+      "eventId": "daaddcf6-6b1e-4132-8638-117d0f22fab9",
       "sequence": 105,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1335,10 +1354,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:39.238Z"
+      "createdAt": "2026-11-22T19:26:42.108Z"
     },
     {
-      "eventId": "284254c5-4cdd-4a1c-a882-d8d5bad9dc07",
+      "eventId": "65bd07d8-f692-4ae6-9e07-ba174d1b4be8",
       "sequence": 106,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1347,10 +1366,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:39.381Z"
+      "createdAt": "2026-11-22T19:26:42.242Z"
     },
     {
-      "eventId": "32d6029c-cefb-45b7-b651-4ee9db9ae7af",
+      "eventId": "3037194b-898a-4ded-8da4-a8a44c791be2",
       "sequence": 107,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1359,10 +1378,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:39.503Z"
+      "createdAt": "2026-11-22T19:26:42.364Z"
     },
     {
-      "eventId": "f6ba938c-f783-4dd0-9362-351f6807d891",
+      "eventId": "1bc30d41-19b2-4213-8dde-95725314be96",
       "sequence": 108,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1371,10 +1390,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:39.639Z"
+      "createdAt": "2026-11-22T19:26:42.501Z"
     },
     {
-      "eventId": "03333863-a79f-411c-baa8-91f6146402be",
+      "eventId": "b8996174-ecea-4fee-9b71-6cebc31267d2",
       "sequence": 109,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1384,10 +1403,10 @@
         "operation": "click",
         "targetRef": "target13"
       },
-      "createdAt": "2026-11-22T18:48:39.756Z"
+      "createdAt": "2026-11-22T19:26:42.621Z"
     },
     {
-      "eventId": "dafd3c86-820c-4ffc-87ec-a89e02378495",
+      "eventId": "2cca6104-9976-4ef5-bddb-62ac62e45273",
       "sequence": 110,
       "type": "ACTION_DISPATCHED",
       "actor": "automation",
@@ -1396,10 +1415,10 @@
         "code": "dispatching",
         "targetRef": "target13"
       },
-      "createdAt": "2026-11-22T18:48:39.888Z"
+      "createdAt": "2026-11-22T19:26:42.763Z"
     },
     {
-      "eventId": "7e15da5f-35e2-48f8-a8eb-177c10cffed4",
+      "eventId": "2c8f3c26-ee41-4a5e-8a62-6a7cdc691134",
       "sequence": 111,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1409,10 +1428,10 @@
         "operation": "click",
         "targetRef": "target13"
       },
-      "createdAt": "2026-11-22T18:48:40.133Z"
+      "createdAt": "2026-11-22T19:26:43.013Z"
     },
     {
-      "eventId": "bf443ba0-45ef-4722-9632-a5ff0b6311e0",
+      "eventId": "c99df43c-9519-4ad5-a65d-b96cef0d5821",
       "sequence": 112,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1421,10 +1440,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:41.470Z"
+      "createdAt": "2026-11-22T19:26:44.343Z"
     },
     {
-      "eventId": "7f124b5c-3397-48f2-9985-5e6d6bab3f0d",
+      "eventId": "4463b92c-00d4-4354-af60-80df49a1dc94",
       "sequence": 113,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1433,10 +1452,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:41.613Z"
+      "createdAt": "2026-11-22T19:26:44.480Z"
     },
     {
-      "eventId": "be634b17-5e47-4e17-9000-ee31862ddd64",
+      "eventId": "4553f0f1-0ef0-4f89-9656-7449e68791de",
       "sequence": 114,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1445,10 +1464,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:41.742Z"
+      "createdAt": "2026-11-22T19:26:44.598Z"
     },
     {
-      "eventId": "2370b5de-da41-4857-823f-77b34ffb9d85",
+      "eventId": "8c30de87-2f7d-4067-b8d9-e8e26b4a807b",
       "sequence": 115,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1457,10 +1476,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:41.875Z"
+      "createdAt": "2026-11-22T19:26:44.737Z"
     },
     {
-      "eventId": "7764da89-2715-432a-9a7a-79c24a1efa4f",
+      "eventId": "a3fb02ae-c926-476b-8dd7-556b53907a7f",
       "sequence": 116,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1469,10 +1488,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:41.996Z"
+      "createdAt": "2026-11-22T19:26:44.855Z"
     },
     {
-      "eventId": "8ee72f43-586e-4075-a0ab-2d9a10dee0b5",
+      "eventId": "5635d0a9-6155-423e-89ff-0e8739ce11a0",
       "sequence": 117,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1481,10 +1500,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:42.136Z"
+      "createdAt": "2026-11-22T19:26:44.985Z"
     },
     {
-      "eventId": "b357fc87-7bd2-4c37-98ac-5e0de5a6d1aa",
+      "eventId": "11dd971b-7bf7-4713-a1e4-f121d016a526",
       "sequence": 118,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1493,10 +1512,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:42.262Z"
+      "createdAt": "2026-11-22T19:26:45.102Z"
     },
     {
-      "eventId": "86ca5347-8704-4013-a9c7-2806428dcbb9",
+      "eventId": "9aaea07d-b001-4f5c-b175-0cd704a41463",
       "sequence": 119,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1505,10 +1524,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:42.397Z"
+      "createdAt": "2026-11-22T19:26:45.234Z"
     },
     {
-      "eventId": "1ab4690f-0d7d-4906-be9e-82a9f2cd95fc",
+      "eventId": "4f976a4e-a221-444c-b7d5-d598715bdfd9",
       "sequence": 120,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1517,10 +1536,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:43.957Z"
+      "createdAt": "2026-11-22T19:26:46.837Z"
     },
     {
-      "eventId": "34e343a5-1603-4c99-ae9e-8322e5972ba3",
+      "eventId": "05038e4b-c151-48e5-ace2-69ffea747e7c",
       "sequence": 121,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1529,10 +1548,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:44.090Z"
+      "createdAt": "2026-11-22T19:26:46.994Z"
     },
     {
-      "eventId": "329f7889-3187-4a15-a086-fe335cae4807",
+      "eventId": "25f6ccbe-ce4f-4b74-86c4-11d55ce0f1c1",
       "sequence": 122,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1541,10 +1560,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:44.213Z"
+      "createdAt": "2026-11-22T19:26:47.114Z"
     },
     {
-      "eventId": "5088ab7c-6bc4-4808-a2a6-53aac61b4767",
+      "eventId": "4d24fee2-c368-4bdd-b548-940572550723",
       "sequence": 123,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1553,10 +1572,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:44.343Z"
+      "createdAt": "2026-11-22T19:26:47.238Z"
     },
     {
-      "eventId": "1375daa2-bc42-492d-a8c2-c3e992387db0",
+      "eventId": "57cbc707-5219-4386-903d-8079400d6574",
       "sequence": 124,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1565,10 +1584,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:44.479Z"
+      "createdAt": "2026-11-22T19:26:47.357Z"
     },
     {
-      "eventId": "99377c13-3bd8-443f-a44a-4c899014fa5c",
+      "eventId": "47e316b5-acd7-4127-a00e-141b13eca4df",
       "sequence": 125,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1577,10 +1596,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:44.612Z"
+      "createdAt": "2026-11-22T19:26:47.487Z"
     },
     {
-      "eventId": "382128cf-f686-4eb0-ba61-18e0aab19938",
+      "eventId": "ddc31656-0f58-4541-b40e-4115ea5d0de2",
       "sequence": 126,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1589,10 +1608,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:44.733Z"
+      "createdAt": "2026-11-22T19:26:47.606Z"
     },
     {
-      "eventId": "e36e00ba-be84-46ff-b797-5b805b3dafb7",
+      "eventId": "41e68be8-6411-4b7e-8924-bc095f54d7bb",
       "sequence": 127,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1601,10 +1620,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:44.862Z"
+      "createdAt": "2026-11-22T19:26:47.735Z"
     },
     {
-      "eventId": "95494054-3b92-4375-8057-b13fe395c860",
+      "eventId": "5634b650-6509-4676-bccf-64512c170edc",
       "sequence": 128,
       "type": "MODEL_REQUESTED",
       "actor": "automation",
@@ -1614,25 +1633,34 @@
         "modelName": "openai/gpt-4.1",
         "modelCalls": 7
       },
-      "createdAt": "2026-11-22T18:48:44.880Z"
+      "createdAt": "2026-11-22T19:26:47.743Z"
     },
     {
-      "eventId": "6c72aa2e-42ac-4c97-a97d-db001de96d52",
+      "eventId": "938f2c49-86a0-45f6-b3c6-48607213bf1b",
       "sequence": 129,
       "type": "MODEL_COMPLETED",
       "actor": "automation",
       "stepId": null,
       "details": {
         "code": "proposed",
+        "action": "finish",
         "modelName": "openai/gpt-4.1",
         "modelCalls": 7,
-        "inputTokens": 1823,
-        "outputTokens": 101
+        "fieldLabels": [
+          "Account ID",
+          "Account Type",
+          "Currency",
+          "Current Balance",
+          "Member ID"
+        ],
+        "inputTokens": 1829,
+        "outputTokens": 123,
+        "decisionReason": "goal_complete"
       },
-      "createdAt": "2026-11-22T18:48:47.691Z"
+      "createdAt": "2026-11-22T19:26:50.805Z"
     },
     {
-      "eventId": "9178acc3-6296-4d85-b6c0-79eb28dc76a8",
+      "eventId": "56f502b7-5b5a-48af-875c-0c6fe1a98dad",
       "sequence": 130,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1641,10 +1669,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:48.559Z"
+      "createdAt": "2026-11-22T19:26:51.670Z"
     },
     {
-      "eventId": "fa0435e1-4622-4ef7-a930-751ec045eecd",
+      "eventId": "c5dfa571-9669-4a53-ba77-a655406b856b",
       "sequence": 131,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1653,10 +1681,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:49.312Z"
+      "createdAt": "2026-11-22T19:26:52.513Z"
     },
     {
-      "eventId": "b17a5c98-29d1-48fe-b814-a03bcabcea73",
+      "eventId": "e7b095dd-3495-4579-b999-3f80bd1c7f45",
       "sequence": 132,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1665,10 +1693,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:49.433Z"
+      "createdAt": "2026-11-22T19:26:52.635Z"
     },
     {
-      "eventId": "f110ce6e-d29f-449f-b389-68bcc57068ec",
+      "eventId": "93ca7aa1-9f7a-47d7-ae2f-b53eb7886f04",
       "sequence": 133,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1677,10 +1705,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:49.582Z"
+      "createdAt": "2026-11-22T19:26:52.777Z"
     },
     {
-      "eventId": "7e387607-fa30-4af9-9cf6-877d79dbafb6",
+      "eventId": "2695eb1e-a99e-4adc-ad0e-466406be229e",
       "sequence": 134,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1689,10 +1717,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:49.706Z"
+      "createdAt": "2026-11-22T19:26:52.908Z"
     },
     {
-      "eventId": "09f5de17-12bf-4a6a-9ab9-0cc0672a140e",
+      "eventId": "8fdad99c-5dac-4bec-a5f2-de5caa0ebc9c",
       "sequence": 135,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1701,10 +1729,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:49.840Z"
+      "createdAt": "2026-11-22T19:26:53.042Z"
     },
     {
-      "eventId": "ba62b667-a5fc-4318-9472-7f5d25227e20",
+      "eventId": "db5d6d7d-3484-44ee-92be-ba6828d487d6",
       "sequence": 136,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1713,10 +1741,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:49.960Z"
+      "createdAt": "2026-11-22T19:26:53.164Z"
     },
     {
-      "eventId": "efbb9f3d-8147-47cc-98c6-973826368cd7",
+      "eventId": "2ee86a65-3908-4ff1-abf3-5e6ecbda50c4",
       "sequence": 137,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1725,10 +1753,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:50.091Z"
+      "createdAt": "2026-11-22T19:26:53.291Z"
     },
     {
-      "eventId": "c4a08949-ca0c-45d1-84aa-af5bf9798f6f",
+      "eventId": "b5c1ed7a-092c-458b-bc1a-b4df1aa37a2a",
       "sequence": 138,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1737,10 +1765,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:50.210Z"
+      "createdAt": "2026-11-22T19:26:53.404Z"
     },
     {
-      "eventId": "6bc34a36-b1a0-4367-bd98-1bdc44ea66ee",
+      "eventId": "f7d34dac-4591-47d7-925e-e9f84b33fd47",
       "sequence": 139,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1749,10 +1777,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:50.341Z"
+      "createdAt": "2026-11-22T19:26:53.529Z"
     },
     {
-      "eventId": "eac282a8-ce7d-4e38-b412-cb9eb78ac071",
+      "eventId": "8c2987a9-7015-4dc1-84cd-0fd1e806c53d",
       "sequence": 140,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1761,10 +1789,10 @@
         "code": "admitted",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:50.462Z"
+      "createdAt": "2026-11-22T19:26:53.647Z"
     },
     {
-      "eventId": "84aa6b47-dac7-4caf-a960-76e3045cd05a",
+      "eventId": "14203ae4-e237-4270-834d-21c602677cb5",
       "sequence": 141,
       "type": "READ_COMPLETED",
       "actor": "automation",
@@ -1773,10 +1801,10 @@
         "code": "confirmed",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:50.594Z"
+      "createdAt": "2026-11-22T19:26:53.781Z"
     },
     {
-      "eventId": "a1a798eb-411a-4a04-8006-42887f43da7d",
+      "eventId": "4c8de49e-af9e-4b9e-ac92-0cbd518dc975",
       "sequence": 142,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1785,10 +1813,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:50.716Z"
+      "createdAt": "2026-11-22T19:26:53.903Z"
     },
     {
-      "eventId": "091a07b7-764f-493f-b0b7-024ae32a696d",
+      "eventId": "199b4eef-10ec-4284-9400-f6666d402ae3",
       "sequence": 143,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1797,10 +1825,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:50.853Z"
+      "createdAt": "2026-11-22T19:26:54.039Z"
     },
     {
-      "eventId": "5f16e8d2-23eb-4d9b-a9a8-cd49d77a84d0",
+      "eventId": "3d070a1c-5aad-462f-8767-0412b9cfc587",
       "sequence": 144,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1809,10 +1837,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:50.976Z"
+      "createdAt": "2026-11-22T19:26:54.165Z"
     },
     {
-      "eventId": "512c9128-051b-4b45-993f-4450c057d6a9",
+      "eventId": "b938adae-eae3-46a7-b188-99f3c85ed68c",
       "sequence": 145,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1821,10 +1849,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:51.113Z"
+      "createdAt": "2026-11-22T19:26:54.301Z"
     },
     {
-      "eventId": "3ae39e02-8c73-44af-b649-79f126bc3ecf",
+      "eventId": "ddfe9733-27ba-48ca-a595-33af877533c9",
       "sequence": 146,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1833,10 +1861,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:51.240Z"
+      "createdAt": "2026-11-22T19:26:54.420Z"
     },
     {
-      "eventId": "e243541a-c967-4811-b92e-1e88a85a1f52",
+      "eventId": "20ae5ee1-b3a6-462d-95a0-156e07cb940d",
       "sequence": 147,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1845,10 +1873,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:51.369Z"
+      "createdAt": "2026-11-22T19:26:54.551Z"
     },
     {
-      "eventId": "1aa715e1-5dae-41e3-b094-880b45692336",
+      "eventId": "8ba3b200-fad3-47b5-b519-67f8a2c4586b",
       "sequence": 148,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1857,10 +1885,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:51.486Z"
+      "createdAt": "2026-11-22T19:26:54.674Z"
     },
     {
-      "eventId": "ac235554-4764-4247-8b02-c1af9e428698",
+      "eventId": "4faabe45-bd88-4b6c-a1c9-139cafac8993",
       "sequence": 149,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1869,10 +1897,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:51.620Z"
+      "createdAt": "2026-11-22T19:26:54.833Z"
     },
     {
-      "eventId": "267cfcad-2bf4-445f-9887-9b3edbbf2a72",
+      "eventId": "d51fadd9-c580-4091-b7b2-a2539caf4bf7",
       "sequence": 150,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1881,10 +1909,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:51.746Z"
+      "createdAt": "2026-11-22T19:26:54.960Z"
     },
     {
-      "eventId": "755413f3-6308-4714-a0d8-3d55c8e66428",
+      "eventId": "87cf0924-7952-49fd-9dfd-26dc10dd1491",
       "sequence": 151,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1893,10 +1921,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:51.901Z"
+      "createdAt": "2026-11-22T19:26:55.095Z"
     },
     {
-      "eventId": "c4b793ad-3eab-47d3-908f-9d9cc1618f1c",
+      "eventId": "c9af431b-491d-4c2b-b47e-d3bbfe87a314",
       "sequence": 152,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1905,10 +1933,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:52.019Z"
+      "createdAt": "2026-11-22T19:26:55.222Z"
     },
     {
-      "eventId": "d30890e2-6d18-47e0-a461-fcfbab4d417b",
+      "eventId": "564c7389-149b-4e0a-bc9e-cd277146fc8f",
       "sequence": 153,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1917,10 +1945,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:52.150Z"
+      "createdAt": "2026-11-22T19:26:55.356Z"
     },
     {
-      "eventId": "7805299d-0a5a-48d0-9cae-023eb72614eb",
+      "eventId": "284daa90-6e0a-4db0-9501-39d35b1d1d6c",
       "sequence": 154,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1929,10 +1957,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:52.271Z"
+      "createdAt": "2026-11-22T19:26:55.472Z"
     },
     {
-      "eventId": "ac7a871d-babc-4523-8015-39a862f94050",
+      "eventId": "6e4c68aa-b530-4a20-895c-efc77c3608a8",
       "sequence": 155,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1941,10 +1969,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:52.404Z"
+      "createdAt": "2026-11-22T19:26:55.609Z"
     },
     {
-      "eventId": "87ec87bd-7e0d-4727-b61a-2246eae1e2a9",
+      "eventId": "152e6a73-36cf-4924-a7ea-851543fed2f5",
       "sequence": 156,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1953,10 +1981,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:52.526Z"
+      "createdAt": "2026-11-22T19:26:55.727Z"
     },
     {
-      "eventId": "b748f298-5d61-4136-91f8-17327e2b1819",
+      "eventId": "248f97c6-49a3-491e-97bc-b146991a17b6",
       "sequence": 157,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -1965,10 +1993,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:52.655Z"
+      "createdAt": "2026-11-22T19:26:55.867Z"
     },
     {
-      "eventId": "0bfda0b1-0b4e-4c85-9582-10de14054bad",
+      "eventId": "888b7600-9b4c-458b-a749-981b427906c6",
       "sequence": 158,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -1977,10 +2005,10 @@
         "code": "admitted",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:52.775Z"
+      "createdAt": "2026-11-22T19:26:55.987Z"
     },
     {
-      "eventId": "f4b2a60e-d51b-43e0-a2a5-1f3f7d85fe26",
+      "eventId": "bce294f9-1446-42de-abd4-af517e80bf85",
       "sequence": 159,
       "type": "READ_COMPLETED",
       "actor": "automation",
@@ -1989,10 +2017,10 @@
         "code": "confirmed",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:52.911Z"
+      "createdAt": "2026-11-22T19:26:56.115Z"
     },
     {
-      "eventId": "133a6339-c726-4bb0-bc46-649d9806cc42",
+      "eventId": "8de7e0e6-5900-4d82-abff-f41173dcae64",
       "sequence": 160,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2001,10 +2029,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:53.035Z"
+      "createdAt": "2026-11-22T19:26:56.233Z"
     },
     {
-      "eventId": "dc00f8b2-cd81-4e7f-b2c4-0452be2bb555",
+      "eventId": "d58556c5-1d4a-4ade-b4c2-86abf78bc1dd",
       "sequence": 161,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2013,10 +2041,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:53.175Z"
+      "createdAt": "2026-11-22T19:26:56.473Z"
     },
     {
-      "eventId": "18d180cf-e6f9-45fb-862d-f4e49ef68a89",
+      "eventId": "154a09de-61f3-43f1-8f65-14028ba1cc16",
       "sequence": 162,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2025,10 +2053,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:53.292Z"
+      "createdAt": "2026-11-22T19:26:56.591Z"
     },
     {
-      "eventId": "4b117dfb-d9ae-45b7-8138-e7adc0235807",
+      "eventId": "14fef2c6-93d4-45a5-89f4-b3f61258b96c",
       "sequence": 163,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2037,10 +2065,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:53.421Z"
+      "createdAt": "2026-11-22T19:26:56.726Z"
     },
     {
-      "eventId": "d2885896-d980-4de1-825b-b3108756c0c3",
+      "eventId": "8630ee25-f08f-4b54-9c0b-f501f60a72b4",
       "sequence": 164,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2049,10 +2077,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:53.539Z"
+      "createdAt": "2026-11-22T19:26:56.846Z"
     },
     {
-      "eventId": "df251ce9-69f5-46ab-8893-1931b829a9d6",
+      "eventId": "374d5e9e-5191-43fa-8c3a-3cdeea6769bd",
       "sequence": 165,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2061,10 +2089,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:53.670Z"
+      "createdAt": "2026-11-22T19:26:56.989Z"
     },
     {
-      "eventId": "c3edf4d7-0a25-4c10-841d-fa9f548d4606",
+      "eventId": "af5590f4-d168-4a1b-9cae-ea6377411a1b",
       "sequence": 166,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2073,10 +2101,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:53.785Z"
+      "createdAt": "2026-11-22T19:26:57.114Z"
     },
     {
-      "eventId": "bbfad0f7-8b51-42d3-8d6a-b46b32415a8b",
+      "eventId": "17b46669-6d50-4466-8fa7-e3ab1d2e7c5a",
       "sequence": 167,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2085,10 +2113,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:53.911Z"
+      "createdAt": "2026-11-22T19:26:57.245Z"
     },
     {
-      "eventId": "e45ded94-b9c9-4d29-bcfa-ba884ae22814",
+      "eventId": "1cf51ea4-fc0f-4622-b208-3bc16b128481",
       "sequence": 168,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2097,10 +2125,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:54.033Z"
+      "createdAt": "2026-11-22T19:26:57.364Z"
     },
     {
-      "eventId": "a0138c85-e008-42c7-94c9-8fa27e5a5c0d",
+      "eventId": "2b099bb8-19ed-42ca-9952-46b3c2e75bba",
       "sequence": 169,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2109,10 +2137,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:54.173Z"
+      "createdAt": "2026-11-22T19:26:57.499Z"
     },
     {
-      "eventId": "e3f2f93c-2d46-4b4c-b0b2-7fb18769f8e1",
+      "eventId": "e280e965-c34a-4d10-a124-4aeda833bc42",
       "sequence": 170,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2121,10 +2149,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:54.291Z"
+      "createdAt": "2026-11-22T19:26:57.612Z"
     },
     {
-      "eventId": "cee08fe1-1a6c-474e-a13c-b86d44b87ccd",
+      "eventId": "87634a6a-75fd-46f7-bdcc-4aa25d361659",
       "sequence": 171,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2133,10 +2161,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:54.419Z"
+      "createdAt": "2026-11-22T19:26:57.740Z"
     },
     {
-      "eventId": "bf385050-6370-4226-8700-145073dcffb0",
+      "eventId": "49af9dac-9652-46d2-9ae6-5e2397759bf3",
       "sequence": 172,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2145,10 +2173,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:54.549Z"
+      "createdAt": "2026-11-22T19:26:57.862Z"
     },
     {
-      "eventId": "a479b8dc-4969-462a-8c93-3eae8e6acae3",
+      "eventId": "a691264a-438e-4b4e-83ee-50b5b0985958",
       "sequence": 173,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2157,10 +2185,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:54.680Z"
+      "createdAt": "2026-11-22T19:26:57.994Z"
     },
     {
-      "eventId": "6ec3e649-e881-4170-a294-73e4aa6a7079",
+      "eventId": "4d4eaaf9-8256-448c-89c5-f1fe5a18979a",
       "sequence": 174,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2169,10 +2197,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:54.803Z"
+      "createdAt": "2026-11-22T19:26:58.125Z"
     },
     {
-      "eventId": "ee98c9ed-a2dd-41c9-96ff-7220c02655c5",
+      "eventId": "68542bcb-2beb-4f94-836c-bfb63989e175",
       "sequence": 175,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2181,10 +2209,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:54.934Z"
+      "createdAt": "2026-11-22T19:26:58.259Z"
     },
     {
-      "eventId": "cc243636-7d7a-4ef9-b9bb-01fe7e3c64e3",
+      "eventId": "4616fac0-3c09-434f-bb03-b99ec39f73f7",
       "sequence": 176,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2193,10 +2221,10 @@
         "code": "admitted",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:55.057Z"
+      "createdAt": "2026-11-22T19:26:58.380Z"
     },
     {
-      "eventId": "f1199833-0c5d-4983-b14f-4a2e5b6b1df3",
+      "eventId": "32ffab07-8157-4c94-a68f-46c979a51e35",
       "sequence": 177,
       "type": "READ_COMPLETED",
       "actor": "automation",
@@ -2205,10 +2233,10 @@
         "code": "confirmed",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:55.192Z"
+      "createdAt": "2026-11-22T19:26:58.513Z"
     },
     {
-      "eventId": "355a813d-d2ee-4274-b7f1-c6ff26c22cd1",
+      "eventId": "548240b8-052c-41fc-b2d1-079b19df5200",
       "sequence": 178,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2217,10 +2245,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:55.312Z"
+      "createdAt": "2026-11-22T19:26:58.635Z"
     },
     {
-      "eventId": "81820d0f-1980-43a9-b9bf-dc3abfdde8c2",
+      "eventId": "7bc9d7c8-7f0d-4540-9c5b-78fe639c0e1d",
       "sequence": 179,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2229,10 +2257,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:55.447Z"
+      "createdAt": "2026-11-22T19:26:58.877Z"
     },
     {
-      "eventId": "de6cbbe6-4710-46bc-90b0-bbcb887d0a32",
+      "eventId": "e43eabbb-d9f5-4e21-bb5a-b3b2143715bc",
       "sequence": 180,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2241,10 +2269,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:55.563Z"
+      "createdAt": "2026-11-22T19:26:59.003Z"
     },
     {
-      "eventId": "0e904c25-bab9-4425-b1f0-edc64bc27b33",
+      "eventId": "f2e98046-30af-42fc-91f2-8e8caf38721a",
       "sequence": 181,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2253,10 +2281,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:55.696Z"
+      "createdAt": "2026-11-22T19:26:59.144Z"
     },
     {
-      "eventId": "66236af3-9c0d-482a-8408-e8701df8f7c0",
+      "eventId": "c62b4a9d-f160-4654-8313-aebf572f50b4",
       "sequence": 182,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2265,10 +2293,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:55.819Z"
+      "createdAt": "2026-11-22T19:26:59.265Z"
     },
     {
-      "eventId": "70a17631-28e7-46af-8865-36a1b6d3265f",
+      "eventId": "b1977c8a-28d7-4fa3-8a8a-878824d787d5",
       "sequence": 183,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2277,10 +2305,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:55.955Z"
+      "createdAt": "2026-11-22T19:26:59.397Z"
     },
     {
-      "eventId": "2233dee1-aaf5-4fdf-9672-a9e6ddc6534f",
+      "eventId": "ddfe046e-a234-4366-9980-52bb625f6009",
       "sequence": 184,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2289,10 +2317,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:56.073Z"
+      "createdAt": "2026-11-22T19:26:59.520Z"
     },
     {
-      "eventId": "ddb7a781-a473-439a-bda1-0de572284d23",
+      "eventId": "caf19ab6-8e7b-48bb-ae0c-e38be03e0323",
       "sequence": 185,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2301,10 +2329,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:56.204Z"
+      "createdAt": "2026-11-22T19:26:59.650Z"
     },
     {
-      "eventId": "12fdbdca-6d84-4e60-a5be-f5f1080b31f7",
+      "eventId": "02d4853d-13df-4a64-a549-c695a9aaee03",
       "sequence": 186,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2313,10 +2341,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:56.322Z"
+      "createdAt": "2026-11-22T19:26:59.769Z"
     },
     {
-      "eventId": "8ff8a007-76e4-48ae-9568-ef547ddd1b4c",
+      "eventId": "6fb8514d-4081-48f6-a7e3-efd7f361d92f",
       "sequence": 187,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2325,10 +2353,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:56.458Z"
+      "createdAt": "2026-11-22T19:27:00.014Z"
     },
     {
-      "eventId": "6457d5d3-e986-4952-a80f-516922f6a6d4",
+      "eventId": "981560a6-f5a5-4f90-b30b-40fe0f60e01c",
       "sequence": 188,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2337,10 +2365,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:56.583Z"
+      "createdAt": "2026-11-22T19:27:00.136Z"
     },
     {
-      "eventId": "8d7b9118-4722-47e7-9a9e-761363e16db1",
+      "eventId": "fc9a7513-95ea-41ec-89eb-e3a404238262",
       "sequence": 189,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2349,10 +2377,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:56.720Z"
+      "createdAt": "2026-11-22T19:27:00.276Z"
     },
     {
-      "eventId": "6b5bf152-c808-4c3d-ac96-8e66daf5e08a",
+      "eventId": "e1b43e28-320f-48f2-bc41-3cd5214f9b96",
       "sequence": 190,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2361,10 +2389,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:56.843Z"
+      "createdAt": "2026-11-22T19:27:00.395Z"
     },
     {
-      "eventId": "16d92855-3bf2-4f45-9619-e7d0edc20faf",
+      "eventId": "aafc8ba8-dc4d-410a-a92b-8107e26008ca",
       "sequence": 191,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2373,10 +2401,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:56.974Z"
+      "createdAt": "2026-11-22T19:27:00.531Z"
     },
     {
-      "eventId": "39ee7f65-da36-4412-adf1-42e188eb4b7e",
+      "eventId": "9e44e6b1-9642-4799-be6f-ddfd458afbab",
       "sequence": 192,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2385,10 +2413,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:57.096Z"
+      "createdAt": "2026-11-22T19:27:00.666Z"
     },
     {
-      "eventId": "c0c276f5-0301-4735-b37b-cf2d7d722506",
+      "eventId": "2708ef91-f081-4ca6-8454-fb2b011ee994",
       "sequence": 193,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2397,10 +2425,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:57.229Z"
+      "createdAt": "2026-11-22T19:27:00.804Z"
     },
     {
-      "eventId": "9b77e4ba-7d21-40d7-9877-f1a9fff21a3a",
+      "eventId": "99cefd60-cfbf-4837-93c1-25c9481bc1fa",
       "sequence": 194,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2409,10 +2437,10 @@
         "code": "admitted",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:57.345Z"
+      "createdAt": "2026-11-22T19:27:00.948Z"
     },
     {
-      "eventId": "68bf4e6e-7596-4980-be66-9818b2f3c0e4",
+      "eventId": "dc0920a2-7b43-4e19-987e-5e50d513e060",
       "sequence": 195,
       "type": "READ_COMPLETED",
       "actor": "automation",
@@ -2421,10 +2449,10 @@
         "code": "confirmed",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:57.477Z"
+      "createdAt": "2026-11-22T19:27:01.084Z"
     },
     {
-      "eventId": "feb078f1-5f86-41d3-b3b4-c09eb2e43e32",
+      "eventId": "437ec062-5882-45a6-9009-ec07054f7930",
       "sequence": 196,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2433,10 +2461,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:57.600Z"
+      "createdAt": "2026-11-22T19:27:01.210Z"
     },
     {
-      "eventId": "3fbbef1e-b473-44e4-a1cc-a7b501705a68",
+      "eventId": "39c5e6df-cd30-460a-b81c-8bf47ec1b278",
       "sequence": 197,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2445,10 +2473,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:57.731Z"
+      "createdAt": "2026-11-22T19:27:01.453Z"
     },
     {
-      "eventId": "4da34532-1202-4693-813b-e4c90882649b",
+      "eventId": "cd232d06-e2a4-484f-b914-a03db923ab80",
       "sequence": 198,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2457,10 +2485,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:57.855Z"
+      "createdAt": "2026-11-22T19:27:01.575Z"
     },
     {
-      "eventId": "3dd9fbf2-ed1b-491e-9455-5a35ab5c9bc7",
+      "eventId": "441809ed-07c6-45f8-a4e4-90b8347782c8",
       "sequence": 199,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2469,10 +2497,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:57.990Z"
+      "createdAt": "2026-11-22T19:27:01.702Z"
     },
     {
-      "eventId": "8f6d93db-f33a-4e05-b67a-5e6e8e7b2425",
+      "eventId": "1435df6a-8867-4365-8f8f-685b8fae8806",
       "sequence": 200,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2481,10 +2509,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:58.117Z"
+      "createdAt": "2026-11-22T19:27:01.816Z"
     },
     {
-      "eventId": "c2d97a4e-e650-4b37-92f6-ade351cefc47",
+      "eventId": "6110353d-da98-4dea-9e5b-62ccc9f6c463",
       "sequence": 201,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2493,10 +2521,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:58.245Z"
+      "createdAt": "2026-11-22T19:27:01.946Z"
     },
     {
-      "eventId": "9e121bc9-7137-4275-ab6f-3c910a292b62",
+      "eventId": "d8db2eb7-c5aa-48ab-afe1-d76e72a6dceb",
       "sequence": 202,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2505,10 +2533,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:58.365Z"
+      "createdAt": "2026-11-22T19:27:02.072Z"
     },
     {
-      "eventId": "67f4d223-d489-4d2c-bcf7-7e5b2dac314b",
+      "eventId": "3b92b832-2f96-497f-88f2-a1c69710f7ee",
       "sequence": 203,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2517,10 +2545,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:58.499Z"
+      "createdAt": "2026-11-22T19:27:02.204Z"
     },
     {
-      "eventId": "7fcedb9a-6c5a-44f4-9263-d6e24fa5aa1e",
+      "eventId": "2bbc69bd-2342-4f84-9a45-e648e1580343",
       "sequence": 204,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2529,10 +2557,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:58.620Z"
+      "createdAt": "2026-11-22T19:27:02.336Z"
     },
     {
-      "eventId": "e8f85698-9811-48b1-9713-b0777d1981af",
+      "eventId": "cabb0951-23db-4a62-bd42-07bca0e347ca",
       "sequence": 205,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2541,10 +2569,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:58.763Z"
+      "createdAt": "2026-11-22T19:27:02.481Z"
     },
     {
-      "eventId": "ff2a75d2-e168-4751-aab7-1a9e726a54d4",
+      "eventId": "d680feaf-29df-40f9-853f-5304172a648e",
       "sequence": 206,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2553,10 +2581,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:58.887Z"
+      "createdAt": "2026-11-22T19:27:02.604Z"
     },
     {
-      "eventId": "4d1cb931-787c-421a-bf9a-2730c6d12fba",
+      "eventId": "c5d194df-6613-40bb-b067-e5b35bad0822",
       "sequence": 207,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2565,10 +2593,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:59.020Z"
+      "createdAt": "2026-11-22T19:27:02.740Z"
     },
     {
-      "eventId": "b69428f7-a976-4469-b732-329c973607e9",
+      "eventId": "77486a15-61ba-4543-863e-fdcd306c3c2e",
       "sequence": 208,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2577,10 +2605,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:59.142Z"
+      "createdAt": "2026-11-22T19:27:02.856Z"
     },
     {
-      "eventId": "b95fc7c7-d538-4127-821b-2521bc9b4ce1",
+      "eventId": "c1748272-1f63-42c6-bc2e-b3e02755d422",
       "sequence": 209,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2589,10 +2617,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:59.271Z"
+      "createdAt": "2026-11-22T19:27:02.992Z"
     },
     {
-      "eventId": "c435db81-c205-4d6b-9ee8-723240fdab77",
+      "eventId": "f681a681-0c55-4ed2-863d-47759ad3fb80",
       "sequence": 210,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2601,10 +2629,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:59.392Z"
+      "createdAt": "2026-11-22T19:27:03.118Z"
     },
     {
-      "eventId": "3de476a6-9fb3-4768-bcb3-56d25593e494",
+      "eventId": "755e2b2d-749e-4601-8363-2cd36ab3d93e",
       "sequence": 211,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2613,10 +2641,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:59.522Z"
+      "createdAt": "2026-11-22T19:27:03.252Z"
     },
     {
-      "eventId": "50c75344-e618-4619-9909-2586b448fe0d",
+      "eventId": "0a22ecdd-ade6-4f4a-b0bf-2e3342a891b2",
       "sequence": 212,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2625,10 +2653,10 @@
         "code": "admitted",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:59.645Z"
+      "createdAt": "2026-11-22T19:27:03.373Z"
     },
     {
-      "eventId": "fc3b1854-9de5-4b30-a838-c5f8a4e11305",
+      "eventId": "18f7fb98-3817-4289-b8c8-c7f4c100828c",
       "sequence": 213,
       "type": "READ_COMPLETED",
       "actor": "automation",
@@ -2637,10 +2665,10 @@
         "code": "confirmed",
         "operation": "capture"
       },
-      "createdAt": "2026-11-22T18:48:59.785Z"
+      "createdAt": "2026-11-22T19:27:03.505Z"
     },
     {
-      "eventId": "f3ff52a8-a2c7-425e-8a86-86645c286ff0",
+      "eventId": "41a90bda-e5cc-4492-91fb-bd03c8203c15",
       "sequence": 214,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2649,10 +2677,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:48:59.908Z"
+      "createdAt": "2026-11-22T19:27:03.633Z"
     },
     {
-      "eventId": "05b345b5-7858-4295-ba66-f4062afdd5ab",
+      "eventId": "19a921e4-7b33-4d39-867b-a93aa9bace75",
       "sequence": 215,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2661,10 +2689,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:49:00.049Z"
+      "createdAt": "2026-11-22T19:27:03.870Z"
     },
     {
-      "eventId": "bbda36b1-2dbf-4116-871a-e0f10fd19cc5",
+      "eventId": "ef8f592e-68e2-4258-8e1f-3c6aa7804c2f",
       "sequence": 216,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2673,10 +2701,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:49:00.167Z"
+      "createdAt": "2026-11-22T19:27:03.987Z"
     },
     {
-      "eventId": "4fa8b0d1-9df4-4c9a-aa36-e2a493b24319",
+      "eventId": "4757685c-8f2a-4721-85bf-305ef35c21b0",
       "sequence": 217,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2685,10 +2713,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:49:00.299Z"
+      "createdAt": "2026-11-22T19:27:04.129Z"
     },
     {
-      "eventId": "2fec853c-67ce-4f22-9b25-38da664bbe6c",
+      "eventId": "bc4dd509-f045-401c-a20c-7dc8e1f9f0e1",
       "sequence": 218,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2697,10 +2725,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:49:00.422Z"
+      "createdAt": "2026-11-22T19:27:04.247Z"
     },
     {
-      "eventId": "0d195026-aebd-48eb-93d1-041eb2e88427",
+      "eventId": "36060196-8e36-4526-a47c-036326dfc166",
       "sequence": 219,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2709,10 +2737,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:49:00.558Z"
+      "createdAt": "2026-11-22T19:27:04.377Z"
     },
     {
-      "eventId": "2318ccf0-4e97-4bd9-aea7-8266b666c998",
+      "eventId": "f91f2651-c73e-4cdc-b5a1-2041f39fc70e",
       "sequence": 220,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2721,10 +2749,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:49:00.679Z"
+      "createdAt": "2026-11-22T19:27:04.488Z"
     },
     {
-      "eventId": "c9e0c34d-d7fb-44d8-9301-195bb6ea8a0a",
+      "eventId": "dbfe651e-1c48-46dd-9fcd-f2dc7d5a3303",
       "sequence": 221,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2733,10 +2761,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:49:00.812Z"
+      "createdAt": "2026-11-22T19:27:04.619Z"
     },
     {
-      "eventId": "2ff28f88-a131-4deb-9891-e92c9a30f5e1",
+      "eventId": "ea94a962-707d-42eb-91cd-5ea6b626c096",
       "sequence": 222,
       "type": "ACTION_INTENT",
       "actor": "automation",
@@ -2745,10 +2773,10 @@
         "code": "admitted",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:49:00.946Z"
+      "createdAt": "2026-11-22T19:27:04.745Z"
     },
     {
-      "eventId": "ec6a04c8-d10b-48cb-b919-04bc53bf5edf",
+      "eventId": "d7b1424b-5edf-44f7-8a4d-0cda2c5e68d4",
       "sequence": 223,
       "type": "ACTION_COMPLETED",
       "actor": "automation",
@@ -2757,10 +2785,10 @@
         "code": "confirmed",
         "operation": "wait"
       },
-      "createdAt": "2026-11-22T18:49:01.692Z"
+      "createdAt": "2026-11-22T19:27:05.493Z"
     },
     {
-      "eventId": "8b77c23b-64ef-439f-9b02-d9eb289a6e7f",
+      "eventId": "8cf9083e-d067-4eec-a174-c87f5d9f77cd",
       "sequence": 224,
       "type": "RUN_COMPLETED",
       "actor": "system",
@@ -2768,10 +2796,10 @@
       "details": {
         "code": "capability_saved"
       },
-      "createdAt": "2026-11-22T18:49:01.740Z"
+      "createdAt": "2026-11-22T19:27:05.531Z"
     },
     {
-      "eventId": "fda4ffa0-2a59-4de3-b7f5-448465a4c15f",
+      "eventId": "ee4182dd-f881-4147-b2d9-fef684daf7ca",
       "sequence": 225,
       "type": "SESSION_FINISHED",
       "actor": "system",
@@ -2780,11 +2808,11 @@
         "code": "closed",
         "modelName": "openai/gpt-4.1",
         "modelCalls": 7,
-        "inputTokens": 11325,
-        "outputTokens": 664,
+        "inputTokens": 11297,
+        "outputTokens": 685,
         "inferenceAttempts": 0
       },
-      "createdAt": "2026-11-22T18:49:02.627Z"
+      "createdAt": "2026-11-22T19:27:06.437Z"
     }
   ]
 }

@@ -33,7 +33,7 @@ This checklist defines observable outcomes independently of implementation choic
 - [x] **ART-04 — Success condition.** Record a checkpoint or success condition that can be evaluated during replay. **Verify:** show both a satisfied condition and a case where an unmet condition prevents a success result. (§3.2–3.3)
   **Evidence:** Satisfied: [replay](../evidence/replay.json). Unmet prevents success: [wrong-account](../evidence/int-012-013/wrong-account.json) and [identity mismatch](../evidence/int-016/hard-failure.json).
 - [x] **ART-05 — Reviewability.** A reviewer or calling agent can understand what the capability does, needs, and returns from the artifact and its schema documentation. **Verify:** review a saved example without relying on the discovery transcript. (§3.2)
-  **Evidence:** Name, description, typed contract and provenance in the [capability](../evidence/capability.json); [REPORT: Artifact schema](../REPORT.md#artifact-schema), [CONTRACTS.md](CONTRACTS.md).
+  **Evidence:** Name, generated description, per-output `outputDescriptions`, typed contract and provenance in the [capability](../evidence/capability.json); [REPORT: Artifact schema](../REPORT.md#artifact-schema), [CONTRACTS.md](CONTRACTS.md).
 
 ## 3. Deterministic replay and outcomes — required implementation
 
@@ -48,7 +48,7 @@ This checklist defines observable outcomes independently of implementation choic
 - [x] **REP-05 — Business outcomes.** Represent expected outcomes, such as no matching record, separately from execution failures. **Verify:** trigger a legitimate negative business result and inspect its structured result. (§3.3)
   **Evidence:** [Not-found replay](../evidence/replay-not-found.json) returns `business_outcome` `MEMBER_NOT_FOUND`; no primary savings and access denied in [int-012-013](../evidence/int-012-013/README.md).
 - [x] **REP-06 — Recoverable conditions.** Recognize supported transient/known conditions and apply deliberate recovery. **Verify:** trigger a supported condition, observe bounded waiting/retry or a known recovery action, and demonstrate stopping when recovery is exhausted. (§3.3)
-  **Evidence:** Notice acknowledgment and transient inquiry retry, plus `RECOVERY_EXHAUSTED` after bounded attempts: [int-012-013](../evidence/int-012-013/README.md).
+  **Evidence:** Notice acknowledgment and transient inquiry retry, plus `RECOVERY_EXHAUSTED` after bounded attempts: [int-012-013](../evidence/int-012-013/README.md). Applied recoveries are listed in the result's `recoveries` ([runtime.test.ts](../tests/database/runtime.test.ts)).
 - [x] **REP-07 — Hard failures.** Stop safely when execution cannot proceed and report the step, expected state, and observed state. **Verify:** inject an unrecoverable condition and confirm no subsequent automated step blindly executes. (§3.3)
   **Evidence:** [Identity-mismatch replay](../evidence/int-016/hard-failure.json): step, expected and observed condition, rule ID; no later step dispatched. Also [wrong-account](../evidence/int-012-013/wrong-account.json).
 - [x] **REP-08 — Runtime exception coverage.** Deliberately handle validation errors, missing records, permission denial, unexpected dialogs, session expiry, and slow/failed loads where applicable to the target. Recovery is not required for every condition; a clear stop or escalation may be correct. **Verify:** maintain a scenario-to-behavior mapping, exercise applicable cases, and explain any non-applicable cases. (§3.3)
@@ -70,7 +70,7 @@ Deterministic replay means decisions follow recorded rules without model reasoni
 ## 5. Evidence and observability — required implementation
 
 - [x] **OBS-01 — Structured execution log.** Capture what the agent did and why, with enough context to understand and debug the run. **Verify:** reconstruct a run from its sanitized log. Decision summaries are sufficient; raw private model reasoning is not needed. (§3.5)
-  **Evidence:** Run events in [discovery](../evidence/discovery.json) and [replay](../evidence/replay.json): each model decision, then the chosen operation and target, dispatch, completion, reads, rule matches and cleanup. Free-text model reasoning is deliberately not stored.
+  **Evidence:** Run events in [discovery](../evidence/discovery.json) and [replay](../evidence/replay.json): each model decision summarized as action, control or field labels, binding name and reason; then the chosen operation and target, dispatch, completion, reads, rule matches and cleanup. Free-text model reasoning is deliberately not stored.
 - [x] **OBS-02 — Rich failure evidence.** Capture at least one richer signal on failure, such as a screenshot, state snapshot, or trace. **Verify:** trigger a failure and inspect its sanitized evidence alongside the step-level error. (§3.5)
   **Evidence:** Structural failure snapshots: [identity mismatch](../evidence/int-016/hard-failure-evidence.json), [int-012-013 failures](../evidence/int-012-013/failure-evidence.json).
 
@@ -101,7 +101,7 @@ The operator interface may be minimal or mocked. The pause, live-session access,
 Paths in this section are relative to the repository root.
 
 - [x] **DEL-01 — Runnable source.** Provide readable, reasonably typed source with meaningful tests for important behavior, in a public GitHub repository at submission. **Verify:** run the documented setup and checks from a clean checkout. (§6–7)
-  **Evidence:** Public repository https://github.com/Gervonte/interface-ai; `pnpm check` (258 tests) and `pnpm check:db` (42 PostgreSQL tests) pass, including from a clean clone.
+  **Evidence:** Public repository https://github.com/Gervonte/interface-ai; `pnpm check` (260 tests) and `pnpm check:db` (43 PostgreSQL tests) pass, including from a clean clone.
 - [x] **DEL-02 — README.** Include setup, keys/configuration, any supported operation without live services, and exact discovery-then-replay demo commands in `/README.md`. **Verify:** follow those commands from a clean checkout. Clearly distinguish mock/offline operation from genuine discovery. (§6)
   **Evidence:** [README.md](../README.md): setup, keys, offline checks, exact discovery-then-replay demo.
 - [x] **DEL-03 — Design report.** Provide approximately 1–3 pages in `/REPORT.md` with the seven headings listed below; explain decisions, trade-offs, limitations, deliberate mocks/cuts, and next steps. **Verify:** compare the report with the implementation and assignment. (§6)

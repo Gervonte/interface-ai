@@ -3,7 +3,7 @@ import type { RuleSet } from './rule-profile.js';
 import { BusinessOutcome, RuleEngine } from './rules.js';
 import { randomUUID } from 'node:crypto';
 import { DataSchemaSchema, OutputContractSchema, outputSchemaFor, parseCapability, validateData, validateInvocation, validateOutput } from '@interface-ai/contracts';
-import type { AccountSelection, Capability, Predicate, Target, Values } from '@interface-ai/contracts';
+import type { AccountSelection, Capability, OutputMeaning, Predicate, RequestedOutputContract, Target, Values } from '@interface-ai/contracts';
 import type { Worker, WorkerContext } from '../execution/coordinator.js';
 import { ExecutionError, NeedsIntervention } from '../execution/errors.js';
 import type { Executor, ExecutorOperation } from '../execution/executor.js';
@@ -74,6 +74,19 @@ class Builder {
     return output;
   }
 }
+// Human- and agent-readable description derived from the typed request contract, never from page values or the free-text goal.
+const meaningText: Record<OutputMeaning, string> = { 'member-id': 'Member ID shown for the found member (equals the memberId input).',
+  'account-id': 'Account ID of the selected account.', 'account-type': 'Account type of the selected account (savings or checking).',
+  currency: 'Currency code of the balances (USD).', 'current-balance': 'Current Balance of the selected account, in USD minor units (cents).',
+  'available-balance': 'Available Balance of the selected account, in USD minor units (cents).' };
+export function describeCapability(contract: RequestedOutputContract) {
+  const { type, designation, status } = contract.account;
+  const balances = Object.values(contract.fields).map(field => field.meaning).filter(meaning => meaning.endsWith('-balance')).map(meaning => meaning.replace('-balance', ' balance'));
+  const account = `${status.toLowerCase()} ${designation === 'Primary' ? 'primary ' : ''}${type} account`;
+  return { name: `Account inquiry: ${balances.join(' and ')}`,
+    description: `Given a memberId, searches the staff portal for that member, opens the member's ${account}, verifies the displayed member and account identity, and returns the ${balances.join(' and ')} with account identity and currency. Read-only.`,
+    outputs: Object.fromEntries(Object.entries(contract.fields).map(([name, field]) => [name, meaningText[field.meaning]])) };
+}
 function modelGoal(goal: string, inputs: Values) {
   let prepared = goal;
   for (const [name, value] of Object.entries(inputs)) if (typeof value === 'string' && value.length) prepared = prepared.replaceAll(value, '{{input.' + name + '}}');
@@ -134,12 +147,14 @@ async function discover(request: Extract<Parameters<Worker>[0], { mode: 'discove
       await executor.assert({ kind: 'all', conditions }, 'verify-captured-identity');
       if (values[memberOutput] !== inputs.memberId || values[accountOutput] !== builder.values[selectedAccount]) throw new ExecutionError('INVALID_EXTRACTION');
       // Assemble referenced guards before validating recorded manual contributions.
+      const described = describeCapability(contract);
       let artifact: Capability = { schemaVersion: 1, capabilityId: 'account-read-' + randomUUID().replaceAll('-', ''), version: 1,
-        name: 'Requested account inquiry', description: 'Constructed from confirmed model-selected browser actions and verified UI reads.', sourceDiscoveryRunId: context.runId,
+        name: described.name, description: described.description, sourceDiscoveryRunId: context.runId,
         surfaceRequirements: { kind: 'browser', applicationFamily: context.configuration.target.applicationFamily, compatibleTargetVersions: [context.configuration.target.version], features: ['frames', 'labels', 'roles', 'table-rows', 'dom-text'] },
         inputSchema, outputSchema, variables: builder.variables, targets: builder.targets, preconditions: { entryReady: initialCondition }, steps: builder.steps, outputs,
-        successCondition: { conditions, identity: [{ target: outputs[memberOutput]!.target, input: 'memberId' }] }, outcomeRules: [], recoveryRules: [], manualContributions: [...builder.manualContributions,...(builder.runtime?.manualContributions??[])] };
+        outputDescriptions: described.outputs, successCondition: { conditions, identity: [{ target: outputs[memberOutput]!.target, input: 'memberId' }] }, outcomeRules: [], recoveryRules: [], manualContributions: [...builder.manualContributions,...(builder.runtime?.manualContributions??[])] };
       if(builder.rules){artifact=attachBalanceRules(artifact,contract.account);for(const rule of artifact.recoveryRules){const events=builder.rules.recoveryRules.find(item=>item.id===rule.id)?.source.observedEventSequences;if(events)rule.source.observedEventSequences=[...events];}}
+      if(artifact.outcomeRules.length)artifact.description+=' Declared business outcomes: '+artifact.outcomeRules.map(rule=>rule.code).join(', ')+'.';
       artifact=parseCapability(artifact);
       validateInvocation(artifact, inputs); validateOutput(artifact, values);
       await context.publish(artifact, values); return;

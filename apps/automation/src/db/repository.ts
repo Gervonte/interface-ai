@@ -7,6 +7,7 @@ import type { Capability, RunRequest, Values } from '@interface-ai/contracts';
 import { migrate, transaction } from '@interface-ai/postgres';
 import type { Pool, PoolClient } from '@interface-ai/postgres';
 import { startCategories } from '../execution/diagnostics.js';
+import { safeLabels } from '../workflows/contracts.js';
 
 export const automationMigrations = [new URL('../../migrations/001_initial.sql', import.meta.url), new URL('../../migrations/002_runtime.sql', import.meta.url), new URL('../../migrations/003_rule_revisions.sql', import.meta.url), new URL('../../migrations/004_revision_trigger.sql', import.meta.url)];
 export const migrateAutomation = (pool: Pool) => migrate(pool, 'automation', automationMigrations);
@@ -46,10 +47,13 @@ const hash = (value: unknown) => createHash('sha256').update(canonical(value)).d
 export class RepositoryError extends Error {
   constructor(readonly code: string) { super(code); }
 }
-const eventSchema = z.strictObject({
+export const eventSchema = z.strictObject({
   type: z.enum(['RUN_ACCEPTED', 'RUN_STARTED', 'ACTION_INTENT', 'ACTION_DISPATCHED', 'ACTION_COMPLETED', 'READ_COMPLETED', 'ACTION_FAILED', 'RUN_COMPLETED', 'RUN_FAILED', 'RUN_CANCELLED', 'CANCEL_REQUESTED', 'INTERVENTION_OPENED', 'MODEL_REQUESTED', 'MODEL_COMPLETED', 'MODEL_DECISION_STALE', 'SESSION_FINISHED','RULE_MATCHED','RECOVERY_STARTED','RECOVERY_COMPLETED','RECOVERY_EXHAUSTED','BUSINESS_OUTCOME','CAPABILITY_REVISED','CONTROL_CLAIMED','RESUME_STARTED','RESUME_REJECTED','CONTROL_RETURNED']),
   actor: z.enum(['system', 'caller', 'automation', 'human']), stepId: IdentifierSchema.nullable(), interventionId: z.uuid().optional(),
-  details: z.strictObject({ code: IdentifierSchema, category: z.enum(startCategories).optional(), operatorId: IdentifierSchema.optional(), controlName:IdentifierSchema.optional(), controlRevision: z.number().int().positive().optional(), ruleId:IdentifierSchema.optional(), attempt:z.number().int().min(0).max(10).optional(), operation: z.enum(['navigate','click','fill','wait','capture']).optional(), inputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), outputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), modelCalls: z.number().int().min(0).max(100).optional(), inferenceAttempts: z.number().int().min(0).max(100).optional(), modelName: z.enum(['openai/gpt-5','openai/gpt-4.1']).optional(), targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
+  details: z.strictObject({ code: IdentifierSchema, category: z.enum(startCategories).optional(),
+    // Model decision summary: closed-vocabulary labels and binding names only, never values.
+    action: z.enum(['click', 'fill', 'finish', 'help']).optional(), decisionReason: z.enum(['continue', 'goal_complete', 'blocked', 'unsupported_goal']).optional(),
+    controlLabel: z.enum(safeLabels).optional(), fieldLabels: z.array(z.enum(safeLabels)).min(1).max(8).optional(), inputName: IdentifierSchema.optional(), operatorId: IdentifierSchema.optional(), controlName:IdentifierSchema.optional(), controlRevision: z.number().int().positive().optional(), ruleId:IdentifierSchema.optional(), attempt:z.number().int().min(0).max(10).optional(), operation: z.enum(['navigate','click','fill','wait','capture']).optional(), inputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), outputTokens: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(), modelCalls: z.number().int().min(0).max(100).optional(), inferenceAttempts: z.number().int().min(0).max(100).optional(), modelName: z.enum(['openai/gpt-5','openai/gpt-4.1']).optional(), targetRef: IdentifierSchema.optional(), evidenceId: z.uuid().optional(), dispatchState: z.enum(['not_sent','sent','settled','unknown']).optional(), effectState: z.enum(['not_checked','confirmed','not_applied','unknown']).optional(), bindingNames: z.array(IdentifierSchema).max(32).optional() }),
 }).superRefine((event, ctx) => {
   if (event.actor === 'human' && !event.interventionId) ctx.addIssue({ code: 'custom', message: 'Human events require their intervention reference.' });
 });
@@ -198,7 +202,7 @@ export class AutomationRepository {
       const original=await this.getCapability(artifact.capabilityId,baseVersion,client);
       const latest=(await client.query('SELECT max(version)::integer AS version FROM automation.capabilities WHERE capability_id=$1',[artifact.capabilityId])).rows[0].version;
       if(latest!==baseVersion||artifact.version!==baseVersion+1)throw new RepositoryError('CAPABILITY_VERSION_CONFLICT');
-      const core=(cap:typeof artifact)=>({schemaVersion:cap.schemaVersion,capabilityId:cap.capabilityId,sourceDiscoveryRunId:cap.sourceDiscoveryRunId,inputSchema:cap.inputSchema,outputSchema:cap.outputSchema,variables:cap.variables,preconditions:cap.preconditions,outputs:cap.outputs,successCondition:cap.successCondition,manualContributions:cap.manualContributions,steps:cap.steps.map(({outcomeRuleIds:_outcomes,recoveryRuleIds:_recoveries,...step})=>step)});
+      const core=(cap:typeof artifact)=>({schemaVersion:cap.schemaVersion,capabilityId:cap.capabilityId,sourceDiscoveryRunId:cap.sourceDiscoveryRunId,inputSchema:cap.inputSchema,outputSchema:cap.outputSchema,variables:cap.variables,preconditions:cap.preconditions,outputs:cap.outputs,outputDescriptions:cap.outputDescriptions,successCondition:cap.successCondition,manualContributions:cap.manualContributions,steps:cap.steps.map(({outcomeRuleIds:_outcomes,recoveryRuleIds:_recoveries,...step})=>step)});
       if(canonical(core(original))!==canonical(core(artifact))||Object.entries(original.targets).some(([key,target])=>canonical(target)!==canonical(artifact.targets[key]))||original.surfaceRequirements.applicationFamily!==artifact.surfaceRequirements.applicationFamily)throw new RepositoryError('INVALID_RULE_REVISION');
       for(const old of original.recoveryRules)if((old.source.observedEventSequences??[]).length&&canonical(old)!==canonical(artifact.recoveryRules.find(rule=>rule.id===old.id)))throw new RepositoryError('INVALID_RULE_REVISION');
       // Historical recovery executions belong to the source artifact, never a new authored rule.

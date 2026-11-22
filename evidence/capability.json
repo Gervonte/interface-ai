@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "capabilityId": "account-read-236d0fa56936446887d29fbe0f393114",
+  "capabilityId": "account-read-b6ae807acd5544879a2b59ef60439aab",
   "version": 1,
-  "name": "Requested account inquiry",
-  "description": "Constructed from confirmed model-selected browser actions and verified UI reads.",
-  "sourceDiscoveryRunId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+  "name": "Account inquiry: current balance",
+  "description": "Given a memberId, searches the staff portal for that member, opens the member's active primary savings account, verifies the displayed member and account identity, and returns the current balance with account identity and currency. Read-only. Declared business outcomes: MEMBER_NOT_FOUND, NO_PRIMARY_SAVINGS_ACCOUNT, ACCESS_DENIED.",
+  "sourceDiscoveryRunId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
   "surfaceRequirements": {
     "kind": "browser",
     "applicationFamily": "demo-credit-union",
     "compatibleTargetVersions": [
-      1795373262
+      1795375545
     ],
     "features": [
       "frames",
@@ -1135,7 +1135,7 @@
       "recoveryRuleIds": [],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 7
       },
       "type": "navigate",
@@ -1163,7 +1163,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 18
       },
       "type": "click",
@@ -1199,7 +1199,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 29
       },
       "type": "fill",
@@ -1240,7 +1240,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 40
       },
       "type": "click",
@@ -1268,7 +1268,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 51
       },
       "type": "click",
@@ -1305,7 +1305,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 74
       },
       "type": "click",
@@ -1333,7 +1333,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 96
       },
       "type": "capture",
@@ -1366,7 +1366,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 111
       },
       "type": "click",
@@ -1394,7 +1394,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 141
       },
       "type": "capture",
@@ -1427,7 +1427,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 159
       },
       "type": "capture",
@@ -1460,7 +1460,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 177
       },
       "type": "capture",
@@ -1493,7 +1493,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 195
       },
       "type": "capture",
@@ -1526,7 +1526,7 @@
       ],
       "source": {
         "kind": "discovery",
-        "runId": "c8c13c74-e1bc-4d3c-b037-35c4895bc8a9",
+        "runId": "a2ae6204-545c-4069-b8ad-f5b8511a2d7f",
         "eventSequence": 213
       },
       "type": "capture",
@@ -1564,6 +1564,13 @@
       "read": "text",
       "transform": "usd-minor"
     }
+  },
+  "outputDescriptions": {
+    "currency": "Currency code of the balances (USD).",
+    "memberId": "Member ID shown for the found member (equals the memberId input).",
+    "accountId": "Account ID of the selected account.",
+    "accountType": "Account type of the selected account (savings or checking).",
+    "currentBalanceMinor": "Current Balance of the selected account, in USD minor units (cents)."
   },
   "successCondition": {
     "conditions": [

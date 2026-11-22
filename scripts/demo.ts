@@ -36,8 +36,13 @@ async function main() {
   for (const key of ['DATABASE_URL', 'REQUEST_FINGERPRINT_KEY', 'AUTOMATION_API_TOKEN', 'BROWSERBASE_API_KEY', 'BROWSERBASE_PROJECT_ID']) if (!process.env[key]) throw Error('CONFIGURATION_REQUIRED');
   const entry = new URL(process.env.BROWSERBASE_PORTAL_URL ?? '');
   if (entry.protocol !== 'https:' || entry.pathname !== '/' || entry.search || entry.hash || entry.username || entry.password) throw Error('HTTPS_PORTAL_ROOT_REQUIRED');
-  const health = await fetch(new URL('/healthz', entry), { signal: AbortSignal.timeout(10000) });
-  if (!health.ok || (await health.json()).service !== 'demo-target') throw Error('TARGET_UNREACHABLE');
+  // A new tunnel hostname can take a few seconds to resolve.
+  let reachable = false;
+  for (let attempt = 0; attempt < 10 && !reachable; attempt++) {
+    try { const health = await fetch(new URL('/healthz', entry), { signal: AbortSignal.timeout(10000) }); reachable = health.ok && (await health.json()).service === 'demo-target'; } catch { /* not yet reachable */ }
+    if (!reachable) await delay(3000);
+  }
+  check(reachable, 'TARGET_UNREACHABLE');
   const request = RunRequestSchema.parse(JSON.parse(await readFile(resolve(root, args.request!), 'utf8')));
   check(request.mode === 'discovery', 'DISCOVERY_REQUEST_REQUIRED');
   await assertPortFree();

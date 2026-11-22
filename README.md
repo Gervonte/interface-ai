@@ -33,8 +33,8 @@ Secrets live only in ignored `.env` files under `apps/automation/` and `apps/dem
 ## Checks without live services
 
 ```sh
-pnpm check      # typecheck, 258 unit/contract tests, production builds — no keys, database or network
-pnpm check:db   # the above plus 42 PostgreSQL integration tests (Docker running, after setup)
+pnpm check      # typecheck, 260 unit/contract tests, production builds — no keys, database or network
+pnpm check:db   # the above plus 43 PostgreSQL integration tests (Docker running, after setup)
 ```
 
 The unit tests drive the real workflow worker, executor, rule engine and coordinator against injected fake browser surfaces and planners, and the real Stagehand launch path against a fake transport. They check behavior and safety properties; they are **not** evidence of a genuine discovery. That evidence is in [evidence/](evidence/README.md).

@@ -11,11 +11,18 @@ agent ─HTTP─▶ Automation API ─▶ Coordinator ─▶ Worker ────
 operator page ─HTTP─▶ same API (claim, act, resume)      Planner (discovery only): gpt-4.1 via Browserbase Model Gateway
 ```
 
-- **One engine, two drivers.** Discovery and replay share the coordinator, executor, rule engine and browser adapter. Discovery's worker asks a planner which control to use next; replay's worker interprets a saved artifact. Policy, targeting, evidence and handoff therefore behave the same on both paths.
-- **The model chooses, the system records.** The planner sees a sanitized observation: known headings, controls and fields as opaque references, row context, and whether a value matches an input. It never sees values, selectors or DOM. It returns a reference. The worker converts it to a semantic target, dispatches it, confirms the resulting UI condition, and only then records a step citing the confirming event. Artifacts are built from confirmed actions, never from transcripts.
+- **One engine, two drivers.** Discovery and replay share the coordinator, executor, rule engine and browser adapter; only the worker differs (planner loop or artifact interpreter). Policy, targeting, evidence and handoff behave the same on both paths.
+- **The model chooses, the system records.** The planner sees a sanitized observation (known headings, controls and fields as opaque references, row context, input-match flags), never values, selectors or DOM. Each turn it returns one structured decision: action, control reference, binding name, output field references and a reason. The log records it in that safe vocabulary (`click` · `Account Inquiry` · `continue`). The worker converts the reference to a semantic target, dispatches it, confirms the resulting UI condition, and only then records a step citing the confirming event. Artifacts come from confirmed actions, never transcripts.
 - **Durable control, transient data.** PostgreSQL holds runs, events, control revisions, interventions, idempotency receipts and immutable capability versions. Inputs are kept only as HMAC fingerprints; outputs stay in memory for a bounded window.
 - **Deliberately simple.** One coordinator runs one session at a time, enforced by a database constraint, with no queue. Control transfer and cleanup stay provable; scale comes from more coordinators, not a scheduler.
-- **Trade-offs.** A hosted browser gives isolation and a live session an operator can join, but the target must be reachable over HTTPS (the local portal needs a tunnel). Stagehand provides transport and the model gateway only; its self-healing actions are off, so replay never improvises a locator.
+
+**Key decisions and trade-offs:**
+
+- **TypeScript with Zod:** one set of contracts shared by API, worker, operator page and tests, validated at every boundary.
+- **Browserbase with Stagehand** provides isolated hosted sessions that an operator can join mid-run. The cost is that the target must be reachable over HTTPS, so the local portal needs a tunnel. Stagehand supplies only the transport and model gateway; its self-healing actions are off, so replay never improvises a locator.
+- **`gpt-4.1` through the Browserbase Model Gateway** needs no separate model key. It replaced `gpt-5` after GPT-5 decisions took 30–107 s and hit time budgets. The output schema of each decision is generated from the caller's output contract.
+- **A synthetic portal built here, deliberately legacy-shaped:** an iframe workspace, table-row results, no test IDs, injectable runtime errors, and synthetic members only. Errors are reproducible, and there is no real PII and no third-party terms.
+- **Mocked deliberately:** the target application, the operator console (a minimal page) and the rule set (authored for this portal). Discovery runs, replays and handoffs are real.
 
 ## Artifact schema
 
@@ -23,12 +30,12 @@ A capability ([example](evidence/capability.json), [schema](packages/contracts/s
 
 | Part | Purpose |
 | --- | --- |
-| `capabilityId`, `version`, `name`, `description` | Identity. A new version never mutates an old one. |
+| `capabilityId`, `version`, `name`, `description` | Identity and a plain description generated from the request contract ("Given a memberId… returns the current balance… Declared business outcomes: …"). A new version never mutates an old one. |
 | `sourceDiscoveryRunId`; each step's `source` | Provenance: the producing run and the event that confirmed each step. |
 | `surfaceRequirements` | Surface kind, application family, compatible target versions, required features. A mismatch is refused (`INCOMPATIBLE_TARGET`). |
 | `inputSchema`, `outputSchema` | Bounded JSON Schema: the contract a calling agent reads. |
 | `targets`, `steps` | Named semantic targets; ordered `navigate`/`fill`/`click`/`wait`/`capture`/`intervene` steps, each with `before`/`after` predicates and a timeout. |
-| `outputs`, `successCondition` | Typed extractions (`usd-minor` turns "$1,250.34" into 125034); final conditions plus identity bindings. |
+| `outputs`, `outputDescriptions`, `successCondition` | Typed extractions (`usd-minor` turns "$1,250.34" into 125034) and what each output means ("Current Balance of the selected account, in USD minor units"); final conditions plus identity bindings. |
 | `outcomeRules`, `recoveryRules`, `runtimeGuards`, `manualContributions` | Declared runtime behavior and recorded human boundaries. |
 
 A target describes what an operator recognizes, not a selector:
@@ -53,7 +60,7 @@ Replay is a model-free interpreter: its planner is a function that refuses infer
 | Recovery | servicing notice; transient inquiry failure | only declared clicks or waits, bounded attempts; then `RECOVERY_EXHAUSTED` |
 | Conflict | two outcomes, or an outcome and a recovery | `CONFLICTING_SIGNALS`; stop rather than guess |
 
-The result is `success` (outputs) | `business_outcome` (code) | `failure` (code, step, expected and observed condition, dispatch/effect state, evidence) | `cancelled`. Failures name what actually failed: [this replay](evidence/int-016/hard-failure.json) reports `IDENTITY_MISMATCH` at `step-006`, expected `RECORD_IDENTITY_MATCH`, rule `member-identity-0`, with a structural snapshot. An action with an unknown effect is never retried. Discovery is bounded at 30 model calls, 300 actions, 10 s per step and 15 min overall.
+The result is `success` (outputs) | `business_outcome` (code) | `failure` (code, step, expected and observed condition, dispatch/effect state, evidence) | `cancelled`. Success and business outcomes also list any declared `recoveries` applied (rule and attempts), so a caller can tell a clean run from a recovered one. Failures name what actually failed: [this replay](evidence/int-016/hard-failure.json) reports `IDENTITY_MISMATCH` at `step-006`, expected `RECORD_IDENTITY_MATCH`, rule `member-identity-0`, with a structural snapshot. An action with an unknown effect is never retried. Discovery is bounded at 30 model calls, 300 actions, 10 s per step and 15 min overall.
 
 The rules are **authored** for this portal (`source: authored`) and attached when a capability is saved. Discovery learns the route; it does not learn error semantics. Nineteen live conditions are exercised against one saved capability in [int-012-013](evidence/int-012-013/README.md); the end-to-end demo includes a [not-found replay](evidence/replay-not-found.json). **UI drift** fails closed: capabilities are bound to target versions, and a missing or duplicated control stops with `TARGET_NOT_FOUND` or `AMBIGUOUS_TARGET` plus evidence. Nothing self-heals in production.
 
@@ -98,14 +105,13 @@ Exhausted recovery, identity mismatch and policy blocks fail instead: a person s
 
 **Taking control.**
 
-- **Pause:** the coordinator closes its dispatch gate, drains the in-flight command and captures a structural snapshot. It then opens an intervention with step, reason, expected checkpoint, session reference and deadline; the operator page also shows the goal or capability. The run waits in `waiting_for_human` with its browser, bindings and captured variables intact.
+- **Pause:** the coordinator closes its dispatch gate, drains the in-flight command, captures a structural snapshot and opens an intervention (step, reason, expected checkpoint, session reference, deadline; the page also shows the goal or capability). The run waits in `waiting_for_human` with its browser and state intact.
 - **Claim:** an operator claims it. The control revision increments, the operator becomes the controller, and stale requests are rejected by revision. Automation cannot dispatch while a human owns the run.
 - **Manual actions:** the operator acts through the same executor, with the same origins, allowlists and risky blocks, plus a few human-only resolution controls. Each action is recorded as a `human` event, and idempotent receipts prevent double dispatch.
 
 **Handing back.**
 
-- Resume enters `validating_resume` with no controller. The recorded checkpoint and member/account identity are re-checked before automation regains control; a failed check returns the run to `waiting_for_human`.
-- Completed actions are not repeated. A missed deadline ends the run as `INTERVENTION_TIMEOUT`.
+- Resume enters `validating_resume` with no controller. The checkpoint and member/account identity are re-checked; a failed check returns the run to `waiting_for_human`. Completed actions are not repeated, and a missed deadline ends the run as `INTERVENTION_TIMEOUT`.
 - Human steps taken during discovery are saved as manual contributions, so replay keeps them as human boundaries rather than automating them.
 
 [int-014-015](evidence/int-014-015/README.md) shows a real operator resolving pauses in a live discovery and a live replay. The operator page is deliberately minimal: on-demand screenshots and mediated buttons, not co-browsing.
@@ -113,29 +119,23 @@ Exhausted recovery, identity mismatch and policy blocks fail instead: a person s
 ## Safety
 
 - **Allowlist:** a versioned policy lists allowed origins, operation types, and click and fill control names. It is checked before dispatch and again in the page during the same browser turn. The model only sees allowlisted controls.
-- **Risky actions are blocked.** The policy declares risky controls by name and effect (`Close account`: irreversible; `Transfer funds`: financial). It does not infer risk from words like "Submit". Risky controls are checked before the allowlists on every path, including operator control, and a policy that also permits one fails to load. Blocking rather than confirming fits a read-only baseline; confirmation belongs to the handoff flow (see Cuts). Live, the real Close account button was refused with nothing dispatched while seven permitted actions worked.
-- **Data:** inputs are never stored; events hold codes, not values; outputs expire from memory; failure evidence keeps structure, not record values. Page text cannot reach the model, because the observation accepts a closed vocabulary; an instruction planted in the page had no effect. Goals have input values and credential-like tokens redacted. A synthetic-marker sweep finds no goal, input or page values in any table, event, evidence file or API response. Browserbase logging and recording are off.
-- **Limits:**
-  - The hosted browser renders real values, and provider retention cannot be verified here.
-  - Expired evidence is refused but not deleted.
-  - A renamed risky control is caught by the allowlist, not the risk list.
-  - Free text in a goal reaches the model.
-  - Details: [docs/SAFETY.md](docs/SAFETY.md).
+- **Risky actions are blocked.** The policy declares risky controls by name and effect (`Close account`: irreversible; `Transfer funds`: financial) rather than inferring risk from words like "Submit". They are checked before the allowlists on every path, including operator control, and no allowlist may name one. Blocking fits a read-only baseline; confirmation would belong to the handoff flow (see Cuts). Live, the real Close account button was refused while seven permitted actions worked.
+- **Data:** inputs are never stored; events hold codes, not values; outputs expire from memory; failure evidence keeps structure only. Page text cannot reach the model (closed vocabulary; a planted instruction had no effect), and goals have input values and credential-like tokens redacted. A synthetic-marker sweep finds no goal, input or page values in any table, event, evidence file or API response. Browserbase logging and recording are off.
+- **Limits:** the hosted browser renders real values, and provider retention cannot be verified here. Expired evidence is refused but not deleted. A renamed risky control is caught by the allowlist rather than the risk list. Free text in a goal reaches the model. Details: [docs/SAFETY.md](docs/SAFETY.md).
 
 ## Cuts
 
 **Cut deliberately:**
 
-- **Writes.** The planned contact edit, with review and confirmation screens, plus duplicate-commit protection, so that an uncertain write never commits twice.
-- **Confirmation for risky actions.** Today they are blocked.
-- **Local-browser replay.** Replay still needs Browserbase and a tunnel.
-- **Desktop and legacy-web adapters, and tenant overrides.** Designed above, not built.
-- **Live co-browsing** in the operator page.
-- **Arbitrary goals.** Goals are free text, but outputs use a bounded account-inquiry vocabulary.
-- **Scale-out, queues and stability scoring.**
-- **An evidence purge job.**
+- **Writes:** the planned contact edit (review and confirmation screens) and its duplicate-commit protection.
+- **Confirmation for risky actions:** today they are blocked.
+- **Local-browser replay:** replay still needs Browserbase and a tunnel.
+- **Not built, only designed:** desktop and legacy-web adapters, and tenant overrides.
+- **Arbitrary goals:** goals are free text, but outputs use a bounded account-inquiry vocabulary.
+- **Also out:** live co-browsing, scale-out and queues, stability scoring, an evidence purge job.
 
 **Next, in order:**
+
 1. A local-browser replay adapter, which also proves the surface seam with a second implementation.
 2. Tenant overrides with materialized versions and preflight fingerprints.
 3. The contact-edit workflow, with a confirmation handoff for its commit step.

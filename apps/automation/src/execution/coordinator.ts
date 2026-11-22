@@ -39,6 +39,14 @@ export interface WorkerContext {
 export type Worker = (request: RunRequest, context: WorkerContext) => Promise<RunResult | void>;
 const terminal = (status: string) => ['completed', 'failed', 'cancelled'].includes(status);
 const failure = (code: string, category?: string): Extract<RunResult, { kind: 'failure' }> => ({ kind: 'failure', code, summary: failureSummary(code, category), blocked: null, evidenceIds: [] });
+/** What the model chose and why, in the observation's closed vocabulary. Unknown references are omitted, not guessed. */
+export function decisionSummary(prepared: Parameters<Planner['decide']>[0], decision: Awaited<ReturnType<Planner['decide']>>['decision']) {
+  const control = prepared.observation.controls.find(item => item.ref === decision.controlRef);
+  const fields = [...new Set(Object.values(decision.outputs).map(ref => prepared.observation.fields.find(item => item.ref === ref)?.label).filter(label => label !== undefined))];
+  return { action: decision.action, decisionReason: decision.reason, ...(control ? { controlLabel: control.label } : {}),
+    ...(decision.action === 'fill' && prepared.inputNames.includes(decision.inputName) ? { inputName: decision.inputName } : {}),
+    ...(decision.action === 'finish' && fields.length ? { fieldLabels: fields.slice(0, 8) } : {}) };
+}
 const unavailableWorker: Worker = async request => failure(request.mode === 'discovery' ? 'DISCOVERY_NOT_IMPLEMENTED' : 'REPLAY_NOT_IMPLEMENTED');
 interface Pause { id:string; validate:()=>Promise<boolean>; resolve:(value:{interventionId:string;eventSequences:number[]})=>void; reject:(error:Error)=>void; startedAt:number; accountedMs:number; sequences:number[]; observation?:Observation|undefined }
 interface Job { revision:number; pausedMs:number; controlBusy:boolean; inputs:Values; goal:string|undefined; resource?:SessionResource; pause?:Pause|undefined; validation?:{id:string;principal:string}|undefined; runId: string; gate: DispatchGate; abort: AbortController; task: Promise<void>; executor?: Executor }
@@ -151,7 +159,7 @@ export class Coordinator {
           if (remaining <= 0 || job.abort.signal.aborted) throw new ExecutionError('BUDGET_EXHAUSTED');
           let proposed; try { proposed = await session.planner!.decide(prepared, Math.min(120_000, remaining)); } catch { throw new ExecutionError('MODEL_UNAVAILABLE'); }
           job.gate.check(job.revision);
-          await this.repository.record(job.runId, job.revision, { type: 'MODEL_COMPLETED', actor: 'automation', stepId: null, details: { code: 'proposed', modelCalls, modelName: discoveryModelName, inputTokens: proposed.usage.inputTokens, outputTokens: proposed.usage.outputTokens } });
+          await this.repository.record(job.runId, job.revision, { type: 'MODEL_COMPLETED', actor: 'automation', stepId: null, details: { code: 'proposed', modelCalls, modelName: discoveryModelName, inputTokens: proposed.usage.inputTokens, outputTokens: proposed.usage.outputTokens, ...decisionSummary(prepared, proposed.decision) } });
           return proposed.decision;
         });
       },
@@ -255,6 +263,11 @@ export class Coordinator {
           // Keep a specific failure cause visible; cleanup uncertainty is reported alongside it, never instead of it.
           if (result?.kind === 'failure' && result.code !== 'WORKER_FAILED') result = { ...result, summary: (result.summary + ' Browser session closure is also unconfirmed; reconcile before retrying.').slice(0, 500) };
           else result = failure('SESSION_CLEANUP_UNCONFIRMED');
+        }
+        if (result?.kind === 'success' || result?.kind === 'business_outcome') {
+          // Report declared recoveries in the result itself, so a caller can tell a clean run from a recovered one.
+          const applied = (await this.base.pool.query("SELECT details->>'ruleId' AS rule_id, count(*)::int AS attempts FROM automation.run_events WHERE run_id=$1 AND event_type='RECOVERY_STARTED' AND details ? 'ruleId' GROUP BY 1 ORDER BY min(sequence)", [job.runId])).rows;
+          if (applied.length) result = { ...result, recoveries: applied.slice(0, 8).map(row => ({ ruleId: row.rule_id as string, attempts: Math.min(10, row.attempts as number) })) };
         }
         await this.repository.finish(job.runId, result ?? failure('WORKER_FAILED'));
       }

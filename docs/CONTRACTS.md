@@ -131,3 +131,9 @@ INT-014/015 add `manualContributions[].handling = "runtime_guard"`, with `guardI
 ## Requested discovery outputs
 
 Discovery bodies now require `outputContract` with bounded account criteria and named semantic/type declarations. The schema rejects conflicting meanings/types, identity value enums, duplicate semantics, and incomplete identities. The worker derives output declarations and extractions from that request, and the coordinator verifies schema correspondence before publication. The model response schema contains exactly the requested output names. Replay still consumes an exact saved artifact without a goal or output contract; previous artifact schema versions and conversions remain supported. [Full contract, examples, compatibility, and limits](GOAL_OUTPUTS.md).
+
+## Self-description, decision log and recoveries (INT-022)
+
+- **Capability description.** Discovery now sets `name` and `description` from the request contract, for example "Account inquiry: current balance" and "Given a memberId, searches the staff portal for that member, opens the member's active primary savings account, … Declared business outcomes: MEMBER_NOT_FOUND, …". Optional `outputDescriptions` maps every output name to its meaning ("Current Balance of the selected account, in USD minor units (cents)."). Parsing rejects descriptions that do not cover exactly the declared outputs, and rule revisions cannot change them. Earlier artifacts without the field remain valid.
+- **Decision summaries.** `MODEL_COMPLETED` events carry `action`, `decisionReason`, and, where the reference resolved, `controlLabel`, `inputName` (an input-binding name) or `fieldLabels` (the fields chosen for outputs). All are closed-vocabulary labels or binding names; the event schema rejects anything else.
+- **Recoveries in results.** `success` and `business_outcome` results include optional `recoveries: [{ ruleId, attempts }]` listing declared recoveries applied during the run.
