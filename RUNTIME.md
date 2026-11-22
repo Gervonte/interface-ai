@@ -1,6 +1,6 @@
 # Shared executor and run API (INT-007–013)
 
-The runtime implements policy-checked browser operations, sanitized structural evidence, authenticated asynchronous run APIs, single-coordinator ownership, cancellation, and restart reconciliation. Declared outcome/recovery/runtime-guard handling and setup-controlled target scenarios are documented in [SCENARIOS.md](SCENARIOS.md). Supported primary-savings discovery now constructs a capability from real model-selected actions, and replay interprets the exact saved version without inference. [Discovery/replay commands and limits](WORKFLOWS.md).
+The runtime implements policy-checked browser operations, sanitized structural evidence, authenticated asynchronous run APIs, single-coordinator ownership, cancellation, and restart reconciliation. Declared outcome/recovery/runtime-guard handling and setup-controlled target scenarios are documented in [SCENARIOS.md](SCENARIOS.md). Requested account-field discovery constructs a capability from real model-selected actions, and replay interprets the exact saved version without inference. [Discovery/replay commands and limits](WORKFLOWS.md).
 
 ## Start and test
 
@@ -21,7 +21,7 @@ In a second terminal:
 pnpm automation:smoke
 ```
 
-The smoke command loads the private token itself, checks unauthenticated access is denied, creates a run, retries the same request key, and polls the same run. At this milestone, **`failed` with `UNSUPPORTED_GOAL` is the expected smoke result** (the smoke request deliberately uses an unsupported goal). No paid browser session or model call is made. A capacity error means another run/session still occupies execution; inspect it and reconcile rather than deleting database rows.
+The smoke command loads the private token itself, checks unauthenticated access is denied, creates a run, retries the same request key, and polls the same run. At this milestone, **`failed` with `INVALID_BINDING` is the expected smoke result** (the smoke request deliberately uses a malformed member binding). No paid browser session or model call is made. A capacity error means another run/session still occupies execution; inspect it and reconcile rather than deleting database rows.
 
 Run the broader checks independently:
 
@@ -121,3 +121,5 @@ Read-only condition classification can batch target inspection into a single bro
 ## Integrated handoff work
 
 The operator page and authenticated claim/manual observation/action/resume API are implemented in INT-014/015 and pass local ownership, stale-request, validation, and cancellation checks. Real operator discovery and replay handoffs are verified in [evidence/int-014-015](evidence/int-014-015/README.md), including publication with manual provenance and exact-version replay for another member with zero inference. These are integrated demonstrations beyond the earlier SDK spike/target-control QA. See [HANDOFF.md](HANDOFF.md) for the same-session continuation model, volatile screen views, explicit manual permissions, operation receipts, and the live verifier.
+
+New discovery requires the bounded typed `outputContract`; replay bodies and saved artifact versions are unchanged. Contract-only idempotency changes are detected, and publication checks that the artifact output schema matches the accepted request. [Request format and live verifier](GOAL_OUTPUTS.md).

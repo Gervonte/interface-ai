@@ -310,6 +310,8 @@ In the minimal demo, the operator watches a run and follows its `activeIntervent
 
 ### Start discovery
 
+Implementation note (INT-023): the current account-inquiry API additionally requires an explicit typed `outputContract` and uses the `memberId` binding. Complete runnable requests are in [current balance](examples/discovery-current.json) and [available balance](examples/discovery-available.json); see [contract and limits](GOAL_OUTPUTS.md). The domain-neutral record/status example below illustrates the broader design, not an accepted request for the implemented portal.
+
 `POST /v1/runs`
 
 ```json

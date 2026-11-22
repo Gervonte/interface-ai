@@ -1,5 +1,6 @@
+import { RunRequestSchema } from '@interface-ai/contracts';
 import { randomUUID } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createPool } from '@interface-ai/postgres';
 import type { Target } from '@interface-ai/contracts';
@@ -10,6 +11,8 @@ import { EvidenceStore } from './evidence.js';
 import { readBrowserbaseConfig } from '../browserbase/config.js';
 
 async function main() {
+  const currentBalanceRequest=RunRequestSchema.parse(JSON.parse(await readFile(new URL('../../../../examples/discovery-current.json',import.meta.url),'utf8')));
+  if(currentBalanceRequest.mode!=='discovery')throw new Error('DISCOVERY_EXAMPLE_REQUIRED');
   const root = process.env.BROWSERBASE_PORTAL_URL?.replace(/\/$/, '');
   const credentials = readBrowserbaseConfig({ ...process.env, BROWSERBASE_FIXTURE_URL: root ? root + '/compatibility' : undefined });
   const url = new URL(credentials.fixtureUrl); url.pathname = '/';
@@ -63,7 +66,7 @@ async function main() {
     });
   try {
     await coordinator.start();
-    const accepted = await coordinator.accept({ mode: 'discovery', targetId: configuration.target.id, goal: 'Authored shared-executor verification; no discovery model or capability.', inputs: { memberId: 'M1001', otherMemberId: 'M1002' } }, 'demo-operator', randomUUID());
+    const accepted = await coordinator.accept({ mode: 'discovery', outputContract: currentBalanceRequest.outputContract, targetId: configuration.target.id, goal: 'Authored shared-executor verification; no discovery model or capability.', inputs: { memberId: 'M1001', otherMemberId: 'M1002' } }, 'demo-operator', randomUUID());
     await coordinator.idle(); const run = await coordinator.read(accepted.runId, 'demo-operator');
     const events = await coordinator.repository.events(run.runId, 'demo-operator', 0, 200);
     const failed = events.events.findLast(event => event.type === 'ACTION_FAILED');

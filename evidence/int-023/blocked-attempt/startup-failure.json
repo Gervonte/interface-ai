@@ -1,0 +1,84 @@
+{
+  "goal": "current",
+  "mode": "discovery",
+  "processId": 60293,
+  "run": {
+    "runId": "aa31fd2c-89c3-405c-898c-e151afa1b12b",
+    "mode": "discovery",
+    "target": {
+      "id": "demo-credit-union",
+      "version": 1795279598
+    },
+    "policy": {
+      "id": "demo-policy",
+      "version": 1795279598
+    },
+    "status": "failed",
+    "control": {
+      "owner": "none",
+      "revision": 3
+    },
+    "capability": null,
+    "currentStepId": null,
+    "activeInterventionId": null,
+    "result": {
+      "kind": "failure",
+      "code": "SESSION_CLEANUP_UNCONFIRMED",
+      "blocked": null,
+      "summary": "Execution stopped. Inspect the sanitized run events for context.",
+      "evidenceIds": []
+    },
+    "createdAt": "2026-11-20T15:43:48.775Z",
+    "updatedAt": "2026-11-20T15:43:50.724Z"
+  },
+  "interventions": [],
+  "events": [
+    {
+      "eventId": "e419da3a-2e08-4325-b3b4-a1c1b0944ebf",
+      "sequence": 1,
+      "type": "RUN_ACCEPTED",
+      "actor": "caller",
+      "stepId": null,
+      "details": {
+        "code": "accepted",
+        "bindingNames": [
+          "memberId"
+        ]
+      },
+      "createdAt": "2026-11-20T15:43:48.775Z"
+    },
+    {
+      "eventId": "ad633019-987e-4ad1-ad69-d9d5ab1eb4d8",
+      "sequence": 2,
+      "type": "RUN_STARTED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "started"
+      },
+      "createdAt": "2026-11-20T15:43:48.829Z"
+    },
+    {
+      "eventId": "8da3fe46-dc39-4760-bb25-cdf04a21e27d",
+      "sequence": 3,
+      "type": "SESSION_FINISHED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "uncertain"
+      },
+      "createdAt": "2026-11-20T15:43:50.710Z"
+    },
+    {
+      "eventId": "5d150373-d301-4766-9677-d67fe11e931b",
+      "sequence": 4,
+      "type": "RUN_FAILED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "failed"
+      },
+      "createdAt": "2026-11-20T15:43:50.724Z"
+    }
+  ]
+}

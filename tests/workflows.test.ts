@@ -1,3 +1,4 @@
+import { currentBalanceRequest, availableBalanceRequest } from '../examples/discovery-requests.js';
 import {ExecutionError} from '../apps/automation/src/execution/errors.js';
 import {resolveTarget} from '../apps/automation/src/execution/surface.js';
 import { describe, expect, it } from 'vitest';
@@ -5,9 +6,9 @@ import { randomUUID } from 'node:crypto';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { DEFAULT_RUNTIME_BUDGETS } from '@interface-ai/contracts';
-import type { Capability, Target, Values } from '@interface-ai/contracts';
+import type { Capability, RunRequest, Target, Values } from '@interface-ai/contracts';
 import { workflowWorker } from '../apps/automation/src/workflows/worker.js';
-import { DecisionSchema, outputLabels } from '../apps/automation/src/workflows/contracts.js';
+import { DecisionSchema, meaningLabels } from '../apps/automation/src/workflows/contracts.js';
 import type { Observation } from '../apps/automation/src/workflows/contracts.js';
 import type { Configuration, WorkerContext } from '../apps/automation/src/execution/coordinator.js';
 import type { BrowserSurface, ResolvedTarget } from '../apps/automation/src/execution/surface.js';
@@ -23,20 +24,22 @@ const row = { kind: 'tableRow' as const, tableCaption: 'Member accounts', cells:
 const blankOutputs = { memberId: '', accountId: '', accountType: '', currentBalanceMinor: '', currency: '' };
 const goal = 'Find the primary savings account current balance for memberId.';
 const configuration: Configuration = { target: { id: 'demo-credit-union', version: 2, surface: 'browser', applicationFamily: 'demo-credit-union', entryPoint: 'https://portal.example/' }, policy: { id: 'demo-policy', version: 2, allowedOrigins: ['https://portal.example'], allowedClickNames: ['Member Search', 'Search', 'Open', 'Account Inquiry'], allowedFillNames: ['Member ID'], allowedActions: ['navigate','click','fill','capture','wait','intervene'], allowRiskyActions: false, budgets: { ...DEFAULT_RUNTIME_BUDGETS, pollIntervalMs: 1, stepTimeoutMs: 100, activeTimeoutMs: 10_000 } } };
-async function fixture(memberId: string, saved?: Capability, wrongIdentity = false, profile = false) {
+async function fixture(memberId: string, saved?: Capability, wrongIdentity = false, profile = false, requested: Extract<RunRequest,{mode:'discovery'}> = currentBalanceRequest) {
   const config=structuredClone(configuration);if(profile){config.target.version=3;config.policy.allowedClickNames!.push('Acknowledge notice');config.policy.budgets.maxActions=300;}
   let screen = 'Staff workspace'; let location = 'about:blank'; let input = ''; let sequence = 0; let modelCalls = 0; let published: Capability | undefined; let outputs: Values | undefined;
-  const accountId = memberId === 'M1001' ? 'S2001' : 'S2002';
+  const selectedType=requested.outputContract.account.type==='checking'?'Checking':'Primary Savings';
+  const accountId = (selectedType==='Checking'?'C':'S')+(memberId==='M1001'?'2001':'2002');
+  const selectedRow={...row,cells:[{columnHeader:'Account Type',equals:{kind:'literal' as const,value:selectedType}},{columnHeader:'Designation',equals:{kind:'literal' as const,value:requested.outputContract.account.designation}}]};
   const money = memberId === 'M1001' ? '$1,250.34' : '$87.65';
   const actions: string[] = []; const events: StoredEventInput[] = [];
-  const values: Record<string, string> = { 'Member ID': wrongIdentity ? 'M9999' : memberId, 'Account ID': accountId, 'Account Type': 'Primary Savings', Designation: 'Primary', Status: 'ACTIVE', Currency: 'USD', 'Current Balance': money, 'Available Balance': '$0.01' };
+  const values: Record<string, string> = { 'Member ID': wrongIdentity ? 'M9999' : memberId, 'Account ID': accountId, 'Account Type': selectedType, Designation: requested.outputContract.account.designation, Status: requested.outputContract.account.status, Currency: 'USD', 'Current Balance': money, 'Available Balance': '$0.01' };
   const observe = async (): Promise<Observation> => {
     const controls: Observation['controls'] = [];
     const add = (label: Observation['controls'][number]['label'], target = role(label), kind: 'click' | 'fill' = 'click') => { const control = { ref: 'c' + (controls.length + 1), kind, label, target, enabled: true, filled: kind === 'fill' && input === memberId, row: {}, matchesInputs: [] }; controls.push(control); return control; };
     if (screen === 'Staff workspace') add('Member Search'); // A different route from Start Member Search is learned.
     if (screen === 'Member Search') { add('Member ID', { scope, within: [], locator: { kind: 'label', text: 'Member ID', exact: true }, expectedMatches: 1 }, 'fill'); add('Search'); if (actions.at(-1) === 'Search') add('Open', { ...role('Open'), within: [{ kind: 'tableRow', tableCaption: 'Member search results', cells: [{ columnHeader: 'Member ID', equals: { kind: 'input', name: 'memberId' } }] }] }); }
     if (screen === 'Member Overview') add('Account Inquiry');
-    if (screen === 'Account Inquiry') { const control = add('Open', { ...role('Open'), within: [row] }); Object.assign(control, { row: { 'Account Type': 'Primary Savings', Designation: 'Primary' }, accountIdTarget: { scope, within: [row], locator: { kind: 'cell', columnHeader: 'Account ID' }, expectedMatches: 1 } }); }
+    if (screen === 'Account Inquiry') { const control = add('Open', { ...role('Open'), within: [selectedRow] }); Object.assign(control, { row: { 'Account Type': selectedType, Designation: requested.outputContract.account.designation, Status: requested.outputContract.account.status==='ACTIVE'?'Active':'Closed' }, accountIdTarget: { scope, within: [selectedRow], locator: { kind: 'cell', columnHeader: 'Account ID' }, expectedMatches: 1 } }); }
     const fields: Observation['fields'] = screen === 'Account Details' ? Object.keys(values).map((label, index) => ({ ref: 'f' + (index + 1), label: label as 'Member ID', region: 'Account Details', target: field(label), matchesInputs: label === 'Member ID' ? ['memberId'] : [], constant: label === 'Designation' ? 'Primary' : null })) : [];
     return { observationId: randomUUID(), fingerprint: (screen + input + actions.length).split('').map(char => char.charCodeAt(0).toString(16)).join('').padEnd(64, '0').slice(0,64), ready: true, headings: [{ label: screen as 'Staff workspace', target: role(screen, 'heading') }], controls, fields };
   };
@@ -56,13 +59,13 @@ async function fixture(memberId: string, saved?: Capability, wrongIdentity = fal
   const context: WorkerContext = { runId: randomUUID(), signal: new AbortController().signal, configuration:config,
     record: async event => { events.push(event); return ++sequence; }, capability: async () => { if (!saved) throw new Error('Missing artifact'); return saved; },
     executor: async (targets, variables) => new Executor({ runId: randomUUID(), entryPoint: config.target.entryPoint, policy: { ...config.policy, allowedFillNames: config.policy.allowedFillNames!, allowedClickNames: config.policy.allowedClickNames! }, targets, inputs: { memberId }, ...(variables ? { variables } : {}), surface, gate: new DispatchGate(2), revision: 2, signal: new AbortController().signal, routes: { 'fresh-session': 'about:blank', 'target-entry': config.target.entryPoint }, authorize: async () => {}, record: async event => { events.push(event); return ++sequence; }, evidence: new EvidenceStore(folder) }),
-    plan: async ({ observation }) => {
+    plan: async ({ observation, outputContract }) => {
       if (saved) throw new Error('Replay called the model'); modelCalls++;
-      if (screen === 'Account Details') return DecisionSchema.parse({ observationId: observation.observationId, action: 'finish', controlRef: '', inputName: '', outputs: Object.fromEntries(Object.entries(outputLabels).map(([name,label]) => [name, observation.fields.find(field => field.label === label)!.ref])), reason: 'goal_complete' });
+      if (screen === 'Account Details') return DecisionSchema.parse({ observationId: observation.observationId, action: 'finish', controlRef: '', inputName: '', outputs: Object.fromEntries(Object.entries(outputContract.fields).map(([name,field]) => [name, observation.fields.find(item => item.label === meaningLabels[field.meaning])!.ref])), reason: 'goal_complete' });
       const control = screen === 'Member Search' ? observation.controls.find(control => input !== memberId ? control.kind === 'fill' : actions.at(-1) === 'Search' ? control.label === 'Open' : control.label === 'Search')! : observation.controls[0]!;
-      return { observationId: observation.observationId, action: control.kind, controlRef: control.ref, inputName: control.kind === 'fill' ? 'memberId' : '', outputs: blankOutputs, reason: 'continue' };
+      return { observationId: observation.observationId, action: control.kind, controlRef: control.ref, inputName: control.kind === 'fill' ? 'memberId' : '', outputs: Object.fromEntries(Object.keys(outputContract.fields).map(name=>[name,''])), reason: 'continue' };
     }, publish: async (artifact, output) => { published = artifact; outputs = output; } };
-  return { context, actions, events, surface, discover: () => workflowWorker({ mode:'discovery', targetId:'demo-credit-union', goal, inputs:{memberId} }, context), artifact: () => published!, outputs: () => outputs, calls: () => modelCalls };
+  return { context, actions, events, surface, discover: () => workflowWorker({ ...requested, inputs:{memberId} }, context), artifact: () => published!, outputs: () => outputs, calls: () => modelCalls };
 }
 
 describe('model-selected discovery and deterministic capability replay', () => {
@@ -76,12 +79,61 @@ describe('model-selected discovery and deterministic capability replay', () => {
     expect(result).toMatchObject({kind:'success',output:{values:{memberId:'M1002',accountId:'S2002',currentBalanceMinor:8765,currency:'USD'}}}); expect(replay.calls()).toBe(0);
     expect(replay.actions).toEqual(discovery.actions);
   });
+  it('uses requested available-balance semantics and arbitrary output names without task keywords',async()=>{
+    const request=structuredClone(availableBalanceRequest);request.goal='Read the requested figures for the bound record.';
+    const aliases:Record<string,string>={memberId:'subject',accountId:'account',accountType:'kind',availableBalanceMinor:'amount',currency:'unit'};
+    request.outputContract.fields=Object.fromEntries(Object.entries(request.outputContract.fields).map(([name,field])=>[aliases[name]!,field]));
+    const discovery=await fixture('M1001',undefined,false,true,request);await discovery.discover();const artifact=discovery.artifact();
+    expect(discovery.outputs()).toEqual({subject:'M1001',account:'S2001',kind:'savings',amount:1,unit:'USD'});
+    expect(artifact.targets[artifact.outputs.amount!.target]!.locator).toEqual({kind:'field',label:'Available Balance'});
+    expect(artifact.outputSchema.required.sort()).toEqual(['account','amount','kind','subject','unit']);
+    const replay=await fixture('M1002',artifact,false,true,request);
+    expect(await workflowWorker({mode:'replay',targetId:'demo-credit-union',capability:{id:artifact.capabilityId,version:artifact.version},inputs:{memberId:'M1002'}},replay.context)).toMatchObject({kind:'success',output:{values:{subject:'M1002',account:'S2002',amount:1}}});
+    expect(replay.calls()).toBe(0);
+  });
+  it('rejects current balance when the requested meaning is available balance',async()=>{
+    const f=await fixture('M1001',undefined,false,false,availableBalanceRequest);const plan=f.context.plan;
+    f.context.plan=async data=>{const result=await plan(data);if(result.action==='finish')result.outputs.availableBalanceMinor=data.observation.fields.find(field=>field.label==='Current Balance')!.ref;return result;};
+    await expect(f.discover()).rejects.toMatchObject({message:'HUMAN_HELP_REQUIRED'});expect(f.artifact()).toBeUndefined();
+  });
+  it('checks requested account criteria before dispatching the account Open control',async()=>{
+    const f=await fixture('M1001');const observe=f.surface.observe!;
+    f.surface.observe=async(inputs,policy)=>{const o=await observe(inputs,policy);for(const c of o.controls)if(c.accountIdTarget)c.row.Designation='Standard';return o;};
+    await expect(f.discover()).rejects.toMatchObject({message:'HUMAN_HELP_REQUIRED'});expect(f.actions.filter(action=>action==='Open')).toHaveLength(1);expect(f.artifact()).toBeUndefined();
+  });
+  it('supports a checking account without applying the missing-primary-savings outcome',async()=>{
+    const request=structuredClone(currentBalanceRequest);request.goal='Read the current balance of the active standard checking account.';
+    request.outputContract.account={type:'checking',designation:'Standard',status:'ACTIVE'};
+    request.outputContract.fields.accountType!.schema={type:'string',enum:['checking'],maxLength:20};
+    const f=await fixture('M1001',undefined,false,true,request);const inspect=f.surface.inspect;
+    f.surface.inspect=async(target,policy)=>{const state=await inspect(target,policy);return target.locator.kind==='attribute'&&target.locator.value==='No primary savings account'?{...state,count:1,visible:true}:state;};
+    await f.discover();expect(f.outputs()).toMatchObject({accountId:'C2001',accountType:'checking'});
+    expect(f.artifact().outcomeRules.some(rule=>rule.code==='NO_PRIMARY_SAVINGS_ACCOUNT')).toBe(false);
+    const replay=await fixture('M1002',f.artifact(),false,true,request);
+    expect(await workflowWorker({mode:'replay',targetId:'demo-credit-union',capability:{id:f.artifact().capabilityId,version:1},inputs:{memberId:'M1002'}},replay.context)).toMatchObject({kind:'success',output:{values:{accountId:'C2002',accountType:'checking'}}});
+  });
+  it('rejects an invalid requested contract before creating a browser',async()=>{
+    const f=await fixture('M1001');const request=structuredClone(currentBalanceRequest);delete request.outputContract.fields.currency;
+    await expect(workflowWorker(request,f.context)).rejects.toMatchObject({code:'INVALID_OUTPUT_CONTRACT'});expect(f.actions).toEqual([]);expect(f.calls()).toBe(0);
+  });
   it('rejects wrong-member completion before publishing', async()=> { const f=await fixture('M1001',undefined,true); await expect(f.discover()).rejects.toBeTruthy(); expect(f.artifact()).toBeUndefined(); });
   it('rejects mapping available balance as the current balance', async()=> { const f=await fixture('M1001'); const plan=f.context.plan; f.context.plan=async data=>{const decision=await plan(data); if(decision.action==='finish') decision.outputs.currentBalanceMinor=data.observation.fields.find(field=>field.label==='Available Balance')!.ref;return decision;};await expect(f.discover()).rejects.toMatchObject({message:'HUMAN_HELP_REQUIRED'});expect(f.artifact()).toBeUndefined(); });
   it('requires a UI-selected account before accepting a finish decision',async()=>{const f=await fixture('M1001');f.context.plan=async({observation})=>({observationId:observation.observationId,action:'finish',controlRef:'',inputName:'',outputs:blankOutputs,reason:'goal_complete'});await expect(f.discover()).rejects.toMatchObject({message:'HUMAN_HELP_REQUIRED'});expect(f.artifact()).toBeUndefined();});
   it('rejects a proposal for another observation before dispatch',async()=>{const f=await fixture('M1001');f.context.plan=async()=>({observationId:randomUUID(),action:'click',controlRef:'c1',inputName:'',outputs:blankOutputs,reason:'continue'});await expect(f.discover()).rejects.toMatchObject({message:'HUMAN_HELP_REQUIRED'});expect(f.actions).toEqual(['navigate']);});
-  it('requires supported input bindings before creating a browser',async()=>{const f=await fixture('M1001');await expect(workflowWorker({mode:'discovery',targetId:'demo-credit-union',goal,inputs:{memberId:'invalid'}},f.context)).rejects.toMatchObject({code:'INVALID_BINDING'});expect(f.actions).toEqual([]);});
-  it('fails unsupported goals without creating a browser or calling the planner',async()=>{const f=await fixture('M1001');await expect(workflowWorker({mode:'discovery',targetId:'demo-credit-union',goal:'Send a wire transfer.',inputs:{memberId:'M1001'}},f.context)).rejects.toMatchObject({code:'UNSUPPORTED_GOAL'});expect(f.actions).toEqual([]);expect(f.calls()).toBe(0);});
+  it('requires supported input bindings before creating a browser',async()=>{const f=await fixture('M1001');await expect(workflowWorker({mode:'discovery',outputContract:currentBalanceRequest.outputContract,targetId:'demo-credit-union',goal,inputs:{memberId:'invalid'}},f.context)).rejects.toMatchObject({code:'INVALID_BINDING'});expect(f.actions).toEqual([]);});
+  it('stops when the planner cannot support the goal, without dispatching its proposed UI action',async()=>{const f=await fixture('M1001');const plan=f.context.plan;f.context.plan=async data=>({...await plan(data),action:'help',controlRef:'',inputName:'',reason:'unsupported_goal'});await expect(workflowWorker({...currentBalanceRequest,goal:'Send a wire transfer.'},f.context)).rejects.toMatchObject({code:'UNSUPPORTED_GOAL'});expect(f.actions).toEqual(['navigate']);expect(f.calls()).toBe(1);});
+  it('stops without publishing when the planner reports a goal/contract conflict on Account Details',async()=>{
+    // Goal asks for available balance while the contract requests current balance; only the planner can judge the natural-language conflict.
+    const f=await fixture('M1001');const plan=f.context.plan;
+    f.context.plan=async data=>{const decision=await plan(data);return decision.action==='finish'?{...decision,action:'help',outputs:Object.fromEntries(Object.keys(data.outputContract.fields).map(name=>[name,''])),reason:'unsupported_goal'}:decision;};
+    await expect(workflowWorker({...currentBalanceRequest,goal:'Find the available balance of the member\'s active primary savings account.'},f.context)).rejects.toMatchObject({code:'UNSUPPORTED_GOAL'});
+    expect(f.actions.filter(action=>action==='Open')).toHaveLength(2);expect(f.artifact()).toBeUndefined();
+  });
+  it('rejects a finish decision that omits a requested output ref',async()=>{
+    const f=await fixture('M1001',undefined,false,false,availableBalanceRequest);const plan=f.context.plan;
+    f.context.plan=async data=>{const decision=await plan(data);if(decision.action==='finish'){const {availableBalanceMinor:_omitted,...rest}=decision.outputs;return {...decision,outputs:rest};}return decision;};
+    await expect(f.discover()).rejects.toMatchObject({code:'ARTIFACT_INVALID'});expect(f.artifact()).toBeUndefined();
+  });
   it('attaches authored scenario rules to a newly discovered capability',async()=>{
     const f=await fixture('M1001',undefined,false,true);await f.discover();expect(f.artifact().outcomeRules).toHaveLength(3);expect(f.artifact().runtimeGuards!.some(rule=>rule.id==='account-identity')).toBe(true);
   });

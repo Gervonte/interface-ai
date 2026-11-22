@@ -1,0 +1,2452 @@
+{
+  "goal": "available",
+  "mode": "replay",
+  "processId": 18117,
+  "run": {
+    "runId": "302820e7-0cae-45d2-8db8-bb1037a69c01",
+    "mode": "replay",
+    "target": {
+      "id": "demo-credit-union",
+      "version": 1795313449
+    },
+    "policy": {
+      "id": "demo-policy",
+      "version": 1795313449
+    },
+    "status": "completed",
+    "control": {
+      "owner": "none",
+      "revision": 3
+    },
+    "capability": {
+      "id": "account-read-a66a8d8a911b478e98ef5dc3d55d8189",
+      "version": 1
+    },
+    "currentStepId": "verify-output-context",
+    "activeInterventionId": null,
+    "result": {
+      "kind": "success",
+      "capability": {
+        "id": "account-read-a66a8d8a911b478e98ef5dc3d55d8189",
+        "version": 1
+      },
+      "output": {
+        "availability": "available",
+        "values": {
+          "currency": "USD",
+          "memberId": "M1002",
+          "accountId": "S2002",
+          "accountType": "savings",
+          "availableBalanceMinor": 7600
+        }
+      }
+    },
+    "createdAt": "2026-11-22T02:14:10.130Z",
+    "updatedAt": "2026-11-22T02:14:45.751Z"
+  },
+  "interventions": [],
+  "events": [
+    {
+      "eventId": "8b0c4ad6-f38c-463e-a9d3-def4a448570d",
+      "sequence": 1,
+      "type": "RUN_ACCEPTED",
+      "actor": "caller",
+      "stepId": null,
+      "details": {
+        "code": "accepted",
+        "bindingNames": [
+          "memberId"
+        ]
+      },
+      "createdAt": "2026-11-22T02:14:10.130Z"
+    },
+    {
+      "eventId": "c07d47e4-af5f-467f-830b-c911dda5c1d1",
+      "sequence": 2,
+      "type": "RUN_STARTED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "started"
+      },
+      "createdAt": "2026-11-22T02:14:10.167Z"
+    },
+    {
+      "eventId": "600492ab-335f-4554-8bff-65dfe2622ac7",
+      "sequence": 3,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001-before",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:14.654Z"
+    },
+    {
+      "eventId": "7cb51436-147b-41fc-8f51-7c96607b8291",
+      "sequence": 4,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001-before",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:14.773Z"
+    },
+    {
+      "eventId": "61f5b86e-14e9-473c-8239-8926085b70d1",
+      "sequence": 5,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001",
+      "details": {
+        "code": "admitted",
+        "operation": "navigate"
+      },
+      "createdAt": "2026-11-22T02:14:14.903Z"
+    },
+    {
+      "eventId": "68ac5491-5bde-465b-9ede-fb2ad1e916d1",
+      "sequence": 6,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-001",
+      "details": {
+        "code": "dispatching"
+      },
+      "createdAt": "2026-11-22T02:14:14.911Z"
+    },
+    {
+      "eventId": "a045b2e4-afe7-43f6-8acf-6bd0dc1936d0",
+      "sequence": 7,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001",
+      "details": {
+        "code": "confirmed",
+        "operation": "navigate"
+      },
+      "createdAt": "2026-11-22T02:14:15.521Z"
+    },
+    {
+      "eventId": "a7732550-8515-4f31-b09c-653ece5b089c",
+      "sequence": 8,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:15.643Z"
+    },
+    {
+      "eventId": "75f3b307-3995-4a28-8208-576118776409",
+      "sequence": 9,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:15.782Z"
+    },
+    {
+      "eventId": "f4440a1d-72d6-4662-b61b-036ce059296b",
+      "sequence": 10,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:16.157Z"
+    },
+    {
+      "eventId": "b152cafe-41a0-4c4c-aec6-18f376234795",
+      "sequence": 11,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:16.297Z"
+    },
+    {
+      "eventId": "401880b2-1ce3-4f68-a4ab-438d3022ceb2",
+      "sequence": 12,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-001-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:16.672Z"
+    },
+    {
+      "eventId": "2ada95e5-4758-4dec-9507-d407bf1cc0f9",
+      "sequence": 13,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-001-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:16.803Z"
+    },
+    {
+      "eventId": "6884461c-8c64-4fc7-95ef-771a03ab108a",
+      "sequence": 14,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "initial-precondition",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:16.922Z"
+    },
+    {
+      "eventId": "f191a3d2-c93f-40ee-8d0b-cb564bd45219",
+      "sequence": 15,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "initial-precondition",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:17.053Z"
+    },
+    {
+      "eventId": "e9c58b27-c877-4d6e-8f92-7e051a4152ab",
+      "sequence": 16,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-002-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:17.175Z"
+    },
+    {
+      "eventId": "9f0bf98b-ffed-459c-9a21-7cf1802d53cc",
+      "sequence": 17,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-002-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:17.314Z"
+    },
+    {
+      "eventId": "400a4253-7631-4770-be17-9ea41cb79247",
+      "sequence": 18,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-002",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "target2"
+      },
+      "createdAt": "2026-11-22T02:14:17.435Z"
+    },
+    {
+      "eventId": "4d6e5e16-72dd-488a-8d77-471ed8d07b7d",
+      "sequence": 19,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-002",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "target2"
+      },
+      "createdAt": "2026-11-22T02:14:17.570Z"
+    },
+    {
+      "eventId": "bea23c6c-4d0f-40a7-b190-8045d10d020b",
+      "sequence": 20,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-002",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "target2"
+      },
+      "createdAt": "2026-11-22T02:14:17.824Z"
+    },
+    {
+      "eventId": "7b4eaa83-2cd3-4bb4-82e1-f5701dbfae8b",
+      "sequence": 21,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-002-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:17.945Z"
+    },
+    {
+      "eventId": "e9ffc088-6df3-4d78-832d-1650f9b3fb0b",
+      "sequence": 22,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-002-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:18.086Z"
+    },
+    {
+      "eventId": "8e41689b-0c16-482b-9e87-14fd2f746187",
+      "sequence": 23,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-003-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:18.215Z"
+    },
+    {
+      "eventId": "26cb2eaa-9152-4b61-9eaf-98c9a28be3bc",
+      "sequence": 24,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-003-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:18.372Z"
+    },
+    {
+      "eventId": "c36a37a6-2a0d-47c5-ade2-c7b9bd3f9c07",
+      "sequence": 25,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-003",
+      "details": {
+        "code": "admitted",
+        "operation": "fill",
+        "targetRef": "target4"
+      },
+      "createdAt": "2026-11-22T02:14:18.493Z"
+    },
+    {
+      "eventId": "e735a3ff-c59f-459e-83a6-f564070d1a82",
+      "sequence": 26,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-003",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "target4"
+      },
+      "createdAt": "2026-11-22T02:14:18.628Z"
+    },
+    {
+      "eventId": "bd9a21e4-4793-4348-9b3c-4661c4468888",
+      "sequence": 27,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-003",
+      "details": {
+        "code": "confirmed",
+        "operation": "fill",
+        "targetRef": "target4"
+      },
+      "createdAt": "2026-11-22T02:14:18.878Z"
+    },
+    {
+      "eventId": "4fc17410-18f9-4f15-8775-3ccfecd8577b",
+      "sequence": 28,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-003-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:19.012Z"
+    },
+    {
+      "eventId": "8615b989-9c33-4827-8db1-c76c3aa7079c",
+      "sequence": 29,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-003-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:19.155Z"
+    },
+    {
+      "eventId": "8200064b-e635-49fa-a5f3-b1431331c5c2",
+      "sequence": 30,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-004-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:19.282Z"
+    },
+    {
+      "eventId": "3cccfdee-1a79-40f2-9019-c41ab64f57da",
+      "sequence": 31,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-004-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:19.420Z"
+    },
+    {
+      "eventId": "e726ca20-d25a-4e5e-b86a-82575be62869",
+      "sequence": 32,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-004",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "target5"
+      },
+      "createdAt": "2026-11-22T02:14:19.533Z"
+    },
+    {
+      "eventId": "017ece21-7fc1-4c63-822c-bd8fe4801c3e",
+      "sequence": 33,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-004",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "target5"
+      },
+      "createdAt": "2026-11-22T02:14:19.667Z"
+    },
+    {
+      "eventId": "5b5cddd5-6071-486c-ac80-0f7013c498ce",
+      "sequence": 34,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-004",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "target5"
+      },
+      "createdAt": "2026-11-22T02:14:19.918Z"
+    },
+    {
+      "eventId": "174a4e85-72b4-4a46-82fd-42cd421f029f",
+      "sequence": 35,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-004-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:20.035Z"
+    },
+    {
+      "eventId": "95fcf4aa-af77-419e-b7c0-285f133c3c3e",
+      "sequence": 36,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-004-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:20.169Z"
+    },
+    {
+      "eventId": "c1edb203-6e60-4482-b601-6375e50e0c31",
+      "sequence": 37,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-005-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:20.291Z"
+    },
+    {
+      "eventId": "e1c79a6f-5620-4588-b922-d8ad59bee4a5",
+      "sequence": 38,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-005-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:20.580Z"
+    },
+    {
+      "eventId": "475b938e-52c6-47b8-81b3-2fed235c60f6",
+      "sequence": 39,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-005",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "target7"
+      },
+      "createdAt": "2026-11-22T02:14:20.701Z"
+    },
+    {
+      "eventId": "411cf2be-213e-43bf-83e0-a0e067a62414",
+      "sequence": 40,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-005",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "target7"
+      },
+      "createdAt": "2026-11-22T02:14:21.175Z"
+    },
+    {
+      "eventId": "9d1082fe-4c19-4382-ba16-b65ca0216bd8",
+      "sequence": 41,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-005",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "target7"
+      },
+      "createdAt": "2026-11-22T02:14:21.629Z"
+    },
+    {
+      "eventId": "7cfbb202-739f-4bbf-8d07-ca7fefe102ea",
+      "sequence": 42,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-005-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:21.757Z"
+    },
+    {
+      "eventId": "438c5521-c2df-42dc-824e-19a433f5f57d",
+      "sequence": 43,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-005-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:22.109Z"
+    },
+    {
+      "eventId": "b15e4bb0-edd0-4531-af89-f211f36a2d4b",
+      "sequence": 44,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-005-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:22.231Z"
+    },
+    {
+      "eventId": "0dd64473-3e2a-49d5-9e3c-d2ee74aba9cf",
+      "sequence": 45,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-005-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:22.470Z"
+    },
+    {
+      "eventId": "acaa8776-7572-4982-afc1-5aa9bed1e388",
+      "sequence": 46,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-005-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:22.593Z"
+    },
+    {
+      "eventId": "9955f3ea-6f3a-41b9-a2cc-55b401a64c0d",
+      "sequence": 47,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-005-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:22.837Z"
+    },
+    {
+      "eventId": "395ad2bf-5ada-414c-a98f-a677c9935ced",
+      "sequence": 48,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-006-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:22.964Z"
+    },
+    {
+      "eventId": "793c6cd0-ee3e-471f-ab24-f9e9c8d3da43",
+      "sequence": 49,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-006-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:23.214Z"
+    },
+    {
+      "eventId": "e63a394d-0d98-41bb-91e0-33094136e4b7",
+      "sequence": 50,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-006-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:23.347Z"
+    },
+    {
+      "eventId": "5895ec94-52dd-49be-95eb-3b02b894b32d",
+      "sequence": 51,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-006-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:23.480Z"
+    },
+    {
+      "eventId": "1ef2c71e-a6bc-4d02-8600-bb98ad29a48a",
+      "sequence": 52,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-006-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:23.616Z"
+    },
+    {
+      "eventId": "7e2e3de1-25d9-4bc6-ba6b-28cebc64957c",
+      "sequence": 53,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-006-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:23.756Z"
+    },
+    {
+      "eventId": "9f025aeb-9041-4c69-a24f-7e849aafa03b",
+      "sequence": 54,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-006",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "target9"
+      },
+      "createdAt": "2026-11-22T02:14:23.880Z"
+    },
+    {
+      "eventId": "81345ee2-e8bf-4757-a7a6-81ed2835a165",
+      "sequence": 55,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-006",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "target9"
+      },
+      "createdAt": "2026-11-22T02:14:24.013Z"
+    },
+    {
+      "eventId": "016901c1-6b32-40a2-82eb-bbf906038ea2",
+      "sequence": 56,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-006",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "target9"
+      },
+      "createdAt": "2026-11-22T02:14:24.258Z"
+    },
+    {
+      "eventId": "063c4c41-2c0f-4acd-9cfd-45ea699a1ebc",
+      "sequence": 57,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-006-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:24.380Z"
+    },
+    {
+      "eventId": "bb357053-6a0b-438b-b7dd-227b77ea57fb",
+      "sequence": 58,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-006-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:24.645Z"
+    },
+    {
+      "eventId": "f38af7a2-763a-4da2-b8f7-03a542d126e4",
+      "sequence": 59,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-006-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:24.775Z"
+    },
+    {
+      "eventId": "220ce4fe-cfd7-4993-8652-6971d86a454f",
+      "sequence": 60,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-006-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:24.908Z"
+    },
+    {
+      "eventId": "0baf5b00-60af-4580-8a20-1d3a78846eb7",
+      "sequence": 61,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-006-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:25.032Z"
+    },
+    {
+      "eventId": "a99c9419-7a82-4001-b73e-dd185309169d",
+      "sequence": 62,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-006-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:25.163Z"
+    },
+    {
+      "eventId": "4011be19-600e-4b0e-9fb2-1dd7f43a5e95",
+      "sequence": 63,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-007-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:25.286Z"
+    },
+    {
+      "eventId": "05a7e93d-0f6e-4fc6-a3c2-312809b46daf",
+      "sequence": 64,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-007-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:25.429Z"
+    },
+    {
+      "eventId": "ffe9a752-b68a-47c2-99bf-382751744995",
+      "sequence": 65,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-007-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:25.549Z"
+    },
+    {
+      "eventId": "bba3946b-6824-4faf-bc70-2240e249f5a0",
+      "sequence": 66,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-007-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:25.677Z"
+    },
+    {
+      "eventId": "85074bec-738c-42b1-a160-a14293385980",
+      "sequence": 67,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-007-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:25.798Z"
+    },
+    {
+      "eventId": "5949a155-6c37-49d2-a9d3-13d3a3847046",
+      "sequence": 68,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-007-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:25.928Z"
+    },
+    {
+      "eventId": "e9f3fa87-aea1-427a-b865-1acdc6a96a61",
+      "sequence": 69,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-007",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:26.051Z"
+    },
+    {
+      "eventId": "012ea653-1723-4aba-99fd-d2da019ab623",
+      "sequence": 70,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-007",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:26.184Z"
+    },
+    {
+      "eventId": "66918b43-5e52-4b31-b7f6-b50b8ea8718a",
+      "sequence": 71,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-007-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:26.306Z"
+    },
+    {
+      "eventId": "1a848eb2-3ebd-4e53-bf42-2361799a584d",
+      "sequence": 72,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-007-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:26.441Z"
+    },
+    {
+      "eventId": "4e892072-662b-4c4d-bd38-918f849de84d",
+      "sequence": 73,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-007-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:26.565Z"
+    },
+    {
+      "eventId": "b5bc6605-fbeb-4e8a-80c3-a41530472443",
+      "sequence": 74,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-007-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:26.693Z"
+    },
+    {
+      "eventId": "52b2cc9d-20b5-40af-81b1-5629aaf099ef",
+      "sequence": 75,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-007-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:26.814Z"
+    },
+    {
+      "eventId": "076c2310-ea67-4b61-aa54-46dcaf0519d1",
+      "sequence": 76,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-007-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:26.951Z"
+    },
+    {
+      "eventId": "4dc7333d-f367-4a38-87a9-e8ba37146efa",
+      "sequence": 77,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-008-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:27.078Z"
+    },
+    {
+      "eventId": "425f5f2f-924e-46d9-9964-3a22a9e96ad6",
+      "sequence": 78,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-008-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:27.225Z"
+    },
+    {
+      "eventId": "b9086352-a28a-45b4-a41c-ce3cc07aaddf",
+      "sequence": 79,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:27.348Z"
+    },
+    {
+      "eventId": "186182b0-01db-41ce-810e-3fd16532d302",
+      "sequence": 80,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:27.486Z"
+    },
+    {
+      "eventId": "41a141da-23eb-4d1c-9304-118b2dc3d933",
+      "sequence": 81,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:27.610Z"
+    },
+    {
+      "eventId": "406fba17-3298-482f-9c23-1cf184d4dda5",
+      "sequence": 82,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:27.736Z"
+    },
+    {
+      "eventId": "5211a0e7-dfbd-44fb-9014-7e1980519d5f",
+      "sequence": 83,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-008",
+      "details": {
+        "code": "admitted",
+        "operation": "click",
+        "targetRef": "target13"
+      },
+      "createdAt": "2026-11-22T02:14:27.861Z"
+    },
+    {
+      "eventId": "1e70fe0b-ad3e-47ba-81fd-ba95b953ae74",
+      "sequence": 84,
+      "type": "ACTION_DISPATCHED",
+      "actor": "automation",
+      "stepId": "step-008",
+      "details": {
+        "code": "dispatching",
+        "targetRef": "target13"
+      },
+      "createdAt": "2026-11-22T02:14:27.996Z"
+    },
+    {
+      "eventId": "045af024-680a-4692-8f3e-45e236941fb2",
+      "sequence": 85,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-008",
+      "details": {
+        "code": "confirmed",
+        "operation": "click",
+        "targetRef": "target13"
+      },
+      "createdAt": "2026-11-22T02:14:28.236Z"
+    },
+    {
+      "eventId": "03ffdb9e-b498-4825-a3b7-1dea7ac7ca09",
+      "sequence": 86,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-008-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:28.357Z"
+    },
+    {
+      "eventId": "68b8849a-ee47-4624-81e2-2e998f3aa2b2",
+      "sequence": 87,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-008-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:28.592Z"
+    },
+    {
+      "eventId": "6a4aa71f-8277-4dae-8df1-a32accda7011",
+      "sequence": 88,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:28.730Z"
+    },
+    {
+      "eventId": "6c07bfeb-4d0e-4841-aa3d-caba42b24a76",
+      "sequence": 89,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:28.878Z"
+    },
+    {
+      "eventId": "5d0c7611-ce3e-4b75-b6bf-1c014d952675",
+      "sequence": 90,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:29.006Z"
+    },
+    {
+      "eventId": "d6f9705c-1ff0-4667-b237-8e34851d9704",
+      "sequence": 91,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:29.144Z"
+    },
+    {
+      "eventId": "91dce652-390a-4f14-b17b-8836ae2231d9",
+      "sequence": 92,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:29.269Z"
+    },
+    {
+      "eventId": "ce29aea3-f350-46ff-b22a-73c7310a6557",
+      "sequence": 93,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-008-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:29.410Z"
+    },
+    {
+      "eventId": "e9be090f-7a03-4dec-9999-5ae458669029",
+      "sequence": 94,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-009-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:29.534Z"
+    },
+    {
+      "eventId": "9061226d-85aa-458e-bc5b-10dd55ddf915",
+      "sequence": 95,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-009-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:29.670Z"
+    },
+    {
+      "eventId": "52351bcd-b981-4315-b4fd-4a263b804e40",
+      "sequence": 96,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:29.794Z"
+    },
+    {
+      "eventId": "dc0a44d3-f9f7-4fcc-a9ec-ff906eb015b2",
+      "sequence": 97,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:29.930Z"
+    },
+    {
+      "eventId": "f021bb71-0ee2-4891-b134-0c9287161335",
+      "sequence": 98,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:30.057Z"
+    },
+    {
+      "eventId": "e8af3c73-d203-49d1-a557-3c4d7621d276",
+      "sequence": 99,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:30.193Z"
+    },
+    {
+      "eventId": "46796973-1f3d-4afc-ab72-62a0bb1a2145",
+      "sequence": 100,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:30.317Z"
+    },
+    {
+      "eventId": "c0c98893-1e3e-4b17-8b50-bea7ef516006",
+      "sequence": 101,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:30.461Z"
+    },
+    {
+      "eventId": "19e212dd-94a9-4d6a-bdf7-a1f57f0d8d61",
+      "sequence": 102,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-009",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:30.577Z"
+    },
+    {
+      "eventId": "41239e7d-11f8-4cb3-876a-0f407bc09a65",
+      "sequence": 103,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-009",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:30.709Z"
+    },
+    {
+      "eventId": "0225a622-8e21-4557-9999-7936a7bf14d9",
+      "sequence": 104,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-009-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:30.833Z"
+    },
+    {
+      "eventId": "8414bf98-e728-4d14-b8e0-a79bf42cc27f",
+      "sequence": 105,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-009-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:30.974Z"
+    },
+    {
+      "eventId": "3b5fc6f2-7313-4117-b95d-c8b2cb1f9421",
+      "sequence": 106,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:31.098Z"
+    },
+    {
+      "eventId": "d89417d7-822b-4de1-9092-271524257555",
+      "sequence": 107,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:31.231Z"
+    },
+    {
+      "eventId": "87c99ff0-afb7-47bf-9a9f-09da071c3dd0",
+      "sequence": 108,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:31.348Z"
+    },
+    {
+      "eventId": "6d6a4ab8-8233-47c3-809a-17a44046e641",
+      "sequence": 109,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:31.479Z"
+    },
+    {
+      "eventId": "8590e7ce-29ca-47a7-a9fe-572a1ee0e1cf",
+      "sequence": 110,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:31.595Z"
+    },
+    {
+      "eventId": "e761ce0f-c62a-47b1-9e09-8a17ecc56557",
+      "sequence": 111,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-009-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:31.725Z"
+    },
+    {
+      "eventId": "4289de81-54d5-424d-a414-2c0ee301f13b",
+      "sequence": 112,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-010-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:31.844Z"
+    },
+    {
+      "eventId": "d1cecf4d-e4c3-4530-bcbd-f4506b7c3553",
+      "sequence": 113,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-010-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:31.980Z"
+    },
+    {
+      "eventId": "014e6820-3df7-403b-ba9e-08123f8b6b5a",
+      "sequence": 114,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:32.102Z"
+    },
+    {
+      "eventId": "f119295d-a6a5-49f5-8eda-4a843d8ae4bc",
+      "sequence": 115,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:32.234Z"
+    },
+    {
+      "eventId": "185df425-b57f-4aac-b911-f03a75a61ab9",
+      "sequence": 116,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:32.359Z"
+    },
+    {
+      "eventId": "fae10e9c-3519-4205-bef2-442d57d10199",
+      "sequence": 117,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:32.487Z"
+    },
+    {
+      "eventId": "0f2337a2-f0e4-4aee-82d3-ad13ebdb1060",
+      "sequence": 118,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:32.602Z"
+    },
+    {
+      "eventId": "543d0ba2-e822-4d9b-93e2-a6c9a90c34c8",
+      "sequence": 119,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:32.730Z"
+    },
+    {
+      "eventId": "1a0f8ded-89d3-4a5e-8c45-1c547a837b92",
+      "sequence": 120,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-010",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:32.856Z"
+    },
+    {
+      "eventId": "d4ef05d9-2b3e-4040-9da8-dfdf0e65241c",
+      "sequence": 121,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-010",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:32.993Z"
+    },
+    {
+      "eventId": "3555d9c8-fbed-48ba-b224-63e74b945c63",
+      "sequence": 122,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-010-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:33.115Z"
+    },
+    {
+      "eventId": "b91f7d19-8416-4b93-b150-67a0caf6097e",
+      "sequence": 123,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-010-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:33.259Z"
+    },
+    {
+      "eventId": "5f89adb8-4400-428e-bf54-3d302af9d96d",
+      "sequence": 124,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:33.385Z"
+    },
+    {
+      "eventId": "91052662-c3f8-48f2-b071-f46aa93e6e6c",
+      "sequence": 125,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:33.517Z"
+    },
+    {
+      "eventId": "266af884-a2b6-4052-9a39-5d9c7bbc3354",
+      "sequence": 126,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:33.636Z"
+    },
+    {
+      "eventId": "4953d989-c186-4e11-b6f0-772b27057c15",
+      "sequence": 127,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:33.768Z"
+    },
+    {
+      "eventId": "714451e3-a2a3-45a5-bfdb-39b3eb51fb28",
+      "sequence": 128,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:33.892Z"
+    },
+    {
+      "eventId": "119738f6-cd19-48ae-97de-04db96b0f2cc",
+      "sequence": 129,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-010-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:34.151Z"
+    },
+    {
+      "eventId": "cf55c6d5-62b5-4ed8-96dc-a20f428c0574",
+      "sequence": 130,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-011-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:34.277Z"
+    },
+    {
+      "eventId": "aa4cdaab-a953-4b7c-9018-7cb5dbf7c4f7",
+      "sequence": 131,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-011-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:34.623Z"
+    },
+    {
+      "eventId": "0556a719-9214-4557-859b-c6e7b8e6c23e",
+      "sequence": 132,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:34.741Z"
+    },
+    {
+      "eventId": "7dc24dc1-175e-4849-a02a-35a1f68adc01",
+      "sequence": 133,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:34.873Z"
+    },
+    {
+      "eventId": "e944612c-eee9-4b82-a06e-515b84058ec3",
+      "sequence": 134,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:34.992Z"
+    },
+    {
+      "eventId": "56191abc-f78c-4c6f-8d9b-2c9bd1fe8946",
+      "sequence": 135,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:35.125Z"
+    },
+    {
+      "eventId": "fc03dd5c-9ddf-4c0b-8240-87cbb29b6c01",
+      "sequence": 136,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:35.254Z"
+    },
+    {
+      "eventId": "91a27e97-95c3-4388-b281-96d5b3915644",
+      "sequence": 137,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:35.384Z"
+    },
+    {
+      "eventId": "369335b3-9209-4700-9a1c-904f52f67305",
+      "sequence": 138,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-011",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:35.503Z"
+    },
+    {
+      "eventId": "b7a22e86-ba9d-44cb-bc89-6c0be6d72670",
+      "sequence": 139,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-011",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:35.638Z"
+    },
+    {
+      "eventId": "2d3eb978-1c21-48c3-a865-898b02fa6ce0",
+      "sequence": 140,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-011-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:35.760Z"
+    },
+    {
+      "eventId": "80821968-f585-4522-b5e0-fafc1965eb0b",
+      "sequence": 141,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-011-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:35.896Z"
+    },
+    {
+      "eventId": "b5f57823-6ef8-4f47-943a-638c10845100",
+      "sequence": 142,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:36.014Z"
+    },
+    {
+      "eventId": "b0d7390d-d340-406f-ab66-79f6be025016",
+      "sequence": 143,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:36.145Z"
+    },
+    {
+      "eventId": "b8f38257-9186-4aa0-8fbf-3c59e72ff91c",
+      "sequence": 144,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:36.273Z"
+    },
+    {
+      "eventId": "f52ef82a-c39c-4186-9dae-975711732179",
+      "sequence": 145,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:36.409Z"
+    },
+    {
+      "eventId": "540100f2-f17d-47b8-baee-85f97f5aedce",
+      "sequence": 146,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:36.530Z"
+    },
+    {
+      "eventId": "49cedc0d-200d-4db4-bb18-17ae35587a4e",
+      "sequence": 147,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-011-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:36.793Z"
+    },
+    {
+      "eventId": "eaed43e3-be52-4ce5-87c7-095fbb7f62e9",
+      "sequence": 148,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-012-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:36.915Z"
+    },
+    {
+      "eventId": "bf2b7191-aa9a-49af-8b0a-b8ba400004f5",
+      "sequence": 149,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-012-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:37.271Z"
+    },
+    {
+      "eventId": "e307a74d-379b-475b-98d9-7374613e8914",
+      "sequence": 150,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:37.392Z"
+    },
+    {
+      "eventId": "e78f7cab-dbbd-47e4-84a2-851bbdd7f7f0",
+      "sequence": 151,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:37.531Z"
+    },
+    {
+      "eventId": "0f3173b1-885f-47bc-b283-ba3369da0227",
+      "sequence": 152,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:37.654Z"
+    },
+    {
+      "eventId": "bb3e87b7-4176-4cbd-ab70-e810dbbff29e",
+      "sequence": 153,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:37.787Z"
+    },
+    {
+      "eventId": "3a0e7722-9261-4e3f-92f7-ccda1887a86b",
+      "sequence": 154,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:37.908Z"
+    },
+    {
+      "eventId": "4750be03-f5d8-4de9-b6f5-28ad80a577ca",
+      "sequence": 155,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:38.037Z"
+    },
+    {
+      "eventId": "48eaa165-4745-42af-9c17-f5431e040ec1",
+      "sequence": 156,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-012",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:38.162Z"
+    },
+    {
+      "eventId": "08cdefd0-5d55-45e1-999d-4480ff84734d",
+      "sequence": 157,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-012",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:38.299Z"
+    },
+    {
+      "eventId": "341045c9-f979-4524-9f88-08f3e60d9237",
+      "sequence": 158,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-012-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:38.425Z"
+    },
+    {
+      "eventId": "42dd299c-7306-4ff1-866d-650db7783068",
+      "sequence": 159,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-012-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:38.568Z"
+    },
+    {
+      "eventId": "45c036cd-f9e9-4000-ad64-f98b9538c0fc",
+      "sequence": 160,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:38.693Z"
+    },
+    {
+      "eventId": "8e602757-6a74-4c49-b500-a12c69293489",
+      "sequence": 161,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:38.821Z"
+    },
+    {
+      "eventId": "a39da13d-36be-49ef-976d-390e52fc0f9b",
+      "sequence": 162,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:38.940Z"
+    },
+    {
+      "eventId": "62912438-a2af-4329-b054-34be7a11f1d0",
+      "sequence": 163,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:39.076Z"
+    },
+    {
+      "eventId": "08d38d3b-f6e3-4c71-bd90-776bde55eb74",
+      "sequence": 164,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:39.196Z"
+    },
+    {
+      "eventId": "2fb4e48d-5b92-47af-890e-76ad4620535a",
+      "sequence": 165,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-012-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:39.334Z"
+    },
+    {
+      "eventId": "74f0c7c2-2bfb-40b7-90bc-2f9ec5604c9a",
+      "sequence": 166,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-013-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:39.457Z"
+    },
+    {
+      "eventId": "81a67534-e6ec-4b73-8827-afe08fe957fb",
+      "sequence": 167,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-013-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:39.596Z"
+    },
+    {
+      "eventId": "b9ae60ee-3854-4ced-83b4-161f66b6f08d",
+      "sequence": 168,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:39.717Z"
+    },
+    {
+      "eventId": "4a430453-9c2e-4429-b881-cef8d33c2b3d",
+      "sequence": 169,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:39.846Z"
+    },
+    {
+      "eventId": "4cb73921-e2cd-41d9-bb05-236532279f96",
+      "sequence": 170,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:39.967Z"
+    },
+    {
+      "eventId": "8ea4d494-aa3b-4201-b9e2-2d7ec8c8852e",
+      "sequence": 171,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:40.095Z"
+    },
+    {
+      "eventId": "3c3fb4e1-6b7e-47f3-b934-f2a4674fcf13",
+      "sequence": 172,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:40.215Z"
+    },
+    {
+      "eventId": "8d8493fc-23de-47ed-a9a9-3a06e1137162",
+      "sequence": 173,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:40.348Z"
+    },
+    {
+      "eventId": "4adc8c63-bbe9-4837-b8b9-a1f07ffcc403",
+      "sequence": 174,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-013",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:40.476Z"
+    },
+    {
+      "eventId": "876ef8d5-4149-494e-99c5-93cba5569e44",
+      "sequence": 175,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-013",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:40.613Z"
+    },
+    {
+      "eventId": "ed8e1829-e517-4109-a7db-cefb78437f11",
+      "sequence": 176,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-013-classify",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:40.736Z"
+    },
+    {
+      "eventId": "562962be-ea66-4792-b933-12ea109f635a",
+      "sequence": 177,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-013-classify",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:40.878Z"
+    },
+    {
+      "eventId": "8d5fd219-7073-4a91-8393-f62944137e2e",
+      "sequence": 178,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:40.995Z"
+    },
+    {
+      "eventId": "74b78baf-eea0-46e7-89d2-26f52a517204",
+      "sequence": 179,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:41.124Z"
+    },
+    {
+      "eventId": "95463952-b752-4559-adb5-3c64f456a0e4",
+      "sequence": 180,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:41.250Z"
+    },
+    {
+      "eventId": "7e976879-b0af-4a1d-b261-dbda37ae0913",
+      "sequence": 181,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:41.385Z"
+    },
+    {
+      "eventId": "f5b7e4cb-d745-4065-a95a-ce1bb337acad",
+      "sequence": 182,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:41.506Z"
+    },
+    {
+      "eventId": "37570611-9600-472b-b219-1e0807bb2ef8",
+      "sequence": 183,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "step-013-identity",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:41.641Z"
+    },
+    {
+      "eventId": "91ab0f41-1873-430e-8329-86a4ceb34879",
+      "sequence": 184,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "verify-terminal",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:41.760Z"
+    },
+    {
+      "eventId": "4a746631-3c33-49f7-b359-4c8e3eed8de7",
+      "sequence": 185,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "verify-terminal",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:42.657Z"
+    },
+    {
+      "eventId": "ccf7dde2-2820-435d-a192-9459197d65c6",
+      "sequence": 186,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "output-currency",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:42.786Z"
+    },
+    {
+      "eventId": "93e75185-b7d8-4104-bad1-f4fda7e03020",
+      "sequence": 187,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "output-currency",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:42.920Z"
+    },
+    {
+      "eventId": "23383a6d-45dd-439b-ac25-1eceb6a03efc",
+      "sequence": 188,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "output-memberId",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:43.038Z"
+    },
+    {
+      "eventId": "16e7729d-4c7d-4238-8acf-76f11ae2ffe8",
+      "sequence": 189,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "output-memberId",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:43.173Z"
+    },
+    {
+      "eventId": "7922a7d5-73fa-43a9-8f70-7815d89a70f0",
+      "sequence": 190,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "output-accountId",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:43.292Z"
+    },
+    {
+      "eventId": "8423173b-daa6-4d51-b5e2-bf87ab5a718a",
+      "sequence": 191,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "output-accountId",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:43.428Z"
+    },
+    {
+      "eventId": "eda3f396-4973-4ded-ba11-3fb344cab0eb",
+      "sequence": 192,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "output-accountType",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:43.551Z"
+    },
+    {
+      "eventId": "f88f4dc6-69b2-45f5-845d-ca78e08cd756",
+      "sequence": 193,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "output-accountType",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:43.684Z"
+    },
+    {
+      "eventId": "23a65681-b986-4a02-85c0-c590739fd96a",
+      "sequence": 194,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "output-availableBalanceMinor",
+      "details": {
+        "code": "admitted",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:43.804Z"
+    },
+    {
+      "eventId": "12643ae2-d463-404c-a28f-2c7f1a51b3e4",
+      "sequence": 195,
+      "type": "READ_COMPLETED",
+      "actor": "automation",
+      "stepId": "output-availableBalanceMinor",
+      "details": {
+        "code": "confirmed",
+        "operation": "capture"
+      },
+      "createdAt": "2026-11-22T02:14:43.935Z"
+    },
+    {
+      "eventId": "b450664b-9271-4223-b70e-c9af60d96331",
+      "sequence": 196,
+      "type": "ACTION_INTENT",
+      "actor": "automation",
+      "stepId": "verify-output-context",
+      "details": {
+        "code": "admitted",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:44.065Z"
+    },
+    {
+      "eventId": "631a5c11-eb1f-44a2-b44a-bbc10277bed4",
+      "sequence": 197,
+      "type": "ACTION_COMPLETED",
+      "actor": "automation",
+      "stepId": "verify-output-context",
+      "details": {
+        "code": "confirmed",
+        "operation": "wait"
+      },
+      "createdAt": "2026-11-22T02:14:44.810Z"
+    },
+    {
+      "eventId": "d934aa3e-d687-462e-b5b2-07fd1f1562a4",
+      "sequence": 198,
+      "type": "SESSION_FINISHED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "createdAt": "2026-11-22T02:14:45.740Z"
+    },
+    {
+      "eventId": "5eda461d-d2c2-4eea-87a1-563260e543e1",
+      "sequence": 199,
+      "type": "RUN_COMPLETED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "completed"
+      },
+      "createdAt": "2026-11-22T02:14:45.751Z"
+    }
+  ]
+}

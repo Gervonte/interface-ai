@@ -62,6 +62,7 @@ Every output has exactly one UI extraction, never an input echo or literal. Each
 | `trim` | String with only outer whitespace removed |
 | `integer` | Strict signed decimal integer parsed into a safe integer; no general numeric coercion |
 | `usd-minor` | Explicit USD display parsed into integer cents, without floating-point amount arithmetic |
+| `account-type` | Exact Savings/Primary Savings or Checking labels mapped to savings/checking |
 | `savings-type` | Exact supported Savings/Primary Savings label mapped to `savings`; other account types fail |
 
 These are instructions for the later deterministic adapter, not uploaded functions. Checked-state reads only permit identity. Other read/transform combinations have statically checked output types; actual converted values still need `validateOutput`.
@@ -126,3 +127,7 @@ Optional predicate absence evaluates false during classification. Invalid/unboun
 ## Live manual contributions
 
 INT-014/015 add `manualContributions[].handling = "runtime_guard"`, with `guardId`, the real `interventionId`, and confirmed human `eventSequences`. The referenced guard must exist and require intervention. Publication accounts for these manual mutations in discovery history; it never converts a human-only resolution into an automated click. Explicit planner help can instead produce a `required_intervention` contribution and an authored `intervene` step. Replay supports those two manual boundaries, validates continuation in the same browser, and rejects unsupported contribution handling. Existing artifacts remain valid. [Handoff API and limits](HANDOFF.md).
+
+## Requested discovery outputs
+
+Discovery bodies now require `outputContract` with bounded account criteria and named semantic/type declarations. The schema rejects conflicting meanings/types, identity value enums, duplicate semantics, and incomplete identities. The worker derives output declarations and extractions from that request, and the coordinator verifies schema correspondence before publication. The model response schema contains exactly the requested output names. Replay still consumes an exact saved artifact without a goal or output contract; previous artifact schema versions and conversions remain supported. [Full contract, examples, compatibility, and limits](GOAL_OUTPUTS.md).

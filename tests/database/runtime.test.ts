@@ -1,3 +1,4 @@
+import { currentBalanceRequest, availableBalanceRequest } from '../../examples/discovery-requests.js';
 import { NeedsIntervention } from '../../apps/automation/src/execution/errors.js';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { randomBytes, randomUUID } from 'node:crypto';
@@ -24,7 +25,7 @@ const settings = databaseSettings({ ...secrets, DB_AUTOMATION_MIGRATOR_PASSWORD:
   DB_DEMO_MIGRATOR_PASSWORD: randomBytes(32).toString('hex'), DB_DEMO_APP_PASSWORD: randomBytes(32).toString('hex') }, 'interface_test_' + randomBytes(6).toString('hex'));
 let owner: Pool; let pool: Pool; let repository: AutomationRepository; let configuration: Awaited<ReturnType<typeof loadConfigurations>>; let folder: string;
 const cleanups: Array<() => Promise<void>> = [];
-const request = { mode: 'discovery', targetId: 'demo-credit-union', goal: 'synthetic-private-goal-marker', inputs: { memberId: 'synthetic-private-input-marker' } };
+const request = { mode: 'discovery', outputContract: currentBalanceRequest.outputContract, targetId: 'demo-credit-union', goal: 'synthetic-private-goal-marker', inputs: { memberId: 'synthetic-private-input-marker' } };
 async function service(worker?: Worker, sessions?: SessionFactory) {
   const coordinator = new Coordinator(repository, secrets.REQUEST_FINGERPRINT_KEY, configuration, new EvidenceStore(folder), sessions, worker);
   await coordinator.start();
@@ -224,6 +225,17 @@ describe('authenticated run API and durable coordinator', () => {
   it('rejects an unconfirmed negative discovery result', async()=>{
     const f=await service(async()=>({kind:'business_outcome',code:'MEMBER_NOT_FOUND',summary:'Unconfirmed.',evidenceIds:[]}));
     const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',request)).json());await f.coordinator.idle();expect((await f.coordinator.read(accepted.runId,'test-operator')).result).toMatchObject({kind:'failure',code:'WORKER_FAILED'});
+  });
+
+  it('refuses publication when an otherwise typed artifact ignores the requested output contract',async()=>{
+    const f=await service(async(_request,context)=>{
+      const artifact=JSON.parse(await readFile(new URL('../../examples/primary-savings.contract.json',import.meta.url),'utf8'));
+      artifact.sourceDiscoveryRunId=context.runId;
+      await context.publish(artifact,{memberId:'M1001',accountId:'S2001',accountType:'savings',currentBalanceMinor:125034,currency:'USD'});
+    });
+    const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',availableBalanceRequest)).json());await f.coordinator.idle();
+    expect((await f.coordinator.read(accepted.runId,'test-operator')).result).toMatchObject({kind:'failure',code:'ARTIFACT_INVALID'});
+    expect((await pool.query('SELECT 1 FROM automation.capabilities WHERE source_discovery_run_id=$1',[accepted.runId])).rowCount).toBe(0);
   });
 
   async function handoffFixture(slow=false,timeoutMs?:number) {

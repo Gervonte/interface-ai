@@ -2,18 +2,17 @@ import { accountGuard, attachBalanceRules, balanceRules } from './rule-profile.j
 import type { RuleSet } from './rule-profile.js';
 import { BusinessOutcome, RuleEngine } from './rules.js';
 import { randomUUID } from 'node:crypto';
-import { DataSchemaSchema, parseCapability, validateData, validateInvocation, validateOutput } from '@interface-ai/contracts';
-import type { Capability, Predicate, Target, Values } from '@interface-ai/contracts';
+import { DataSchemaSchema, OutputContractSchema, outputSchemaFor, parseCapability, validateData, validateInvocation, validateOutput } from '@interface-ai/contracts';
+import type { AccountSelection, Capability, Predicate, Target, Values } from '@interface-ai/contracts';
 import type { Worker, WorkerContext } from '../execution/coordinator.js';
 import { ExecutionError, NeedsIntervention } from '../execution/errors.js';
 import type { Executor, ExecutorOperation } from '../execution/executor.js';
-import { balanceInputSchema, balanceOutputSchema, DecisionSchema, outputLabels } from './contracts.js';
+import { balanceInputSchema, decisionSchemaFor, meaningLabels } from './contracts.js';
 import type { Observation } from './contracts.js';
 
 const inputSchema = DataSchemaSchema.parse(balanceInputSchema);
-const outputSchema = DataSchemaSchema.parse(balanceOutputSchema);
 const visible = (target: string): Predicate => ({ kind: 'visible', target });
-const sourceValue = (target: string, transform: 'trim' | 'savings-type' | 'usd-minor' = 'trim') => ({ target, read: 'text' as const, transform });
+const sourceValue = (target: string, transform: 'trim' | 'account-type' | 'usd-minor' = 'trim') => ({ target, read: 'text' as const, transform });
 const same = (target: string, value: { kind: 'input' | 'variable'; name: string } | { kind: 'literal'; value: string }): Predicate => ({ kind: 'equals', source: sourceValue(target), value });
 function problem(reason: 'MANUAL_PREREQUISITE' | 'POLICY_BLOCKED' | 'AMBIGUOUS_TARGET', stepId: string | null = null) {
   return new NeedsIntervention({ stepId, actionIndex: null, reason, dispatchState: 'not_sent', effectState: 'not_checked', checkpointId: null,
@@ -29,7 +28,7 @@ class Builder {
   private registry = new Map<string, string>();
   private index = 0;
   readonly rules: RuleSet | undefined; runtime: RuleEngine | undefined;
-  constructor(readonly context: WorkerContext) { this.rules=context.configuration.policy.allowedClickNames?.includes('Acknowledge notice')?balanceRules(this.targets):undefined; }
+  constructor(readonly context: WorkerContext, readonly account: AccountSelection) { this.rules=context.configuration.policy.allowedClickNames?.includes('Acknowledge notice')?balanceRules(this.targets,account):undefined; }
   id() { return 'step-' + String(++this.index).padStart(3, '0'); }
   target(value: Target) {
     const encoded = JSON.stringify(value); const previous = this.registry.get(encoded); if (previous) return previous;
@@ -81,9 +80,13 @@ function modelGoal(goal: string, inputs: Values) {
   return prepared.replace(/(?:sk-|bb_live_|Bearer\s+)[A-Za-z0-9_-]{12,}/g, '[REDACTED]');
 }
 async function discover(request: Extract<Parameters<Worker>[0], { mode: 'discovery' }>, context: WorkerContext) {
-  if (!/primary/i.test(request.goal) || !/savings/i.test(request.goal) || !/balance/i.test(request.goal)) throw new ExecutionError('UNSUPPORTED_GOAL');
+  const parsedContract=OutputContractSchema.safeParse(request.outputContract);
+  if(!parsedContract.success)throw new ExecutionError('INVALID_OUTPUT_CONTRACT');
+  const contract=parsedContract.data,outputSchema=outputSchemaFor(contract);
+  const outputName=(meaning:string)=>Object.entries(contract.fields).find(([,field])=>field.meaning===meaning)![0];
+  const memberOutput=outputName('member-id'),accountOutput=outputName('account-id'),typeOutput=outputName('account-type');
   let inputs: Values; try { inputs = validateData(inputSchema, request.inputs); } catch { throw new ExecutionError('INVALID_BINDING'); }
-  const builder = new Builder(context); const executor = await context.executor(builder.targets, builder.values);
+  const builder = new Builder(context,contract.account); const executor = await context.executor(builder.targets, builder.values);
   if(builder.rules)builder.runtime=new RuleEngine(builder.rules,executor,context,true);
   let observation: Observation | undefined;
   await builder.record(executor, { type: 'navigate', destination: 'target-entry' }, { kind: 'location', routeKey: 'fresh-session' }, async () => {
@@ -92,48 +95,51 @@ async function discover(request: Extract<Parameters<Worker>[0], { mode: 'discove
   const initialCondition = builder.steps[0]!.after;
   const history: Array<{ action: string; label: string }> = [];
   let selectedAccount: string | undefined;
+  let selectedAccountType: string | undefined;
   for (let call = 0; call < context.configuration.policy.budgets.maxModelCalls; call++) {
     observation = await executor.observe();
     if(builder.runtime)await builder.runtime.guard(builder.anchor(observation),'discovery-state');
-    const response = await context.plan({ goal: modelGoal(request.goal, inputs), inputNames: Object.keys(inputs), observation, history });
-    const parsedDecision = DecisionSchema.safeParse(response); if (!parsedDecision.success) throw new ExecutionError('ARTIFACT_INVALID');
+    const response = await context.plan({ goal: modelGoal(request.goal, inputs), outputContract:contract, inputNames: Object.keys(inputs), observation, history });
+    const parsedDecision = decisionSchemaFor(contract).safeParse(response); if (!parsedDecision.success) throw new ExecutionError('ARTIFACT_INVALID');
     const decision = parsedDecision.data;
     if (decision.observationId !== observation.observationId) throw problem('POLICY_BLOCKED');
     const current = await executor.observe();
     if (current.fingerprint !== observation.fingerprint) { await context.record({ type: 'MODEL_DECISION_STALE', actor: 'system', stepId: null, details: { code: 'state_changed' } }); continue; }
     if (decision.action === 'help') { if(decision.reason==='unsupported_goal')throw new ExecutionError('UNSUPPORTED_GOAL'); await builder.handoff(executor,observation);history.push({action:'intervene',label:'Manual prerequisite'});continue; }
     if (decision.action === 'finish') {
-      if (!selectedAccount || decision.controlRef || decision.inputName) throw problem('POLICY_BLOCKED');
+      if (!selectedAccount || !selectedAccountType || decision.controlRef || decision.inputName) throw problem('POLICY_BLOCKED');
       const outputs: Capability['outputs'] = {};
-      for (const [name, expectedLabel] of Object.entries(outputLabels)) {
-        const ref = decision.outputs[name as keyof typeof outputLabels];
+      for (const [name, declaration] of Object.entries(contract.fields)) {
+        const expectedLabel=meaningLabels[declaration.meaning];
+        const ref = decision.outputs[name];
         const field = observation.fields.find(item => item.ref === ref);
         if (!field || field.label !== expectedLabel || field.region !== 'Account Details') throw problem('POLICY_BLOCKED');
         const target = builder.target(field.target);
-        outputs[name] = sourceValue(target, name === 'accountType' ? 'savings-type' : name === 'currentBalanceMinor' ? 'usd-minor' : 'trim');
+        outputs[name] = sourceValue(target, declaration.meaning === 'account-type' ? 'account-type' : ['current-balance','available-balance'].includes(declaration.meaning) ? 'usd-minor' : 'trim');
       }
       const designation = observation.fields.find(field => field.label === 'Designation' && field.region === 'Account Details');
       const status = observation.fields.find(field => field.label === 'Status' && field.region === 'Account Details');
       if (!designation || !status) throw problem('MANUAL_PREREQUISITE');
-      const conditions: Predicate[] = [builder.anchor(observation), same(outputs.memberId!.target, { kind: 'input', name: 'memberId' }),
-        same(outputs.accountId!.target, { kind: 'variable', name: selectedAccount }), same(builder.target(designation.target), { kind: 'literal', value: 'Primary' }),
-        same(builder.target(status.target), { kind: 'literal', value: 'ACTIVE' })];
+      const conditions: Predicate[] = [builder.anchor(observation), same(outputs[memberOutput]!.target, { kind: 'input', name: 'memberId' }),
+        same(outputs[accountOutput]!.target, { kind: 'variable', name: selectedAccount }), same(outputs[typeOutput]!.target,{kind:'literal',value:selectedAccountType}),
+        same(builder.target(designation.target), { kind: 'literal', value: contract.account.designation }),
+        same(builder.target(status.target), { kind: 'literal', value: contract.account.status })];
       await executor.assert({ kind: 'all', conditions }, 'verify-terminal');
       const values: Values = {};
       for (const [name, extraction] of Object.entries(outputs)) {
         values[name] = (await builder.record(executor, { type: 'capture', sourceValue: extraction }, visible(extraction.target), visible(extraction.target),
-          { variable: 'output_' + name, field: outputSchema.properties[name]! }))!;
+          { variable: 'output_' + (Object.keys(builder.variables).length+1), field: outputSchema.properties[name]! }))!;
       }
       validateData(outputSchema, values);
       await executor.assert({ kind: 'all', conditions }, 'verify-captured-identity');
-      if (values.memberId !== inputs.memberId || values.accountId !== builder.values[selectedAccount]) throw new ExecutionError('INVALID_EXTRACTION');
+      if (values[memberOutput] !== inputs.memberId || values[accountOutput] !== builder.values[selectedAccount]) throw new ExecutionError('INVALID_EXTRACTION');
       // Assemble referenced guards before validating recorded manual contributions.
-      let artifact: Capability = { schemaVersion: 1, capabilityId: 'balance-' + randomUUID().replaceAll('-', ''), version: 1,
-        name: 'Primary savings current balance', description: 'Constructed from confirmed model-selected browser actions and verified UI reads.', sourceDiscoveryRunId: context.runId,
+      let artifact: Capability = { schemaVersion: 1, capabilityId: 'account-read-' + randomUUID().replaceAll('-', ''), version: 1,
+        name: 'Requested account inquiry', description: 'Constructed from confirmed model-selected browser actions and verified UI reads.', sourceDiscoveryRunId: context.runId,
         surfaceRequirements: { kind: 'browser', applicationFamily: context.configuration.target.applicationFamily, compatibleTargetVersions: [context.configuration.target.version], features: ['frames', 'labels', 'roles', 'table-rows', 'dom-text'] },
         inputSchema, outputSchema, variables: builder.variables, targets: builder.targets, preconditions: { entryReady: initialCondition }, steps: builder.steps, outputs,
-        successCondition: { conditions, identity: [{ target: outputs.memberId!.target, input: 'memberId' }] }, outcomeRules: [], recoveryRules: [], manualContributions: [...builder.manualContributions,...(builder.runtime?.manualContributions??[])] };
-      if(builder.rules){artifact=attachBalanceRules(artifact);for(const rule of artifact.recoveryRules){const events=builder.rules.recoveryRules.find(item=>item.id===rule.id)?.source.observedEventSequences;if(events)rule.source.observedEventSequences=[...events];}}
+        successCondition: { conditions, identity: [{ target: outputs[memberOutput]!.target, input: 'memberId' }] }, outcomeRules: [], recoveryRules: [], manualContributions: [...builder.manualContributions,...(builder.runtime?.manualContributions??[])] };
+      if(builder.rules){artifact=attachBalanceRules(artifact,contract.account);for(const rule of artifact.recoveryRules){const events=builder.rules.recoveryRules.find(item=>item.id===rule.id)?.source.observedEventSequences;if(events)rule.source.observedEventSequences=[...events];}}
       artifact=parseCapability(artifact);
       validateInvocation(artifact, inputs); validateOutput(artifact, values);
       await context.publish(artifact, values); return;
@@ -150,6 +156,10 @@ async function discover(request: Extract<Parameters<Worker>[0], { mode: 'discove
       if (decision.inputName) throw problem('POLICY_BLOCKED');
       let descriptor = control.target;
       if (control.accountIdTarget) {
+        const type=control.row['Account Type'];
+        const matchesType=contract.account.type==='checking'?type==='Checking':['Savings','Primary Savings'].includes(type??'');
+        if(!matchesType||control.row.Designation!==contract.account.designation||control.row.Status?.toUpperCase()!==contract.account.status)throw problem('POLICY_BLOCKED');
+        selectedAccountType=type;
         selectedAccount = 'selectedAccount' + (Object.keys(builder.variables).length + 1);
         const target = builder.target(control.accountIdTarget);
         await builder.record(executor, { type: 'capture', sourceValue: sourceValue(target) }, visible(target), visible(target),

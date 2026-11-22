@@ -1,3 +1,4 @@
+import { currentBalanceRequest, availableBalanceRequest } from '../examples/discovery-requests.js';
 import { describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { runInNewContext } from 'node:vm';
@@ -12,10 +13,21 @@ describe('sanitized model boundary',()=>{
     let rendered='';let calls=0;
     const helper={evaluate:async(expression:string)=>{ runInNewContext(expression,{document:{createElement:()=>({textContent:''}),body:{replaceChildren:(pre:{textContent:string})=>{rendered=pre.textContent;}}}}); }} as unknown as Page;
     const stagehand={extract:async(_prompt:string,schema:{toJSONSchema():unknown},options:{page:Page;screenshot:boolean;cache:boolean})=>{calls++;expect(options).toMatchObject({page:helper,screenshot:false,cache:false});expect(rendered).toContain('memberId');expect(rendered).not.toContain(observation.fingerprint);expect(rendered).not.toContain('expectedMatches');expect(JSON.stringify(schema.toJSONSchema())).not.toContain('allOf');return{data:decision,metadata:{usage:{inputTokens:100,outputTokens:30},cache:{status:'DISABLED'}}};}} as unknown as Stagehand;
-    const planner=new GatewayPlanner(stagehand,async()=>helper);expect(await planner.decide({goal:'Find the primary savings balance.',inputNames:['memberId'],observation,history:[]},1000)).toMatchObject({decision,usage:{inputTokens:100}});expect(calls).toBe(1);
+    const planner=new GatewayPlanner(stagehand,async()=>helper);expect(await planner.decide({goal:'Find the primary savings balance.',outputContract:currentBalanceRequest.outputContract,inputNames:['memberId'],observation,history:[]},1000)).toMatchObject({decision,usage:{inputTokens:100}});expect(calls).toBe(1);
+  });
+  it('uses the same instructions with request-shaped outputs for both meanings',async()=>{
+    let rendered='';const prompts:string[]=[];const keys:string[][]=[];
+    const helper={evaluate:async(expression:string)=>{runInNewContext(expression,{document:{createElement:()=>({textContent:''}),body:{replaceChildren:(pre:{textContent:string})=>{rendered=pre.textContent;}}}});}}as unknown as Page;
+    const stagehand={extract:async(prompt:string,schema:{toJSONSchema():any})=>{prompts.push(prompt);const prepared=JSON.parse(rendered);const names=Object.keys(prepared.outputContract.fields);keys.push(Object.keys(schema.toJSONSchema().properties.outputs.properties));
+      expect(rendered).not.toContain('M1001');expect(prepared.outputContract.fields[names.find((name:string)=>name.endsWith('BalanceMinor'))!].schema.type).toBe('integer');
+      return{data:{...decision,action:'help',controlRef:'',inputName:'',reason:'blocked',outputs:Object.fromEntries(names.map(name=>[name,'']))},metadata:{usage:{inputTokens:100,outputTokens:30},cache:{status:'DISABLED'}}};}}as unknown as Stagehand;
+    const planner=new GatewayPlanner(stagehand,async()=>helper);
+    for(const request of[currentBalanceRequest,availableBalanceRequest])await planner.decide({goal:request.goal,outputContract:request.outputContract,inputNames:['memberId'],observation,history:[]},1000);
+    expect(prompts[0]).toBe(prompts[1]);expect(prompts[0]).not.toMatch(/PRIMARY SAVINGS|never Available Balance|choose Primary/i);
+    expect(keys[0]).toContain('currentBalanceMinor');expect(keys[0]).not.toContain('availableBalanceMinor');expect(keys[1]).toContain('availableBalanceMinor');expect(keys[1]).not.toContain('currentBalanceMinor');
   });
   it('rejects model-shaped data with an invalid observation UUID',async()=>{
     const stagehand={extract:async()=>({data:{...decision,observationId:'invalid'},metadata:{usage:{inputTokens:100,outputTokens:30},cache:{status:'DISABLED'}}})}as unknown as Stagehand;
-    const planner=new GatewayPlanner(stagehand,async()=>({evaluate:async()=>{}}as unknown as Page));await expect(planner.decide({goal:'Primary savings balance.',inputNames:['memberId'],observation,history:[]},1000)).rejects.toBeTruthy();
+    const planner=new GatewayPlanner(stagehand,async()=>({evaluate:async()=>{}}as unknown as Page));await expect(planner.decide({goal:'Primary savings balance.',outputContract:currentBalanceRequest.outputContract,inputNames:['memberId'],observation,history:[]},1000)).rejects.toBeTruthy();
   });
 });

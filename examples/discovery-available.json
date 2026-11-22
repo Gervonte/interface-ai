@@ -1,0 +1,61 @@
+{
+  "mode": "discovery",
+  "targetId": "demo-credit-union",
+  "goal": "Find the available balance and currency of the member's active primary savings account. Verify the member and account identity.",
+  "inputs": {
+    "memberId": "M1001"
+  },
+  "outputContract": {
+    "account": {
+      "type": "savings",
+      "designation": "Primary",
+      "status": "ACTIVE"
+    },
+    "fields": {
+      "memberId": {
+        "meaning": "member-id",
+        "schema": {
+          "type": "string",
+          "format": "member-id",
+          "maxLength": 5
+        }
+      },
+      "accountId": {
+        "meaning": "account-id",
+        "schema": {
+          "type": "string",
+          "format": "account-id",
+          "maxLength": 5
+        }
+      },
+      "accountType": {
+        "meaning": "account-type",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "savings"
+          ],
+          "maxLength": 20
+        }
+      },
+      "currency": {
+        "meaning": "currency",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "USD"
+          ],
+          "maxLength": 3
+        }
+      },
+      "availableBalanceMinor": {
+        "meaning": "available-balance",
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    }
+  }
+}

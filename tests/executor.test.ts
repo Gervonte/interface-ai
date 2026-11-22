@@ -113,6 +113,7 @@ describe('strict values and JSON transport', () => {
   it.each([['$1,250.34', 125034], ['$0.01', 1], ['$87.65', 8765]])('parses %s using integer minor units', (value, expected) => expect(transform(value as string, 'usd-minor')).toBe(expected));
   it.each(['1250.34', '$1,25.34', '$-1.00', '$1.2', '$90071992547409.92'])('rejects invalid/unsafe USD %s', value => expect(() => transform(value, 'usd-minor')).toThrow());
   it.each(['01', '1.2', ' 1', '9007199254740992'])('rejects noncanonical/unsafe integer %s', value => expect(() => transform(value, 'integer')).toThrow());
+  it('normalizes supported account types without changing the legacy savings-only transform',()=>{expect(transform('Checking','account-type')).toBe('checking');expect(transform('Primary Savings','account-type')).toBe('savings');expect(()=>transform('Loan','account-type')).toThrow();expect(()=>transform('Checking','savings-type')).toThrow();});
   it('checks exact savings types and booleans', () => { expect(transform('Primary Savings', 'savings-type')).toBe('savings'); expect(transform(true, 'identity')).toBe(true); expect(() => transform('Checking', 'savings-type')).toThrow(); });
   it.each(['{"a":1,"a":2}', '{"a":1,"\\u0061":2}', '{"inputs":{"memberId":"x","memberId":"y"}}', '{"__proto__":{}}'])('rejects ambiguous JSON', text => expect(() => parseRequestJson(text)).toThrow());
   it('accepts ordinary nested JSON with escaped quotes and independent object keys', () => expect(parseRequestJson('{"a":[{"x":"a\\\"b"},{"x":2}],"b":true}')).toEqual({ a: [{ x: 'a"b' }, { x: 2 }], b: true }));

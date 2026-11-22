@@ -1,0 +1,51 @@
+{
+  "task": "INT-023",
+  "status": "implementation_verified_live_proof_blocked",
+  "clientDate": "2026-11-21",
+  "localVerification": {
+    "tests": 218,
+    "postgresTests": "37 passed before latest contract fixes; rerun pending (Docker unavailable)",
+    "typecheck": "passed",
+    "productionBuilds": "passed"
+  },
+  "liveVerification": {
+    "successfulRuns": 0,
+    "newCapabilities": 0,
+    "requiredRuns": [
+      "current discovery",
+      "current exact-artifact replay for different member",
+      "available discovery",
+      "available exact-artifact replay for different member"
+    ]
+  },
+  "latestProviderCheck": {
+    "note": "Most recent session-creation probe; no run was created by this probe.",
+    "at": "2026-11-21T16:46:41.523Z",
+    "phase": "sdk-session-create",
+    "success": false,
+    "status": 402,
+    "name": "Error",
+    "mentionsUsage": true,
+    "mentionsConcurrency": false,
+    "mentionsUpgrade": true,
+    "mentionsTimeout": false,
+    "mentionsDomain": false,
+    "mentionsPermission": false
+  },
+  "latestRunAttempt": {
+    "note": "Most recent verifier run that reached the automation API (earlier than latestProviderCheck). See startup-failure.json.",
+    "createdAt": "2026-11-20T15:43:48.775Z",
+    "runId": "aa31fd2c-89c3-405c-898c-e151afa1b12b",
+    "result": {
+      "kind": "failure",
+      "code": "SESSION_CLEANUP_UNCONFIRMED",
+      "blocked": null,
+      "summary": "Execution stopped. Inspect the sanitized run events for context.",
+      "evidenceIds": []
+    },
+    "modelEvents": 0,
+    "dispatchedUiActions": 0
+  },
+  "requiredExternalChange": "Restore Browserbase session capacity under the configured project usage/plan. Then reconcile the recorded cleanup hold and rerun goal:demo.",
+  "rawProviderResponseRetained": false
+}

@@ -1,3 +1,4 @@
+import { currentBalanceRequest } from '../examples/discovery-requests.js';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import { randomUUID } from 'node:crypto';
@@ -48,7 +49,7 @@ async function main() {
       for (let attempt = 0; attempt < 100; attempt++) { if ((child.exitCode !== null || child.signalCode !== null)) throw new Error('CHILD_STARTUP_FAILED'); try { const response = await fetch(origin + '/healthz', { signal: AbortSignal.timeout(500) }); if (response.ok) { ready = true; break; } } catch {} await pause(100); }
       if (!ready) throw new Error('CHILD_NOT_READY');
       const accepted = await api('/v1/runs', mode === 'discovery'
-        ? { mode, targetId: initial.target.id, goal: 'Find the current balance and currency of the primary savings account for the member identified by memberId. Verify member and account identity.', inputs: { memberId: 'M1001' } }
+        ? { mode, outputContract: currentBalanceRequest.outputContract, targetId: initial.target.id, goal: 'Find the current balance and currency of the primary savings account for the member identified by memberId. Verify member and account identity.', inputs: { memberId: 'M1001' } }
         : { mode, targetId: initial.target.id, capability: reference, inputs: { memberId: 'M1002' } });
       runId = accepted.runId;
       const events: any[] = []; let run; let lastLog = 0;

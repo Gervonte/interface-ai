@@ -6,10 +6,10 @@ import type { BlockedContextSchema } from '@interface-ai/contracts';
 import type { z } from 'zod';
 import type { StoredEventInput } from '../db/repository.js';
 import type { Planner, SessionStatistics } from '../workflows/contracts.js';
-import { RunRequestSchema, validateCapabilityResult, validateOutput } from '@interface-ai/contracts';
+import { RunRequestSchema, outputSchemaFor, validateCapabilityResult, validateOutput } from '@interface-ai/contracts';
 import type { Capability, RunRequest, RunResult, Target, Values } from '@interface-ai/contracts';
 import type { AutomationRepository, loadConfigurations } from '../db/repository.js';
-import { RepositoryError, targetSchema, policySchema } from '../db/repository.js';
+import { RepositoryError, canonical, targetSchema, policySchema } from '../db/repository.js';
 import { RuntimeRepository } from '../db/runtime-repository.js';
 import { DispatchGate } from './gate.js';
 import { Executor } from './executor.js';
@@ -165,6 +165,7 @@ export class Coordinator {
       publish: async (capability, outputs) => {
         job.gate.check(job.revision); if (job.abort.signal.aborted) throw new ExecutionError('CANCELLED');
         if (request.mode !== 'discovery') throw new RepositoryError('RUN_STATE_CONFLICT');
+        if(canonical({...capability.outputSchema,required:[...capability.outputSchema.required].sort()})!==canonical(outputSchemaFor(request.outputContract)))throw new ExecutionError('ARTIFACT_INVALID');
         const safe = validateOutput(capability, outputs);
         await this.base.publishCapability(job.runId, capability, safe, 'transient', 'model-driven');
         this.storeOutputs(job.runId, safe);
