@@ -41,7 +41,8 @@
     "handoff:demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/handoff-demo.ts",
     "goal:demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/goal-demo.ts",
     "safety:demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/safety-demo.ts",
-    "demo:e2e": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/demo.ts"
+    "demo:e2e": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/demo.ts",
+    "replay:local": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --import tsx scripts/replay-local.ts"
   },
   "devDependencies": {
     "@types/node": "26.2.0",

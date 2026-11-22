@@ -38,7 +38,7 @@ This checklist defines observable outcomes independently of implementation choic
 ## 3. Deterministic replay and outcomes — required implementation
 
 - [x] **REP-01 — Replay without model decisions.** Execute a saved artifact with invocation inputs without asking an LLM what to do. **Verify:** replay with model access disabled or with instrumentation that would fail on a model call. (§3.3)
-  **Evidence:** [Replay](../evidence/replay.json) reports zero model calls, attempts and tokens; replay's model is a rejecting function, and tests fail on any planner call.
+  **Evidence:** [Replay](../evidence/replay.json) and [local replays](../evidence/local-replay/README.md) report zero model calls, attempts and tokens; replay's model is a rejecting function, and tests fail on any planner call.
 - [x] **REP-02 — Reusable inputs.** Use invocation parameters rather than retaining discovery-specific values where parameters are declared. **Verify:** replay the same artifact with a different valid input and confirm the corresponding output. (§3.2–3.3; proposed proof of parameterization)
   **Evidence:** The same capability version replayed for M1002 returns S2002 / 8765 ([replay](../evidence/replay.json)); account order differs between members.
 - [x] **REP-03 — Stable targeting and synchronization.** Resolve controls reliably and wait for required UI states before proceeding. **Verify:** explain target resolution and waiting rules, then exercise a delayed transition. (§3.3, §7)
@@ -101,9 +101,9 @@ The operator interface may be minimal or mocked. The pause, live-session access,
 Paths in this section are relative to the repository root.
 
 - [x] **DEL-01 — Runnable source.** Provide readable, reasonably typed source with meaningful tests for important behavior, in a public GitHub repository at submission. **Verify:** run the documented setup and checks from a clean checkout. (§6–7)
-  **Evidence:** Public repository https://github.com/Gervonte/interface-ai; `pnpm check` (260 tests) and `pnpm check:db` (43 PostgreSQL tests) pass, including from a clean clone.
+  **Evidence:** Public repository https://github.com/Gervonte/interface-ai; `pnpm check` (262 tests) and `pnpm check:db` (43 PostgreSQL tests) pass, including from a clean clone.
 - [x] **DEL-02 — README.** Include setup, keys/configuration, any supported operation without live services, and exact discovery-then-replay demo commands in `/README.md`. **Verify:** follow those commands from a clean checkout. Clearly distinguish mock/offline operation from genuine discovery. (§6)
-  **Evidence:** [README.md](../README.md): setup, keys, offline checks, exact discovery-then-replay demo.
+  **Evidence:** [README.md](../README.md): setup, keys, offline checks, exact discovery-then-replay demo, and local replay without hosted services ([evidence](../evidence/local-replay/README.md)).
 - [x] **DEL-03 — Design report.** Provide approximately 1–3 pages in `/REPORT.md` with the seven headings listed below; explain decisions, trade-offs, limitations, deliberate mocks/cuts, and next steps. **Verify:** compare the report with the implementation and assignment. (§6)
   **Evidence:** [REPORT.md](../REPORT.md) with the seven headings.
 - [x] **DEL-04 — Genuine run evidence.** Include a saved example capability and sanitized logs from a real discovery run and a replay run in `/evidence/`. **Verify:** identify which discovery produced the artifact and which replay consumed it. (§4, §6)

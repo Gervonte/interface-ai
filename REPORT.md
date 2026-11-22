@@ -19,7 +19,7 @@ operator page ─HTTP─▶ same API (claim, act, resume)      Planner (discover
 **Key decisions and trade-offs:**
 
 - **TypeScript with Zod:** one set of contracts shared by API, worker, operator page and tests, validated at every boundary.
-- **Browserbase with Stagehand** provides isolated hosted sessions that an operator can join mid-run. The cost is that the target must be reachable over HTTPS, so the local portal needs a tunnel. Stagehand supplies only the transport and model gateway; its self-healing actions are off, so replay never improvises a locator.
+- **Browserbase with Stagehand** provides isolated hosted sessions that an operator can join mid-run. The cost is that the target must be reachable over HTTPS, so the local portal needs a tunnel. Stagehand supplies only the transport and model gateway; its self-healing actions are off, so replay never improvises a locator. Replay also runs in a local Chrome (`pnpm replay:local`): the same engine with a different session provider, needing no hosted browser, tunnel or model.
 - **`gpt-4.1` through the Browserbase Model Gateway** needs no separate model key. It replaced `gpt-5` after GPT-5 decisions took 30–107 s and hit time budgets. The output schema of each decision is generated from the caller's output contract.
 - **A synthetic portal built here, deliberately legacy-shaped:** an iframe workspace, table-row results, no test IDs, injectable runtime errors, and synthetic members only. Errors are reproducible, and there is no real PII and no third-party terms.
 - **Mocked deliberately:** the target application, the operator console (a minimal page) and the rule set (authored for this portal). Discovery runs, replays and handoffs are real.
@@ -129,14 +129,13 @@ Exhausted recovery, identity mismatch and policy blocks fail instead: a person s
 
 - **Writes:** the planned contact edit (review and confirmation screens) and its duplicate-commit protection.
 - **Confirmation for risky actions:** today they are blocked.
-- **Local-browser replay:** replay still needs Browserbase and a tunnel.
 - **Not built, only designed:** desktop and legacy-web adapters, and tenant overrides.
 - **Arbitrary goals:** goals are free text, but outputs use a bounded account-inquiry vocabulary.
 - **Also out:** live co-browsing, scale-out and queues, stability scoring, an evidence purge job.
 
 **Next, in order:**
 
-1. A local-browser replay adapter, which also proves the surface seam with a second implementation.
+1. Local sessions in the coordinator, so local replay also gets persistence and operator handoff.
 2. Tenant overrides with materialized versions and preflight fingerprints.
 3. The contact-edit workflow, with a confirmation handoff for its commit step.
 4. A capability catalog exposing saved capabilities as typed agent tools.

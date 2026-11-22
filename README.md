@@ -14,8 +14,9 @@ The target is a synthetic credit-union staff portal built in this repository: a 
 - Docker Desktop with Compose, for the local PostgreSQL databases.
 - A **Browserbase** account: API key and project ID. Discovery's model calls go through Browserbase's Model Gateway on the same credentials, so no separate model-provider key is needed.
 - `cloudflared`, to give the hosted browser an HTTPS route to the locally served portal.
+- Google Chrome, for local replay only (`CHROME_PATH` overrides where it is found).
 
-**Replay needs no model, but it still needs a browser.** Every discovery and every replay runs in a Browserbase-hosted browser, which must reach the portal over HTTPS. Without Browserbase credentials and a tunnel you can run the checks below, but not discovery or replay. A local-browser replay adapter is listed under [Cuts](REPORT.md#cuts).
+**What needs what.** Discovery and the hosted demos run in a Browserbase browser, which reaches the locally served portal through an HTTPS tunnel. **Replay needs no model and can also run locally**: `pnpm replay:local` replays a saved capability in a local Chrome against the local portal, with no Browserbase account, tunnel or API key (see [below](#replay-locally-no-browserbase-tunnel-or-keys)).
 
 ## Setup (once)
 
@@ -33,11 +34,32 @@ Secrets live only in ignored `.env` files under `apps/automation/` and `apps/dem
 ## Checks without live services
 
 ```sh
-pnpm check      # typecheck, 260 unit/contract tests, production builds — no keys, database or network
+pnpm check      # typecheck, 262 unit/contract tests, production builds — no keys, database or network
 pnpm check:db   # the above plus 43 PostgreSQL integration tests (Docker running, after setup)
 ```
 
 The unit tests drive the real workflow worker, executor, rule engine and coordinator against injected fake browser surfaces and planners, and the real Stagehand launch path against a fake transport. They check behavior and safety properties; they are **not** evidence of a genuine discovery. That evidence is in [evidence/](evidence/README.md).
+
+## Replay locally (no Browserbase, tunnel or keys)
+
+Replay needs no model, so a saved capability can run on this machine. You need only Docker (for the portal's database) and Chrome:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm db:up && pnpm db:setup     # the portal's synthetic members
+pnpm demo:serve                 # portal on http://127.0.0.1:3002 (leave running)
+pnpm replay:local               # replays evidence/capability.json for M1002 in a local headless Chrome
+```
+
+Expected: `{"kind":"success", … "memberId":"M1002","accountId":"S2002","currentBalanceMinor":8765}` with `modelCalls: 0` and `inferenceAttempts: 0`. Other cases:
+
+| Command | Result |
+| --- | --- |
+| `pnpm replay:local --member M9999` | `business_outcome` `MEMBER_NOT_FOUND` |
+| `pnpm replay:local --scenario servicing-notice` | `success` with `recoveries: [{ruleId: "acknowledge-notice", attempts: 1}]` |
+| `pnpm replay:local --scenario wrong-member --member M1001` | `failure` `IDENTITY_MISMATCH` with the step, expected and observed conditions, and a snapshot |
+
+`--capability <file>` replays any saved capability, and `--headful` shows the browser. This runs the same replay worker, executor, rule engine and policy as the hosted path. It skips the coordinator and database: run records go to the ignored `apps/automation/runtime/local-replay/`, there is no operator handoff, and only loopback targets are allowed. [Recorded local runs](evidence/local-replay/README.md).
 
 ## Demo: goal → discovery → saved capability → replay
 
