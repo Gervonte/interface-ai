@@ -1,0 +1,2199 @@
+{
+  "schemaVersion": 1,
+  "capabilityId": "account-read-a66a8d8a911b478e98ef5dc3d55d8189",
+  "version": 1,
+  "name": "Requested account inquiry",
+  "description": "Constructed from confirmed model-selected browser actions and verified UI reads.",
+  "sourceDiscoveryRunId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+  "surfaceRequirements": {
+    "kind": "browser",
+    "applicationFamily": "demo-credit-union",
+    "compatibleTargetVersions": [
+      1795313449
+    ],
+    "features": [
+      "frames",
+      "labels",
+      "roles",
+      "table-rows",
+      "dom-text"
+    ]
+  },
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "memberId": {
+        "type": "string",
+        "maxLength": 5,
+        "format": "member-id"
+      }
+    },
+    "required": [
+      "memberId"
+    ],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "currency": {
+        "type": "string",
+        "maxLength": 3,
+        "enum": [
+          "USD"
+        ]
+      },
+      "memberId": {
+        "type": "string",
+        "maxLength": 5,
+        "format": "member-id"
+      },
+      "accountId": {
+        "type": "string",
+        "maxLength": 5,
+        "format": "account-id"
+      },
+      "accountType": {
+        "type": "string",
+        "maxLength": 20,
+        "enum": [
+          "savings"
+        ]
+      },
+      "availableBalanceMinor": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      }
+    },
+    "required": [
+      "accountId",
+      "accountType",
+      "availableBalanceMinor",
+      "currency",
+      "memberId"
+    ],
+    "additionalProperties": false
+  },
+  "variables": {
+    "output_2": {
+      "type": "string",
+      "maxLength": 5,
+      "format": "member-id"
+    },
+    "output_3": {
+      "type": "string",
+      "maxLength": 5,
+      "format": "account-id"
+    },
+    "output_4": {
+      "type": "string",
+      "maxLength": 20,
+      "enum": [
+        "savings"
+      ]
+    },
+    "output_5": {
+      "type": "string",
+      "maxLength": 3,
+      "enum": [
+        "USD"
+      ]
+    },
+    "output_6": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "selectedAccount1": {
+      "type": "string",
+      "maxLength": 5,
+      "format": "account-id"
+    }
+  },
+  "targets": {
+    "target1": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "role",
+        "role": "heading",
+        "name": "Staff workspace",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target2": {
+      "scope": {
+        "kind": "document"
+      },
+      "within": [],
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Member Search",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target3": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "role",
+        "role": "heading",
+        "name": "Member Search",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target4": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "role",
+            "role": "form",
+            "name": "Member Search",
+            "exact": true
+          }
+        }
+      ],
+      "locator": {
+        "kind": "label",
+        "text": "Member ID",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target5": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "role",
+            "role": "form",
+            "name": "Member Search",
+            "exact": true
+          }
+        }
+      ],
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Search",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target6": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "caption",
+        "text": "Member search results",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target7": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "tableRow",
+          "tableCaption": "Member search results",
+          "cells": [
+            {
+              "columnHeader": "Member ID",
+              "equals": {
+                "kind": "input",
+                "name": "memberId"
+              }
+            },
+            {
+              "columnHeader": "Membership Status",
+              "equals": {
+                "kind": "literal",
+                "value": "Active"
+              }
+            }
+          ]
+        }
+      ],
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Open",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target8": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "role",
+        "role": "heading",
+        "name": "Member Overview",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target9": {
+      "scope": {
+        "kind": "document"
+      },
+      "within": [],
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Account Inquiry",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target10": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "role",
+        "role": "heading",
+        "name": "Account Inquiry",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target11": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "caption",
+        "text": "Member accounts",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target12": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "tableRow",
+          "tableCaption": "Member accounts",
+          "cells": [
+            {
+              "columnHeader": "Account Type",
+              "equals": {
+                "kind": "literal",
+                "value": "Primary Savings"
+              }
+            },
+            {
+              "columnHeader": "Designation",
+              "equals": {
+                "kind": "literal",
+                "value": "Primary"
+              }
+            },
+            {
+              "columnHeader": "Status",
+              "equals": {
+                "kind": "literal",
+                "value": "Active"
+              }
+            },
+            {
+              "columnHeader": "Currency",
+              "equals": {
+                "kind": "literal",
+                "value": "USD"
+              }
+            }
+          ]
+        }
+      ],
+      "locator": {
+        "kind": "cell",
+        "columnHeader": "Account ID"
+      },
+      "expectedMatches": 1
+    },
+    "target13": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "tableRow",
+          "tableCaption": "Member accounts",
+          "cells": [
+            {
+              "columnHeader": "Account Type",
+              "equals": {
+                "kind": "literal",
+                "value": "Primary Savings"
+              }
+            },
+            {
+              "columnHeader": "Designation",
+              "equals": {
+                "kind": "literal",
+                "value": "Primary"
+              }
+            },
+            {
+              "columnHeader": "Status",
+              "equals": {
+                "kind": "literal",
+                "value": "Active"
+              }
+            },
+            {
+              "columnHeader": "Currency",
+              "equals": {
+                "kind": "literal",
+                "value": "USD"
+              }
+            },
+            {
+              "columnHeader": "Account ID",
+              "equals": {
+                "kind": "variable",
+                "name": "selectedAccount1"
+              }
+            }
+          ]
+        }
+      ],
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Open",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target14": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "role",
+        "role": "heading",
+        "name": "Account Details",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "target15": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "role",
+            "role": "region",
+            "name": "Account Details",
+            "exact": true
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Member ID"
+      },
+      "expectedMatches": 1
+    },
+    "target16": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "role",
+            "role": "region",
+            "name": "Account Details",
+            "exact": true
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Account ID"
+      },
+      "expectedMatches": 1
+    },
+    "target17": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "role",
+            "role": "region",
+            "name": "Account Details",
+            "exact": true
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Account Type"
+      },
+      "expectedMatches": 1
+    },
+    "target18": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "role",
+            "role": "region",
+            "name": "Account Details",
+            "exact": true
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Currency"
+      },
+      "expectedMatches": 1
+    },
+    "target19": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "role",
+            "role": "region",
+            "name": "Account Details",
+            "exact": true
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Available Balance"
+      },
+      "expectedMatches": 1
+    },
+    "target20": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "role",
+            "role": "region",
+            "name": "Account Details",
+            "exact": true
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Designation"
+      },
+      "expectedMatches": 1
+    },
+    "target21": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "role",
+            "role": "region",
+            "name": "Account Details",
+            "exact": true
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Status"
+      },
+      "expectedMatches": 1
+    },
+    "ruleRetry": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "attribute",
+            "name": "aria-label",
+            "value": "Account inquiry unavailable"
+          }
+        }
+      ],
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Try again",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "ruleDenied": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-label",
+        "value": "Access denied"
+      },
+      "expectedMatches": 1
+    },
+    "ruleDialog": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-modal",
+        "value": "true"
+      },
+      "expectedMatches": 1
+    },
+    "ruleExpiry": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-label",
+        "value": "Staff session expired"
+      },
+      "expectedMatches": 1
+    },
+    "ruleNotice": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-label",
+        "value": "Servicing notice"
+      },
+      "expectedMatches": 1
+    },
+    "ruleReview": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-label",
+        "value": "Servicing review required"
+      },
+      "expectedMatches": 1
+    },
+    "ruleInquiry": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "role",
+        "role": "heading",
+        "name": "Account Inquiry",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "ruleLoading": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-label",
+        "value": "Loading servicing screen"
+      },
+      "expectedMatches": 1
+    },
+    "ruleAccounts": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "caption",
+        "text": "Member accounts",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "ruleNoMember": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-label",
+        "value": "No matching member"
+      },
+      "expectedMatches": 1
+    },
+    "ruleNoPrimary": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-label",
+        "value": "No primary savings account"
+      },
+      "expectedMatches": 1
+    },
+    "ruleMemberOpen": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "tableRow",
+          "tableCaption": "Member search results",
+          "cells": [
+            {
+              "columnHeader": "Member ID",
+              "equals": {
+                "kind": "input",
+                "name": "memberId"
+              }
+            }
+          ]
+        }
+      ],
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Open",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "ruleValidation": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-label",
+        "value": "Member search validation error"
+      },
+      "expectedMatches": 1
+    },
+    "ruleAcknowledge": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "attribute",
+            "name": "aria-label",
+            "value": "Servicing notice"
+          }
+        }
+      ],
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Acknowledge notice",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "rulePrimaryOpen": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "tableRow",
+          "tableCaption": "Member accounts",
+          "cells": [
+            {
+              "columnHeader": "Account Type",
+              "equals": {
+                "kind": "literal",
+                "value": "Primary Savings"
+              }
+            },
+            {
+              "columnHeader": "Designation",
+              "equals": {
+                "kind": "literal",
+                "value": "Primary"
+              }
+            }
+          ]
+        }
+      ],
+      "locator": {
+        "kind": "role",
+        "role": "button",
+        "name": "Open",
+        "exact": true
+      },
+      "expectedMatches": 1
+    },
+    "ruleUnavailable": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [],
+      "locator": {
+        "kind": "attribute",
+        "name": "aria-label",
+        "value": "Account inquiry unavailable"
+      },
+      "expectedMatches": 1
+    },
+    "ruleShellIdentity": {
+      "scope": {
+        "kind": "document"
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "attribute",
+            "name": "aria-label",
+            "value": "Active member"
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Member ID"
+      },
+      "expectedMatches": 1
+    },
+    "ruleMemberIdentity": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "attribute",
+            "name": "aria-label",
+            "value": "Active member"
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Member ID"
+      },
+      "expectedMatches": 1
+    },
+    "ruleAccountIdentity": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "attribute",
+            "name": "aria-label",
+            "value": "Account Details"
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Account ID"
+      },
+      "expectedMatches": 1
+    },
+    "ruleSearchedIdentity": {
+      "scope": {
+        "kind": "frame",
+        "frames": [
+          {
+            "attribute": "title",
+            "value": "Member servicing workspace"
+          }
+        ]
+      },
+      "within": [
+        {
+          "kind": "container",
+          "locator": {
+            "kind": "attribute",
+            "name": "aria-label",
+            "value": "Member Search Results"
+          }
+        }
+      ],
+      "locator": {
+        "kind": "field",
+        "label": "Searched Member ID"
+      },
+      "expectedMatches": 1
+    }
+  },
+  "preconditions": {
+    "entryReady": {
+      "kind": "visible",
+      "target": "target1"
+    }
+  },
+  "steps": [
+    {
+      "id": "step-001",
+      "before": {
+        "kind": "location",
+        "routeKey": "fresh-session"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target1"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [],
+      "recoveryRuleIds": [],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 7
+      },
+      "type": "navigate",
+      "destination": "target-entry"
+    },
+    {
+      "id": "step-002",
+      "before": {
+        "kind": "enabled",
+        "target": "target2"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target3"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 18
+      },
+      "type": "click",
+      "target": "target2"
+    },
+    {
+      "id": "step-003",
+      "before": {
+        "kind": "editable",
+        "target": "target4"
+      },
+      "after": {
+        "kind": "equals",
+        "source": {
+          "target": "target4",
+          "read": "value",
+          "transform": "identity"
+        },
+        "value": {
+          "kind": "input",
+          "name": "memberId"
+        }
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 29
+      },
+      "type": "fill",
+      "target": "target4",
+      "value": {
+        "kind": "input",
+        "name": "memberId"
+      }
+    },
+    {
+      "id": "step-004",
+      "before": {
+        "kind": "enabled",
+        "target": "target5"
+      },
+      "after": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "visible",
+            "target": "target3"
+          },
+          {
+            "kind": "visible",
+            "target": "target6"
+          }
+        ]
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 40
+      },
+      "type": "click",
+      "target": "target5"
+    },
+    {
+      "id": "step-005",
+      "before": {
+        "kind": "enabled",
+        "target": "target7"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target8"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 51
+      },
+      "type": "click",
+      "target": "target7"
+    },
+    {
+      "id": "step-006",
+      "before": {
+        "kind": "enabled",
+        "target": "target9"
+      },
+      "after": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "visible",
+            "target": "target10"
+          },
+          {
+            "kind": "visible",
+            "target": "target11"
+          }
+        ]
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 74
+      },
+      "type": "click",
+      "target": "target9"
+    },
+    {
+      "id": "step-007",
+      "before": {
+        "kind": "visible",
+        "target": "target12"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target12"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 96
+      },
+      "type": "capture",
+      "variable": "selectedAccount1",
+      "sourceValue": {
+        "target": "target12",
+        "read": "text",
+        "transform": "trim"
+      }
+    },
+    {
+      "id": "step-008",
+      "before": {
+        "kind": "enabled",
+        "target": "target13"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target14"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 111
+      },
+      "type": "click",
+      "target": "target13"
+    },
+    {
+      "id": "step-009",
+      "before": {
+        "kind": "visible",
+        "target": "target15"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target15"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 141
+      },
+      "type": "capture",
+      "variable": "output_2",
+      "sourceValue": {
+        "target": "target15",
+        "read": "text",
+        "transform": "trim"
+      }
+    },
+    {
+      "id": "step-010",
+      "before": {
+        "kind": "visible",
+        "target": "target16"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target16"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 159
+      },
+      "type": "capture",
+      "variable": "output_3",
+      "sourceValue": {
+        "target": "target16",
+        "read": "text",
+        "transform": "trim"
+      }
+    },
+    {
+      "id": "step-011",
+      "before": {
+        "kind": "visible",
+        "target": "target17"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target17"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 177
+      },
+      "type": "capture",
+      "variable": "output_4",
+      "sourceValue": {
+        "target": "target17",
+        "read": "text",
+        "transform": "account-type"
+      }
+    },
+    {
+      "id": "step-012",
+      "before": {
+        "kind": "visible",
+        "target": "target18"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target18"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 195
+      },
+      "type": "capture",
+      "variable": "output_5",
+      "sourceValue": {
+        "target": "target18",
+        "read": "text",
+        "transform": "trim"
+      }
+    },
+    {
+      "id": "step-013",
+      "before": {
+        "kind": "visible",
+        "target": "target19"
+      },
+      "after": {
+        "kind": "visible",
+        "target": "target19"
+      },
+      "timeoutMs": 10000,
+      "outcomeRuleIds": [
+        "member-not-found",
+        "no-primary-savings",
+        "access-denied"
+      ],
+      "recoveryRuleIds": [
+        "acknowledge-notice",
+        "retry-inquiry"
+      ],
+      "source": {
+        "kind": "discovery",
+        "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+        "eventSequence": 213
+      },
+      "type": "capture",
+      "variable": "output_6",
+      "sourceValue": {
+        "target": "target19",
+        "read": "text",
+        "transform": "usd-minor"
+      }
+    }
+  ],
+  "outputs": {
+    "currency": {
+      "target": "target18",
+      "read": "text",
+      "transform": "trim"
+    },
+    "memberId": {
+      "target": "target15",
+      "read": "text",
+      "transform": "trim"
+    },
+    "accountId": {
+      "target": "target16",
+      "read": "text",
+      "transform": "trim"
+    },
+    "accountType": {
+      "target": "target17",
+      "read": "text",
+      "transform": "account-type"
+    },
+    "availableBalanceMinor": {
+      "target": "target19",
+      "read": "text",
+      "transform": "usd-minor"
+    }
+  },
+  "successCondition": {
+    "conditions": [
+      {
+        "kind": "visible",
+        "target": "target14"
+      },
+      {
+        "kind": "equals",
+        "source": {
+          "target": "target15",
+          "read": "text",
+          "transform": "trim"
+        },
+        "value": {
+          "kind": "input",
+          "name": "memberId"
+        }
+      },
+      {
+        "kind": "equals",
+        "source": {
+          "target": "target16",
+          "read": "text",
+          "transform": "trim"
+        },
+        "value": {
+          "kind": "variable",
+          "name": "selectedAccount1"
+        }
+      },
+      {
+        "kind": "equals",
+        "source": {
+          "target": "target17",
+          "read": "text",
+          "transform": "trim"
+        },
+        "value": {
+          "kind": "literal",
+          "value": "Primary Savings"
+        }
+      },
+      {
+        "kind": "equals",
+        "source": {
+          "target": "target20",
+          "read": "text",
+          "transform": "trim"
+        },
+        "value": {
+          "kind": "literal",
+          "value": "Primary"
+        }
+      },
+      {
+        "kind": "equals",
+        "source": {
+          "target": "target21",
+          "read": "text",
+          "transform": "trim"
+        },
+        "value": {
+          "kind": "literal",
+          "value": "ACTIVE"
+        }
+      }
+    ],
+    "identity": [
+      {
+        "target": "target15",
+        "input": "memberId"
+      }
+    ]
+  },
+  "outcomeRules": [
+    {
+      "id": "member-not-found",
+      "code": "MEMBER_NOT_FOUND",
+      "when": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "visible",
+            "target": "ruleNoMember"
+          },
+          {
+            "kind": "equals",
+            "source": {
+              "target": "ruleSearchedIdentity",
+              "read": "text",
+              "transform": "trim"
+            },
+            "value": {
+              "kind": "input",
+              "name": "memberId"
+            }
+          }
+        ]
+      },
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "no-primary-savings",
+      "code": "NO_PRIMARY_SAVINGS_ACCOUNT",
+      "when": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "visible",
+            "target": "ruleInquiry"
+          },
+          {
+            "kind": "visible",
+            "target": "ruleAccounts"
+          },
+          {
+            "kind": "visible",
+            "target": "ruleNoPrimary"
+          },
+          {
+            "kind": "equals",
+            "source": {
+              "target": "ruleMemberIdentity",
+              "read": "text",
+              "transform": "trim"
+            },
+            "value": {
+              "kind": "input",
+              "name": "memberId"
+            }
+          }
+        ]
+      },
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "access-denied",
+      "code": "ACCESS_DENIED",
+      "when": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "visible",
+            "target": "ruleInquiry"
+          },
+          {
+            "kind": "visible",
+            "target": "ruleDenied"
+          },
+          {
+            "kind": "equals",
+            "source": {
+              "target": "ruleMemberIdentity",
+              "read": "text",
+              "transform": "trim"
+            },
+            "value": {
+              "kind": "input",
+              "name": "memberId"
+            }
+          }
+        ]
+      },
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    }
+  ],
+  "recoveryRules": [
+    {
+      "id": "acknowledge-notice",
+      "when": {
+        "kind": "visible",
+        "target": "ruleNotice"
+      },
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "dispatchState": "settled",
+      "maxAttempts": 2,
+      "timeoutMs": 10000,
+      "actions": [
+        {
+          "type": "click",
+          "target": "ruleAcknowledge"
+        }
+      ],
+      "after": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "absent",
+            "target": "ruleNotice"
+          },
+          {
+            "kind": "absent",
+            "target": "ruleLoading"
+          },
+          {
+            "kind": "visible",
+            "target": "ruleAccounts"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "retry-inquiry",
+      "when": {
+        "kind": "visible",
+        "target": "ruleUnavailable"
+      },
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "dispatchState": "settled",
+      "maxAttempts": 2,
+      "timeoutMs": 10000,
+      "actions": [
+        {
+          "type": "click",
+          "target": "ruleRetry"
+        }
+      ],
+      "after": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "absent",
+            "target": "ruleUnavailable"
+          },
+          {
+            "kind": "absent",
+            "target": "ruleLoading"
+          },
+          {
+            "kind": "visible",
+            "target": "ruleAccounts"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    }
+  ],
+  "manualContributions": [],
+  "runtimeGuards": [
+    {
+      "id": "staff-session-expired",
+      "when": {
+        "kind": "visible",
+        "target": "ruleExpiry"
+      },
+      "handling": "intervention",
+      "code": "SESSION_EXPIRED",
+      "reason": "SESSION_EXPIRED",
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "unexpected-dialog",
+      "when": {
+        "kind": "all",
+        "conditions": [
+          {
+            "kind": "visible",
+            "target": "ruleDialog"
+          },
+          {
+            "kind": "absent",
+            "target": "ruleNotice"
+          },
+          {
+            "kind": "absent",
+            "target": "ruleExpiry"
+          }
+        ]
+      },
+      "handling": "intervention",
+      "code": "UNEXPECTED_DIALOG",
+      "reason": "UNEXPECTED_DIALOG",
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "target-validation",
+      "when": {
+        "kind": "visible",
+        "target": "ruleValidation"
+      },
+      "handling": "failure",
+      "code": "TARGET_VALIDATION_ERROR",
+      "reason": "STATE_TIMEOUT",
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "member-identity-0",
+      "when": {
+        "kind": "visible",
+        "target": "ruleMemberIdentity"
+      },
+      "require": {
+        "kind": "equals",
+        "source": {
+          "target": "ruleMemberIdentity",
+          "read": "text",
+          "transform": "trim"
+        },
+        "value": {
+          "kind": "input",
+          "name": "memberId"
+        }
+      },
+      "handling": "failure",
+      "code": "IDENTITY_MISMATCH",
+      "reason": "STATE_TIMEOUT",
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "member-identity-1",
+      "when": {
+        "kind": "visible",
+        "target": "ruleShellIdentity"
+      },
+      "require": {
+        "kind": "equals",
+        "source": {
+          "target": "ruleShellIdentity",
+          "read": "text",
+          "transform": "trim"
+        },
+        "value": {
+          "kind": "input",
+          "name": "memberId"
+        }
+      },
+      "handling": "failure",
+      "code": "IDENTITY_MISMATCH",
+      "reason": "STATE_TIMEOUT",
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "conflicting-no-member",
+      "when": {
+        "kind": "visible",
+        "target": "ruleNoMember"
+      },
+      "require": {
+        "kind": "absent",
+        "target": "ruleMemberOpen"
+      },
+      "handling": "failure",
+      "code": "CONFLICTING_SIGNALS",
+      "reason": "STATE_TIMEOUT",
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "conflicting-no-primary",
+      "when": {
+        "kind": "visible",
+        "target": "ruleNoPrimary"
+      },
+      "require": {
+        "kind": "absent",
+        "target": "rulePrimaryOpen"
+      },
+      "handling": "failure",
+      "code": "CONFLICTING_SIGNALS",
+      "reason": "STATE_TIMEOUT",
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "conflicting-denied",
+      "when": {
+        "kind": "visible",
+        "target": "ruleDenied"
+      },
+      "require": {
+        "kind": "absent",
+        "target": "ruleAccounts"
+      },
+      "handling": "failure",
+      "code": "CONFLICTING_SIGNALS",
+      "reason": "STATE_TIMEOUT",
+      "appliesToStepIds": [
+        "step-002",
+        "step-003",
+        "step-004",
+        "step-005",
+        "step-006",
+        "step-007",
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Explicit, tested credit-union portal scenario contract; not inferred from a successful discovery."
+      }
+    },
+    {
+      "id": "account-identity",
+      "when": {
+        "kind": "visible",
+        "target": "ruleAccountIdentity"
+      },
+      "require": {
+        "kind": "equals",
+        "source": {
+          "target": "ruleAccountIdentity",
+          "read": "text",
+          "transform": "trim"
+        },
+        "value": {
+          "kind": "variable",
+          "name": "selectedAccount1"
+        }
+      },
+      "handling": "failure",
+      "code": "IDENTITY_MISMATCH",
+      "reason": "STATE_TIMEOUT",
+      "appliesToStepIds": [
+        "step-008",
+        "step-009",
+        "step-010",
+        "step-011",
+        "step-012",
+        "step-013"
+      ],
+      "source": {
+        "kind": "authored",
+        "reason": "Account Details must match the account ID captured from the selected row."
+      }
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { currentBalanceRequest } from '../examples/discovery-requests.js';
 import { describe, expect, it } from 'vitest';
 import { ActionProposalSchema, BlockedContextSchema, ClaimRequestSchema, DEFAULT_RUNTIME_BUDGETS, ManualActionRequestSchema, MutationMetadataSchema,
   RunAcceptedSchema, RunRequestSchema, RunResultSchema, RunViewSchema, RuntimeBudgetsSchema } from '@interface-ai/contracts';
@@ -11,7 +12,7 @@ const blocked = {
 } as const;
 describe('run request, result, and control contracts', () => {
   it('accepts distinct discovery/replay bodies while rejecting mixed fields and permission overrides', () => {
-    expect(RunRequestSchema.parse({ mode: 'discovery', targetId: 'demo-credit-union', goal: 'Look up savings balance.', inputs: { memberId: 'M1001' } }).mode).toBe('discovery');
+    expect(RunRequestSchema.parse({ mode: 'discovery', outputContract: currentBalanceRequest.outputContract, targetId: 'demo-credit-union', goal: 'Look up savings balance.', inputs: { memberId: 'M1001' } }).mode).toBe('discovery');
     const replay = { mode: 'replay', targetId: 'demo-credit-union', capability, inputs: { memberId: 'M1002' } };
     expect(RunRequestSchema.parse(replay).mode).toBe('replay');
     for (const invalid of [{ ...replay, goal: 'extra' }, { ...replay, capability: { id: capability.id, version: 'latest' } },

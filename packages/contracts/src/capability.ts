@@ -42,7 +42,7 @@ export const TargetSchema = z.strictObject({
 export type Target = z.infer<typeof TargetSchema>;
 export const ExtractionSchema = z.strictObject({
   target: Id, read: z.enum(['text', 'value', 'checked']),
-  transform: z.enum(['identity', 'trim', 'integer', 'usd-minor', 'savings-type']),
+  transform: z.enum(['identity', 'trim', 'integer', 'usd-minor', 'savings-type', 'account-type']),
 });
 type Extraction = z.infer<typeof ExtractionSchema>;
 export type Predicate =

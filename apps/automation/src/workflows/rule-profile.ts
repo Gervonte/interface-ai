@@ -1,4 +1,4 @@
-import type { Capability, Predicate, Target } from '@interface-ai/contracts';
+import type { AccountSelection, Capability, Predicate, Target } from '@interface-ai/contracts';
 export type RuleSet=Pick<Capability,'outcomeRules'|'recoveryRules'|'runtimeGuards'>;
 const scope={kind:'frame' as const,frames:[{attribute:'title' as const,value:'Member servicing workspace'}]};
 const cue=(label:string):Target=>({scope,within:[],locator:{kind:'attribute',name:'aria-label',value:label},expectedMatches:1});
@@ -7,7 +7,7 @@ const visible=(target:string):Predicate=>({kind:'visible',target});
 const absent=(target:string):Predicate=>({kind:'absent',target});
 const identity=(target:string):Predicate=>({kind:'equals',source:{target,read:'text',transform:'trim'},value:{kind:'input',name:'memberId'}});
 const all=(...conditions:Predicate[]):Predicate=>({kind:'all',conditions});
-export function balanceRules(targets:Record<string,Target>):RuleSet {
+export function balanceRules(targets:Record<string,Target>,account:AccountSelection={type:'savings',designation:'Primary',status:'ACTIVE'}):RuleSet {
   Object.assign(targets,{
     ruleMemberIdentity:field('Active member','Member ID'),ruleSearchedIdentity:field('Member Search Results','Searched Member ID'),ruleAccountIdentity:field('Account Details','Account ID'),
     ruleShellIdentity:{...field('Active member','Member ID'),scope:{kind:'document'}},
@@ -40,11 +40,14 @@ export function balanceRules(targets:Record<string,Target>):RuleSet {
     {id:'conflicting-no-primary',when:visible('ruleNoPrimary'),require:absent('rulePrimaryOpen'),handling:'failure',code:'CONFLICTING_SIGNALS',reason:'STATE_TIMEOUT',appliesToStepIds:[],source},
     {id:'conflicting-denied',when:visible('ruleDenied'),require:absent('ruleAccounts'),handling:'failure',code:'CONFLICTING_SIGNALS',reason:'STATE_TIMEOUT',appliesToStepIds:[],source},
   ];
-  return {outcomeRules,recoveryRules,runtimeGuards};
+  // The missing-primary-savings signal says nothing about a checking/standard-account request.
+  const primarySavings=account.type==='savings'&&account.designation==='Primary';
+  return {outcomeRules:primarySavings?outcomeRules:outcomeRules.filter(rule=>rule.id!=='no-primary-savings'),recoveryRules,
+    runtimeGuards:primarySavings?runtimeGuards:runtimeGuards.filter(rule=>rule.id!=='conflicting-no-primary')};
 }
 export function accountGuard(variable:string):NonNullable<Capability['runtimeGuards']>[number]{return{id:'account-identity',when:visible('ruleAccountIdentity'),require:{kind:'equals',source:{target:'ruleAccountIdentity',read:'text',transform:'trim'},value:{kind:'variable',name:variable}},handling:'failure',code:'IDENTITY_MISMATCH',reason:'STATE_TIMEOUT',appliesToStepIds:[],source:{kind:'authored',reason:'Account Details must match the account ID captured from the selected row.'}};}
-export function attachBalanceRules(capability:Capability):Capability {
-  const artifact=structuredClone(capability);const rules=balanceRules(artifact.targets);const steps=artifact.steps.filter(step=>step.type!=='navigate').map(step=>step.id);
+export function attachBalanceRules(capability:Capability,account?:AccountSelection):Capability {
+  const artifact=structuredClone(capability);const rules=balanceRules(artifact.targets,account);const steps=artifact.steps.filter(step=>step.type!=='navigate').map(step=>step.id);
   for(const rule of [...rules.outcomeRules,...rules.recoveryRules,...rules.runtimeGuards??[]])rule.appliesToStepIds=[...steps];
   const selected=artifact.steps.findIndex(step=>step.type==='capture'&&step.variable.startsWith('selectedAccount'));
   const capture=artifact.steps[selected];if(capture?.type==='capture'){const guard=accountGuard(capture.variable);guard.appliesToStepIds=artifact.steps.slice(selected+1).map(step=>step.id);rules.runtimeGuards!.push(guard);}

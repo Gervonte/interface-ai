@@ -1,3 +1,4 @@
+import { currentBalanceRequest } from '../../examples/discovery-requests.js';
 import { attachBalanceRules } from '../../apps/automation/src/workflows/rule-profile.js';
 import { DemoAccountsSchema, DemoDetailsSchema } from '@interface-ai/contracts';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -22,7 +23,7 @@ const settings = databaseSettings({ ...secrets,
 let automation: Pool; let automationOwner: Pool; let demo: Pool; let demoOwner: Pool;
 let repository: AutomationRepository; let target: DemoRepository;
 let configuration: Awaited<ReturnType<typeof loadConfigurations>>;
-const request = { mode: 'discovery', targetId: 'demo-credit-union', goal: 'Find the requested current balance.', inputs: { memberId: 'M1001' } };
+const request = { mode: 'discovery', outputContract: currentBalanceRequest.outputContract, targetId: 'demo-credit-union', goal: 'Find the requested current balance.', inputs: { memberId: 'M1001' } };
 async function accept(key = randomUUID(), body: unknown = request) {
   return repository.acceptRun(body, { principal: 'test-operator', idempotencyKey: key }, configuration);
 }
@@ -74,6 +75,8 @@ describe('real PostgreSQL persistence and isolation', () => {
     expect(new Set(accepted.map((value) => value.runId)).size).toBe(1);
     expect(accepted.filter((value) => !value.reused)).toHaveLength(1);
     await expect(accept(key, { ...request, inputs: { memberId: 'M1002' } })).rejects.toMatchObject({ code: 'IDEMPOTENCY_KEY_REUSED' });
+    const changed=structuredClone(request);changed.outputContract.fields.currentBalanceMinor!.meaning='available-balance';
+    await expect(accept(key,changed)).rejects.toMatchObject({code:'IDEMPOTENCY_KEY_REUSED'});
     await expect(accept()).rejects.toMatchObject({ code: 'RUN_CAPACITY_REACHED' });
     const rows = await automation.query('SELECT count(*)::integer AS count FROM automation.request_receipts WHERE run_id=$1', [accepted[0]!.runId]);
     expect(rows.rows[0].count).toBe(1);

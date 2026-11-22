@@ -1,0 +1,106 @@
+{
+  "task": "INT-023",
+  "finishedAt": "2026-11-22T02:14:45.894Z",
+  "configurationVersion": 1795313449,
+  "runs": [
+    {
+      "goal": "current",
+      "mode": "discovery",
+      "processId": 16867,
+      "runId": "ba60b64e-8f2d-431c-9902-98caceb53b02",
+      "capability": {
+        "id": "account-read-8b836f3e97824bafa6f2fff56a017072",
+        "version": 1
+      },
+      "output": {
+        "accountId": "S2001",
+        "accountType": "savings",
+        "currency": "USD",
+        "currentBalanceMinor": 125034,
+        "memberId": "M1001"
+      },
+      "session": {
+        "code": "closed",
+        "modelName": "openai/gpt-4.1",
+        "modelCalls": 7,
+        "inputTokens": 11297,
+        "outputTokens": 654,
+        "inferenceAttempts": 0
+      }
+    },
+    {
+      "goal": "current",
+      "mode": "replay",
+      "processId": 17379,
+      "runId": "5d12caa5-847e-4233-93e4-fbb08d977787",
+      "capability": {
+        "id": "account-read-8b836f3e97824bafa6f2fff56a017072",
+        "version": 1
+      },
+      "output": {
+        "currency": "USD",
+        "memberId": "M1002",
+        "accountId": "S2002",
+        "accountType": "savings",
+        "currentBalanceMinor": 8765
+      },
+      "session": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      }
+    },
+    {
+      "goal": "available",
+      "mode": "discovery",
+      "processId": 17616,
+      "runId": "c96b083d-24ef-47df-a5bf-6734590e8202",
+      "capability": {
+        "id": "account-read-a66a8d8a911b478e98ef5dc3d55d8189",
+        "version": 1
+      },
+      "output": {
+        "accountId": "S2001",
+        "accountType": "savings",
+        "availableBalanceMinor": 120034,
+        "currency": "USD",
+        "memberId": "M1001"
+      },
+      "session": {
+        "code": "closed",
+        "modelName": "openai/gpt-4.1",
+        "modelCalls": 7,
+        "inputTokens": 11323,
+        "outputTokens": 700,
+        "inferenceAttempts": 0
+      }
+    },
+    {
+      "goal": "available",
+      "mode": "replay",
+      "processId": 18117,
+      "runId": "302820e7-0cae-45d2-8db8-bb1037a69c01",
+      "capability": {
+        "id": "account-read-a66a8d8a911b478e98ef5dc3d55d8189",
+        "version": 1
+      },
+      "output": {
+        "currency": "USD",
+        "memberId": "M1002",
+        "accountId": "S2002",
+        "accountType": "savings",
+        "availableBalanceMinor": 7600
+      },
+      "session": {
+        "code": "closed",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      }
+    }
+  ],
+  "success": true
+}

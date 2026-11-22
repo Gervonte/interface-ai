@@ -1,3 +1,4 @@
+import { OutputContractSchema } from './discovery.js';
 import { z } from 'zod';
 import { BoundedJsonSchema, IdentifierSchema as Id, ValuesSchema } from './data.js';
 import { parseCapability, validateInvocation, validateOutput } from './capability.js';
@@ -8,7 +9,7 @@ const revision = z.number().int().positive();
 const code = z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/);
 export const VersionReferenceSchema = z.strictObject({ id: Id, version });
 export const RunRequestSchema = BoundedJsonSchema.pipe(z.discriminatedUnion('mode', [
-  z.strictObject({ mode: z.literal('discovery'), targetId: Id, goal: z.string().trim().min(1).max(4000), inputs: ValuesSchema }),
+  z.strictObject({ mode: z.literal('discovery'), targetId: Id, goal: z.string().trim().min(1).max(4000), outputContract: OutputContractSchema, inputs: ValuesSchema }),
   z.strictObject({ mode: z.literal('replay'), targetId: Id, capability: VersionReferenceSchema, inputs: ValuesSchema }),
 ]));
 export type RunRequest = z.infer<typeof RunRequestSchema>;

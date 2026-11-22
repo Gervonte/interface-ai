@@ -1,3 +1,4 @@
+import { currentBalanceRequest } from '../examples/discovery-requests.js';
 import {createPool} from '@interface-ai/postgres';
 import {AutomationRepository} from '../apps/automation/src/db/repository.js';
 import {attachBalanceRules} from '../apps/automation/src/workflows/rule-profile.js';
@@ -45,7 +46,7 @@ async function main(){
     let runId:string|undefined;
     try{
       let ready=false;for(let i=0;i<100;i++){if(child.exitCode!==null||child.signalCode!==null)throw Error('API_STARTUP_FAILED');try{await api('/healthz');ready=true;break;}catch{}await delay(100);}if(!ready)throw Error('API_NOT_READY');
-      const accepted=await api('/v1/runs',mode==='discovery'?{mode,targetId:initial.target.id,goal:'Find the current balance and currency of the primary savings account for memberId. Verify member and account identity.',inputs:{memberId:'M1001'}}:{mode,targetId:initial.target.id,capability:reference,inputs:{memberId:'M1002'}});runId=accepted.runId;
+      const accepted=await api('/v1/runs',mode==='discovery'?{mode,outputContract:currentBalanceRequest.outputContract,targetId:initial.target.id,goal:'Find the current balance and currency of the primary savings account for memberId. Verify member and account identity.',inputs:{memberId:'M1001'}}:{mode,targetId:initial.target.id,capability:reference,inputs:{memberId:'M1002'}});runId=accepted.runId;
       console.info(JSON.stringify({mode,runId,operatorUrl:'http://127.0.0.1:5173',status:'started'}));
       const events:any[]=[];const interventions:any[]=[];let run;let last=0;const seenInterventions=new Set<string>();const sessionRefs=new Set<string>();
       for(let i=0;i<1800;i++){

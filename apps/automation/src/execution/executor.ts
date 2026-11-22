@@ -25,6 +25,7 @@ export function transform(value: string | boolean, name: Extraction['transform']
   if (name === 'identity') return value;
   if (typeof value !== 'string') throw new ExecutionError('INVALID_EXTRACTION');
   if (name === 'trim') return value.trim();
+  if (name === 'account-type') { if (value === 'Checking') return 'checking'; if (['Savings', 'Primary Savings'].includes(value)) return 'savings'; throw new ExecutionError('INVALID_EXTRACTION'); }
   if (name === 'savings-type') { if (!['Savings', 'Primary Savings'].includes(value)) throw new ExecutionError('INVALID_EXTRACTION'); return 'savings'; }
   let amount: bigint;
   if (name === 'integer') {

@@ -20,3 +20,5 @@ export * from './budgets.js';
 export * from './capability.js';
 export * from './runs.js';
 export * from './demo.js';
+
+export * from './discovery.js';
