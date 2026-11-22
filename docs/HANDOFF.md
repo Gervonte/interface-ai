@@ -30,7 +30,7 @@ The page displays controller/revision, step, reason, checkpoint context, session
 
 The verifier checks typed outputs, manual events, control transitions, exact artifact references, distinct processes/members, zero replay inference, and confirmed browser cleanup. Private run reports go to ignored `apps/automation/runtime/int-014-015/`. It resets the next target session to baseline and closes its API/browser after each run. Stop the target, operator page, and tunnel afterward. The verifier requires real operator actions; it does not secretly resolve interventions itself.
 
-For a model-free check using the earlier genuine balance capability, run the same command with `HANDOFF_REPLAY_ONLY=1`. This publishes an explicitly authored rule/environment-binding revision, then exercises only the replay takeover. It requires the earlier persisted discovery under the demo operator; it does not fabricate discovery or mark the discovery handoff verified. [Actual replay handoff evidence](evidence/int-014-015/README.md).
+For a model-free check using the earlier genuine balance capability, run the same command with `HANDOFF_REPLAY_ONLY=1`. This publishes an explicitly authored rule/environment-binding revision, then exercises only the replay takeover. It requires the earlier persisted discovery under the demo operator; it does not fabricate discovery or mark the discovery handoff verified. [Actual replay handoff evidence](../evidence/int-014-015/README.md).
 
 ## Control and continuation
 

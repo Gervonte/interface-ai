@@ -17,6 +17,7 @@ import { DispatchGate } from '../apps/automation/src/execution/gate.js';
 import { EvidenceStore } from '../apps/automation/src/execution/evidence.js';
 import type { StoredEventInput } from '../apps/automation/src/db/repository.js';
 import { riskyControlNames } from '../apps/automation/src/db/repository.js';
+import { parseCapability } from '@interface-ai/contracts';
 
 const scope = { kind: 'frame' as const, frames: [{ attribute: 'title' as const, value: 'Member servicing workspace' }] };
 const role = (name: string, role = 'button'): Target => ({ scope, within: [], locator: { kind: 'role', role: role as 'button', name, exact: true }, expectedMatches: 1 });
@@ -91,6 +92,34 @@ describe('model-selected discovery and deterministic capability replay', () => {
     const replay=await fixture('M1002',artifact,false,true,request);
     expect(await workflowWorker({mode:'replay',targetId:'demo-credit-union',capability:{id:artifact.capabilityId,version:artifact.version},inputs:{memberId:'M1002'}},replay.context)).toMatchObject({kind:'success',output:{values:{subject:'M1002',account:'S2002',amount:1}}});
     expect(replay.calls()).toBe(0);
+  });
+  it('describes what the capability does and what each output means from the request contract, without record values',async()=>{
+    for(const [request,balance,field] of [[currentBalanceRequest,'current balance','currentBalanceMinor'],[availableBalanceRequest,'available balance','availableBalanceMinor']] as const){
+      const f=await fixture('M1001',undefined,false,true,request);await f.discover();const artifact=f.artifact();
+      expect(artifact.name).toBe('Account inquiry: '+balance);
+      expect(artifact.description).toContain(`opens the member's active primary savings account`);expect(artifact.description).toContain('Declared business outcomes: MEMBER_NOT_FOUND');
+      expect(Object.keys(artifact.outputDescriptions!).sort()).toEqual(Object.keys(artifact.outputs).sort());
+      expect(artifact.outputDescriptions![field]!.toLowerCase().startsWith(balance)).toBe(true);
+      expect(JSON.stringify([artifact.name,artifact.description,artifact.outputDescriptions])).not.toMatch(/M100\d|S200\d|\$\d|125034|120034/);
+    }
+    const f=await fixture('M1001');await f.discover();const artifact=structuredClone(f.artifact());delete artifact.outputDescriptions!.currency;
+    expect(()=>parseCapability(artifact)).toThrow();
+  });
+  it('replays a saved capability locally through the same engine, without a coordinator, database or model',async()=>{
+    const { replayLocally } = await import('../apps/automation/src/execution/local-replay.js');
+    const discovery=await fixture('M1001');await discovery.discover();const artifact=discovery.artifact();
+    const replay=await fixture('M1002',artifact);const folder=await mkdtemp(tmpdir()+'/local-replay-');let closes=0;
+    const record=await replayLocally(artifact,{memberId:'M1002'},{configuration:replay.context.configuration,evidenceDirectory:folder,openSurface:async()=>({surface:replay.surface,close:async()=>{closes++;}})});
+    expect(record.result).toMatchObject({kind:'success',output:{values:{memberId:'M1002',accountId:'S2002',currentBalanceMinor:8765}}});
+    expect(record).toMatchObject({mode:'local-replay',modelCalls:0,inferenceAttempts:0,browserClosed:true,inputNames:['memberId']});expect(closes).toBe(1);
+    expect(replay.actions).toEqual(discovery.actions);expect(JSON.stringify(record.events)).not.toMatch(/M1002|S2002|8765/);
+    const other=structuredClone(replay.context.configuration);other.target.applicationFamily='other-application';
+    await expect(replayLocally(artifact,{memberId:'M1002'},{configuration:other,evidenceDirectory:folder,openSurface:async()=>{throw new Error('opened');}})).rejects.toMatchObject({code:'UNSUPPORTED_SURFACE'});
+  });
+  it('refuses to open a local browser for a non-loopback target',async()=>{
+    const { openLocalBrowser } = await import('../apps/automation/src/execution/local-browser.js');
+    const f=await fixture('M1001');
+    await expect(openLocalBrowser(f.context.configuration)).rejects.toMatchObject({code:'POLICY_BLOCKED'});
   });
   it('rejects current balance when the requested meaning is available balance',async()=>{
     const f=await fixture('M1001',undefined,false,false,availableBalanceRequest);const plan=f.context.plan;

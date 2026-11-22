@@ -101,6 +101,8 @@ const structure = z.strictObject({
   variables: z.record(Id, FieldSchema), targets: z.record(Id, TargetSchema),
   preconditions: z.record(Id, PredicateSchema), steps: z.array(StepSchema).min(1).max(128),
   outputs: z.record(Id, ExtractionSchema),
+  // What each output means, for a reviewer or calling agent. Metadata only; never record values.
+  outputDescriptions: z.record(Id, text).optional(),
   successCondition: z.strictObject({ conditions: z.array(PredicateSchema).min(1).max(16),
     identity: z.array(z.strictObject({ target: Id, input: Id })).min(1).max(8) }),
   outcomeRules: z.array(OutcomeRule).max(16), recoveryRules: z.array(RecoveryRule).max(8),
@@ -116,6 +118,7 @@ function semanticValidation(cap: Capability, ctx: z.RefinementCtx) {
   if (!Object.keys(cap.targets).length || Object.keys(cap.targets).length > 128 || !Object.keys(cap.preconditions).length
     || Object.keys(cap.preconditions).length > 32 || Object.keys(cap.variables).length > 32) issue('Invalid target, precondition, or variable count.');
   unique(cap.steps.map((step) => step.id), 'step ID');
+  if (cap.outputDescriptions && Object.keys(cap.outputDescriptions).sort().join() !== Object.keys(cap.outputs).sort().join()) issue('Output descriptions must cover exactly the declared outputs.');
   unique(cap.outcomeRules.map((rule) => rule.id), 'outcome rule ID');
   unique(cap.outcomeRules.map((rule) => rule.code), 'outcome code');
   unique(cap.recoveryRules.map((rule) => rule.id), 'recovery rule ID');

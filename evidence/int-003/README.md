@@ -26,4 +26,4 @@ The [failure screenshot](failure.png) was visually inspected. It shows only the 
 
 `pnpm check` passed typechecking, 51 tests across five files, and all builds. Unit/HTTP tests cover ownership admission, in-flight conflicts, asynchronous hand-back, stale views, descriptor validation, wrong-member output checks, local authorization, hostile Host headers, and safe provider error handling. Those tests supplement the real session evidence above.
 
-Reproduce with [SDK_COMPATIBILITY.md](../../SDK_COMPATIBILITY.md). Runtime files stay ignored; this directory contains the curated synthetic result. The tunnel used for this verification is temporary and is stopped after testing.
+Reproduce with [SDK_COMPATIBILITY.md](../../docs/SDK_COMPATIBILITY.md). Runtime files stay ignored; this directory contains the curated synthetic result. The tunnel used for this verification is temporary and is stopped after testing.

@@ -94,6 +94,6 @@ The new database migrations add `base_version` lineage while retaining one origi
 
 ## Verification scope
 
-[Live results and selected sanitized logs](evidence/int-012-013/README.md) distinguish the 19-case capability replay matrix from target-control QA. Default tests additionally exercise negative discovery, authored-rule attachment, recovery provenance, conflict/identity precedence, finite deadlines, stale-context rejection, and explicit closed-client transport classification. Database tests cover immutable rule revisions, preserved recovery history, and confirmed negative discovery completion without an invented capability.
+[Live results and selected sanitized logs](../evidence/int-012-013/README.md) distinguish the 19-case capability replay matrix from target-control QA. Default tests additionally exercise negative discovery, authored-rule attachment, recovery provenance, conflict/identity precedence, finite deadlines, stale-context rejection, and explicit closed-client transport classification. Database tests cover immutable rule revisions, preserved recovery history, and confirmed negative discovery completion without an invented capability.
 
 Paused cases expose an owned intervention and retain their session. The verifier inspects that state, then cancels for cleanup. Operator claim/manual-action/resume APIs and the genuine discovery/replay human takeover demonstrations remain INT-014/015. Full privacy and adversarial scenario acceptance remains INT-016; this milestone does not declare the entire assessment complete.

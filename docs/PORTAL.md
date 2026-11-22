@@ -71,7 +71,7 @@ The URL must be public HTTPS with no custom port, credentials, query, fragment, 
 
 Only the target's synthetic UI/API are exposed. Stop the temporary tunnel with Ctrl+C after the check. Do not expose the Vite development server, automation API, database, or private configuration. The hostname expires when the tunnel stops; it is not a retained production target configuration.
 
-This is target UI verification. It does not save a discovered capability or establish discovery/replay acceptance. Those remain INT-009–INT-011. [Curated evidence](evidence/int-006/README.md).
+This is target UI verification. It does not save a discovered capability or establish discovery/replay acceptance. Those remain INT-009–INT-011. [Curated evidence](../evidence/int-006/README.md).
 
 ## Verification
 

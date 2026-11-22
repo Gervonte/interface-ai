@@ -12,4 +12,4 @@ This is **authored shared-executor QA**, not model-driven discovery, a generated
 
 The corresponding database tests exercise asynchronous HTTP acceptance/deduplication, authorization, exact versions, cancellation while dispatch remains unresolved, startup cancellation, singleton ownership, transient-output expiry, cleanup uncertainty, and actual child-process death during session creation. These injected workers/fixtures are test evidence for those boundaries; they do not replace the live browser check.
 
-The evidence UUID's 24-hour expiry describes the runtime access route. This explicit reviewed synthetic export is retained in Git separately. Temporary target URLs and runtime binding files are not durable deployments. [Setup, commands and limits](../../RUNTIME.md).
+The evidence UUID's 24-hour expiry describes the runtime access route. This explicit reviewed synthetic export is retained in Git separately. Temporary target URLs and runtime binding files are not durable deployments. [Setup, commands and limits](../../docs/RUNTIME.md).

@@ -57,9 +57,11 @@ const output = z.discriminatedUnion('availability', [
   z.strictObject({ availability: z.literal('available'), values: ValuesSchema }),
   z.strictObject({ availability: z.literal('not_retained'), reason: z.literal('OUTPUTS_NOT_RETAINED') }),
 ]);
+// Declared recoveries applied during a run that still reached success or a business outcome.
+export const RecoveriesSchema = z.array(z.strictObject({ ruleId: Id, attempts: z.number().int().min(1).max(10) })).min(1).max(8);
 export const RunResultSchema = z.discriminatedUnion('kind', [
-  z.strictObject({ kind: z.literal('success'), capability: VersionReferenceSchema, output }),
-  z.strictObject({ kind: z.literal('business_outcome'), code, summary: z.string().max(500), evidenceIds: z.array(z.uuid()).max(16) }),
+  z.strictObject({ kind: z.literal('success'), capability: VersionReferenceSchema, output, recoveries: RecoveriesSchema.optional() }),
+  z.strictObject({ kind: z.literal('business_outcome'), code, summary: z.string().max(500), evidenceIds: z.array(z.uuid()).max(16), recoveries: RecoveriesSchema.optional() }),
   z.strictObject({ kind: z.literal('failure'), code, blocked: BlockedContextSchema.nullable(), summary: z.string().max(500), evidenceIds: z.array(z.uuid()).max(16) }),
   z.strictObject({ kind: z.literal('cancelled'), reason: z.enum(['USER_REQUESTED', 'INTERRUPTED']), dispatchState: DispatchStateSchema, effectState: EffectStateSchema }),
 ]);

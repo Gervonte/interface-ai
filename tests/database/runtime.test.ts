@@ -193,6 +193,17 @@ describe('authenticated run API and durable coordinator', () => {
     const result=(await f.coordinator.read(accepted.runId,'test-operator')).result;
     expect(result).toMatchObject({kind:'failure',code:'INTERVENTION_TIMEOUT',blocked:{stepId:'step-a',reason:'MANUAL_PREREQUISITE',expected:{code:'READY_SCREEN'}}});
   });
+  it('reports declared recoveries in the result of a run that reached a business outcome', async () => {
+    const worker:Worker=async(_request,context)=>{
+      for(const [ruleId,attempt] of [['inquiry-retry',1],['inquiry-retry',2],['servicing-notice',1]] as const)await context.record({type:'RECOVERY_STARTED',actor:'automation',stepId:'step-004',details:{code:'declared_recovery',ruleId,attempt}});
+      await context.record({type:'BUSINESS_OUTCOME',actor:'automation',stepId:'step-004',details:{code:'MEMBER_NOT_FOUND',ruleId:'member-not-found'}});
+      return{kind:'business_outcome',code:'MEMBER_NOT_FOUND',summary:'Synthetic coordinator test.',evidenceIds:[]};
+    };
+    const f=await service(worker);
+    const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',request)).json());await f.coordinator.idle();
+    expect(RunViewSchema.parse(await(await f.call(accepted.statusUrl)).json()).result).toMatchObject({kind:'business_outcome',code:'MEMBER_NOT_FOUND',
+      recoveries:[{ruleId:'inquiry-retry',attempts:2},{ruleId:'servicing-notice',attempts:1}]});
+  });
   it('reconciles expired sessions without redispatching interrupted actions', async () => {
     const accepted = await repository.acceptRun(request, { principal: 'test-operator', idempotencyKey: randomUUID() }, configuration); await repository.markRunning(accepted.runId);
     const runtime = new RuntimeRepository(repository, secrets.REQUEST_FINGERPRINT_KEY); await runtime.sessionIntent(accepted.runId, new Date(Date.now() - 1000));

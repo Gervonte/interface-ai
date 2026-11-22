@@ -2,7 +2,7 @@
 
 This compatibility check qualifies the pinned Stagehand 4.4.0 / Browserbase SDK 2.27.0 integration before building the artifact executor and durable coordinator. It uses the synthetic INT-002 fixture, not the complete assessment portal. See [the implementation plan](IMPLEMENTATION_PLAN.md).
 
-**Verified on 2026-11-16 (America/New_York):** genuine model proposals, serialized action execution, changed-input execution with inference forbidden, real human takeover and hand-back in the same session, failure captures, and confirmed session cleanup. See [the recorded evidence](evidence/int-003/README.md).
+**Verified on 2026-11-16 (America/New_York):** genuine model proposals, serialized action execution, changed-input execution with inference forbidden, real human takeover and hand-back in the same session, failure captures, and confirmed session cleanup. See [the recorded evidence](../evidence/int-003/README.md).
 
 ## Reproduce
 
@@ -79,4 +79,4 @@ Actual runtime results, where verified, are recorded separately from these provi
 
 ## Shared runtime integration (INT-007/008)
 
-The compatibility spike remains historical evidence. The shared executor now supplies an atomic semantic DOM adapter over the hosted Stagehand page, with policy/actionability checks, deterministic extraction, safe failure snapshots and application-owned lifecycle/dispatch fencing. This avoids reliance on positional descriptors or first-match dispatch behavior. [Runtime guide](RUNTIME.md); [real shared-executor evidence](evidence/int-007-008/README.md). Its same-origin/native-DOM limitations are explicit; model-driven discovery and fresh-process capability replay are now verified separately in [INT-009–011](evidence/int-009-011/README.md). The production planner uses Stagehand extract over a sanitized helper document; it does not transmit the controlled portal DOM. [Workflow details](WORKFLOWS.md).
+The compatibility spike remains historical evidence. The shared executor now supplies an atomic semantic DOM adapter over the hosted Stagehand page, with policy/actionability checks, deterministic extraction, safe failure snapshots and application-owned lifecycle/dispatch fencing. This avoids reliance on positional descriptors or first-match dispatch behavior. [Runtime guide](RUNTIME.md); [real shared-executor evidence](../evidence/int-007-008/README.md). Its same-origin/native-DOM limitations are explicit; model-driven discovery and fresh-process capability replay are now verified separately in [INT-009–011](../evidence/int-009-011/README.md). The production planner uses Stagehand extract over a sanitized helper document; it does not transmit the controlled portal DOM. [Workflow details](WORKFLOWS.md).

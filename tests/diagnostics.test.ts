@@ -52,7 +52,7 @@ describe('declared risky-control policy', () => {
   });
 });
 
-describe('session-start classification through the real Stagehand launch path (fake transport, no network)', () => {
+describe('session-start classification through the real Stagehand launch path (fake transport, no network)', { timeout: 30_000 }, () => {
   async function launchWith(statuses: { extension?: number; session?: number; sessionThrows?: boolean }) {
     // Stagehand is an automation-app dependency; resolve it the way that app does.
     const { browserbase } = await import('../apps/automation/node_modules/@browserbasehq/stagehand/dist/index.mjs');
@@ -87,7 +87,7 @@ describe('session-start classification through the real Stagehand launch path (f
   });
   it('keeps a created session whose connection failed uncertain, never "not created"', async () => {
     expect((await launchWith({ session: 201 })).code).toBe('SESSION_START_UNCERTAIN');
-  }, 30_000);
+  });
   it('keeps a create request with no response uncertain', async () => {
     expect((await launchWith({ sessionThrows: true })).code).toBe('SESSION_START_UNCERTAIN');
   });
@@ -96,7 +96,7 @@ describe('session-start classification through the real Stagehand launch path (f
   });
 });
 
-describe('the provider transport used in production', () => {
+describe('the provider transport used in production', { timeout: 30_000 }, () => {
   it('sends the real multipart extension upload and classifies a 401 refusal (local server, no network)', async () => {
     const { createServer } = await import('node:http');
     const { once } = await import('node:events');

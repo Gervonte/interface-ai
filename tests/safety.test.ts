@@ -33,3 +33,28 @@ describe('embedded page instructions cannot reach the planner', () => {
     expect(ObservationSchema.safeParse(observation).success).toBe(false);
   });
 });
+
+describe('model decision summaries in the run log', () => {
+  it('records what was chosen in the closed vocabulary and validates as an event', async () => {
+    const { decisionSummary } = await import('../apps/automation/src/execution/coordinator.js');
+    const { eventSchema } = await import('../apps/automation/src/db/repository.js');
+    const observation = base();
+    const prepared = { goal: 'g', outputContract: {} as never, inputNames: ['memberId'], observation: observation as never, history: [] };
+    const outputs = { memberId: '', currentBalanceMinor: '' };
+    const cases = [
+      [{ action: 'click', controlRef: 'c1', inputName: '', outputs, reason: 'continue' }, { action: 'click', decisionReason: 'continue', controlLabel: 'Open' }],
+      [{ action: 'fill', controlRef: 'c1', inputName: 'memberId', outputs, reason: 'continue' }, { action: 'fill', inputName: 'memberId' }],
+      [{ action: 'fill', controlRef: 'c1', inputName: 'not-a-binding', outputs, reason: 'continue' }, { action: 'fill' }],
+      [{ action: 'finish', controlRef: '', inputName: '', outputs: { memberId: 'f1', currentBalanceMinor: 'f1' }, reason: 'goal_complete' }, { action: 'finish', decisionReason: 'goal_complete', fieldLabels: ['Current Balance'] }],
+      [{ action: 'help', controlRef: 'c99', inputName: '', outputs, reason: 'blocked' }, { action: 'help', decisionReason: 'blocked' }],
+    ] as const;
+    for (const [decision, expected] of cases) {
+      const summary = decisionSummary(prepared, { observationId: observation.observationId, ...decision } as never);
+      expect(summary).toMatchObject(expected);
+      if (decision.inputName === 'not-a-binding') expect(summary).not.toHaveProperty('inputName');
+      if (decision.controlRef === 'c99') expect(summary).not.toHaveProperty('controlLabel');
+      expect(eventSchema.safeParse({ type: 'MODEL_COMPLETED', actor: 'automation', stepId: null, details: { code: 'proposed', ...summary } }).success).toBe(true);
+    }
+    expect(eventSchema.safeParse({ type: 'MODEL_COMPLETED', actor: 'automation', stepId: null, details: { code: 'proposed', controlLabel: embeddedInstruction } }).success).toBe(false);
+  });
+});

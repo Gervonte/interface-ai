@@ -12,4 +12,4 @@ This is **authored UI verification of the target application**. It is not model-
 
 Local Chrome inspection also traversed the M1001 flow, checked desktop/narrow layouts, and verified browser Back to Account Inquiry. After **New member search** cleared context, browser Back showed a context-change error and no old account fields. The normal-flow browser console had no errors/warnings. The HTTP tests exercise late search/account responses after context changes; the real database test changes a stored balance and verifies the target API returns the changed value, then resets the isolated fixture.
 
-The public hostname in `result.json` identifies that temporary run; the tunnel was stopped after verification. It is not a durable deployment URL. See [portal setup and check command](../../PORTAL.md).
+The public hostname in `result.json` identifies that temporary run; the tunnel was stopped after verification. It is not a durable deployment URL. See [portal setup and check command](../../docs/PORTAL.md).
