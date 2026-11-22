@@ -39,7 +39,8 @@
     "scenario:check": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/check-scenarios.ts",
     "scenario:controls": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/check-target-controls.ts",
     "handoff:demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/handoff-demo.ts",
-    "goal:demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/goal-demo.ts"
+    "goal:demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/goal-demo.ts",
+    "safety:demo": "pnpm --filter @interface-ai/contracts build && pnpm --filter @interface-ai/postgres build && node --env-file=apps/automation/.env --import tsx scripts/safety-demo.ts"
   },
   "devDependencies": {
     "@types/node": "26.2.0",

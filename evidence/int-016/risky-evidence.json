@@ -1,0 +1,70 @@
+{
+  "evidenceId": "eea04b6f-5192-4edf-9798-db7b2e945008",
+  "runId": "9bd69fbd-d019-420b-83d1-2c8a8b91f243",
+  "stepId": "risk-17",
+  "capturedAt": "2026-11-22T18:36:18.328Z",
+  "expiresAt": "2026-11-23T18:36:18.328Z",
+  "sanitizationVersion": 1,
+  "snapshot": {
+    "schemaVersion": 1,
+    "kind": "structural-snapshot",
+    "redactedValues": true,
+    "omittedFrames": 0,
+    "documents": [
+      {
+        "depth": 0,
+        "headings": [],
+        "controls": [
+          {
+            "kind": "button",
+            "label": "Staff workspace",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Member Search",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Member Overview",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Account Inquiry",
+            "enabled": true
+          }
+        ],
+        "tables": []
+      },
+      {
+        "depth": 1,
+        "headings": [
+          {
+            "kind": "h1",
+            "label": "Account Details"
+          }
+        ],
+        "controls": [
+          {
+            "kind": "button",
+            "label": "New member search",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": "Back to Accounts",
+            "enabled": true
+          },
+          {
+            "kind": "button",
+            "label": null,
+            "enabled": true
+          }
+        ],
+        "tables": []
+      }
+    ]
+  }
+}

@@ -4,8 +4,17 @@ import { z } from 'zod';
 import { StagehandSurface } from './driver.js';
 import type { SessionFactory, Configuration } from './coordinator.js';
 import { ExecutionError } from './errors.js';
+import { createRequire } from 'node:module';
+import { sessionCreateRecorder, sessionStartError } from './diagnostics.js';
+import type { Fetch } from './diagnostics.js';
+
+// The SDK's own default transport (node-fetch in Node), resolved through Stagehand's dependency. The observer must wrap
+// this rather than the global fetch: the SDK's multipart extension upload body only works with its own implementation.
+export const sdkFetch = (createRequire(import.meta.resolve('@browserbasehq/stagehand'))('@browserbasehq/sdk/_shims/index') as { fetch: Fetch }).fetch;
 import { GatewayPlanner } from '../workflows/planner.js';
 
+// The SDK types fetch with its own shim types; at runtime it calls the standard fetch signature.
+type LaunchFetch = NonNullable<NonNullable<Parameters<typeof browserbase.launch>[0]['clientOptions']>['fetch']>;
 export class BrowserbaseSessions implements SessionFactory {
   inferenceAttempts = 0;
   lastMetrics: Record<string, number> = {};
@@ -40,8 +49,10 @@ export class BrowserbaseSessions implements SessionFactory {
     if (url.protocol !== 'https:' || ['localhost', '127.0.0.1'].includes(url.hostname)) throw new ExecutionError('POLICY_BLOCKED');
     const timeout = Math.ceil(configuration.policy.budgets.overallTimeoutMs / 1000);
     if (timeout > 1800) throw new ExecutionError('BUDGET_EXHAUSTED');
+    // Session creation is classified separately: a definitive refusal proves no session exists; anything else stays uncertain.
+    const create = sessionCreateRecorder(sdkFetch);
     const browser = await browserbase.launch({ apiKey: this.apiKey, projectId: this.projectId, region: 'us-west-2', api_timeout: timeout, keepAlive: false,
-      browserSettings: { allowedDomains: [url.hostname], logSession: false, recordSession: false, solveCaptchas: false, viewport: { width: 1440, height: 1000 } }, clientOptions: { timeout: 30_000, maxRetries: 0 } });
+      browserSettings: { allowedDomains: [url.hostname], logSession: false, recordSession: false, solveCaptchas: false, viewport: { width: 1440, height: 1000 } }, clientOptions: { timeout: 30_000, maxRetries: 0, fetch: create.fetch as unknown as LaunchFetch } }).catch((error: unknown) => { throw sessionStartError(error, create.observation()); });
     let stagehand: Stagehand | undefined;
     try {
       const id = z.uuid().parse(browser.sessionId); await onCreated(id); if (signal.aborted) throw new ExecutionError('CANCELLED');

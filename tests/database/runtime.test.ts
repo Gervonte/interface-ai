@@ -18,6 +18,7 @@ import { RuntimeRepository } from '../../apps/automation/src/db/runtime-reposito
 import { Coordinator } from '../../apps/automation/src/execution/coordinator.js';
 import type { Worker, SessionFactory } from '../../apps/automation/src/execution/coordinator.js';
 import { EvidenceStore } from '../../apps/automation/src/execution/evidence.js';
+import { sessionStartError } from '../../apps/automation/src/execution/diagnostics.js';
 import { databaseSettings, disposeTestDatabases, grantRuntime, provision, readSecrets } from '../../scripts/database-support.js';
 
 const secrets = readSecrets(process.env);
@@ -108,6 +109,89 @@ describe('authenticated run API and durable coordinator', () => {
     expect((await f.call('/v1/runs', request)).status).toBe(409);
     expect(RunViewSchema.parse(await (await f.call(`/v1/runs/${accepted.runId}`)).json()).result).toMatchObject({ kind: 'cancelled', reason: 'INTERRUPTED' });
     expect((await runtime.state(accepted.runId)).session_state).toBe('uncertain');
+  });
+  it('reports a definitive provider refusal as not created, releases capacity, and keeps no cleanup hold', async () => {
+    let reconciles=0;
+    const factory: SessionFactory = { reconcile: async () => { reconciles++; return false; }, open: async () => { throw sessionStartError(Object.assign(new Error('synthetic-provider-text-marker'), { status: 402 })); } };
+    const f = await service(async (_request, context) => { await context.executor({}); throw new Error('unreachable'); }, factory);
+    const accepted = RunAcceptedSchema.parse(await (await f.call('/v1/runs', request)).json()); await f.coordinator.idle();
+    const view = RunViewSchema.parse(await (await f.call(`/v1/runs/${accepted.runId}`)).json());
+    expect(view.result).toMatchObject({ kind: 'failure', code: 'SESSION_NOT_CREATED', blocked: null });
+    expect(view.result?.kind === 'failure' && view.result.summary).toMatch(/usage or plan limit.*No session was created and no model call or UI action ran/);
+    const events = (await f.coordinator.repository.events(accepted.runId, 'test-operator', 0, 50)).events;
+    expect(events.find(event => event.type === 'SESSION_FINISHED')?.details).toMatchObject({ code: 'not_created', category: 'provider_usage_limit', modelCalls: 0 });
+    expect(events.some(event => /^(MODEL_|ACTION_)/.test(event.type))).toBe(false);
+    const runtime = new RuntimeRepository(repository, secrets.REQUEST_FINGERPRINT_KEY);
+    expect((await runtime.state(accepted.runId)).session_state).toBe('closed'); expect(reconciles).toBe(0);
+    expect(JSON.stringify({ view, events })).not.toContain('synthetic-provider-text-marker');
+    // No cleanup hold: the next run is admitted.
+    expect((await f.call('/v1/runs', request)).status).toBe(202);
+  });
+  it('keeps an uncertain session start held and says so instead of reporting a cleanup failure', async () => {
+    const factory: SessionFactory = { reconcile: async () => false, open: async () => { throw sessionStartError(new Error('socket hang up')); } };
+    const f = await service(async (_request, context) => { await context.executor({}); throw new Error('unreachable'); }, factory);
+    const accepted = RunAcceptedSchema.parse(await (await f.call('/v1/runs', request)).json()); await f.coordinator.idle();
+    const result = (await f.coordinator.read(accepted.runId, 'test-operator')).result;
+    expect(result).toMatchObject({ kind: 'failure', code: 'SESSION_START_UNCERTAIN' });
+    expect(result?.kind === 'failure' && result.summary).toMatch(/may have created a session/);
+    expect((await new RuntimeRepository(repository, secrets.REQUEST_FINGERPRINT_KEY).state(accepted.runId)).session_state).toBe('uncertain');
+    expect((await f.call('/v1/runs', request)).status).toBe(409);
+  });
+  it('keeps synthetic goal, input and page markers out of every table, event, evidence file and API response, and explains the failed identity check', async () => {
+    const goalMarker='synthetic-goal-marker-7f3a',inputMarker='synthetic-input-marker-91c2',pageMarker='synthetic-page-marker-4d8e';
+    const fill={scope:{kind:'document' as const},within:[],locator:{kind:'label' as const,text:'Member ID',exact:true as const},expectedMatches:1 as const};
+    let location='about:blank';const dispatched:Array<string|undefined>=[];
+    const surface={location:async()=>location,navigate:async(url:string)=>{location=url;},
+      inspect:async()=>({count:1,visible:true,enabled:true,editable:true,text:pageMarker,value:pageMarker,checked:false,tag:'input',name:'Member ID',inputType:'text'}),
+      dispatch:async(_type:string,_target:unknown,_policy:unknown,value?:string)=>{dispatched.push(value);},
+      snapshot:async()=>({schemaVersion:1,kind:'structural-snapshot',redactedValues:true,omittedFrames:0,documents:[{depth:0,headings:[{kind:'h1',label:'Member Search'}],controls:[{kind:'input',label:'Member ID',enabled:true}],tables:[]}]})};
+    const factory:SessionFactory={reconcile:async()=>true,open:async(_config,created)=>{const id=randomUUID();await created(id);return{id,surface,close:async()=>true};}};
+    const worker:Worker=async(_request,context)=>{
+      const executor=await context.executor({member:fill});
+      await executor.execute({type:'navigate',destination:'target-entry'},'entry');
+      await executor.execute({type:'fill',target:'member',value:{kind:'input',name:'memberId'}},'fill-member');
+      return executor.reject('IDENTITY_MISMATCH','verify-identity','settled','account-identity');
+    };
+    const previous=configuration;
+    configuration={...configuration,policy:{...configuration.policy,allowedFillNames:['Member ID']}};
+    let f:Awaited<ReturnType<typeof service>>;try{f=await service(worker,factory);}finally{configuration=previous;}
+    const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',{...request,goal:goalMarker,inputs:{memberId:inputMarker}})).json());await f.coordinator.idle();
+    // Permitted destination: the bound value reaches the browser fill, and nowhere else.
+    expect(dispatched).toEqual([inputMarker]);
+    const view=await(await f.call(accepted.statusUrl)).json();const events=await(await f.call(accepted.statusUrl+'/events?afterSequence=0&limit=200')).json();
+    expect(view.result).toMatchObject({kind:'failure',code:'IDENTITY_MISMATCH',blocked:{stepId:'verify-identity',reason:'IDENTITY_MISMATCH',dispatchState:'settled',expected:{code:'RECORD_IDENTITY_MATCH'},observed:{code:'IDENTITY_MISMATCH'}}});
+    expect(view.result.blocked.observed.description).toContain('Rule: account-identity.');expect(view.result.summary).toContain('Step: verify-identity.');
+    const evidenceId=view.result.evidenceIds[0];expect(evidenceId).toBeTruthy();
+    const evidence=await(await f.call(accepted.statusUrl+'/evidence/'+evidenceId)).text();
+    const tables=(await owner.query("SELECT table_name FROM information_schema.tables WHERE table_schema='automation' AND table_type='BASE TABLE'")).rows.map(row=>row.table_name as string);
+    expect(tables.length).toBeGreaterThanOrEqual(5);
+    const rows:unknown[]=[];for(const table of tables)rows.push(...(await owner.query(`SELECT to_jsonb(t) AS row FROM automation.${table} t`)).rows);
+    const { readdir } = await import('node:fs/promises');
+    const files=await Promise.all((await readdir(folder+'/'+accepted.runId)).map(name=>readFile(folder+'/'+accepted.runId+'/'+name,'utf8')));
+    expect(files.length).toBeGreaterThan(0);
+    const swept=JSON.stringify({rows,files,view,events,evidence});
+    for(const marker of[goalMarker,inputMarker,pageMarker])expect(swept).not.toContain(marker);
+  });
+  it('keeps an intervention\'s own blocked reason when it times out after an earlier step failure', async () => {
+    const missing={scope:{kind:'document' as const},within:[],locator:{kind:'role' as const,role:'button' as const,name:'Search',exact:true as const},expectedMatches:1 as const};
+    let location='about:blank';
+    const surface={location:async()=>location,navigate:async(url:string)=>{location=url;},
+      inspect:async()=>({count:0,visible:false,enabled:false,editable:false,text:'',value:'',checked:false,tag:'',name:'',inputType:''}),dispatch:async()=>{},
+      snapshot:async()=>({schemaVersion:1,kind:'structural-snapshot',redactedValues:true,omittedFrames:0,documents:[]})};
+    const factory:SessionFactory={reconcile:async()=>true,open:async(_config,created)=>{const id=randomUUID();await created(id);return{id,surface,close:async()=>true};}};
+    const worker:Worker=async(_request,context)=>{
+      const executor=await context.executor({missing});
+      await executor.execute({type:'navigate',destination:'target-entry'},'entry');
+      await executor.execute({type:'click',target:'missing'},'step-a').catch(()=>{});
+      throw new NeedsIntervention({stepId:null,actionIndex:null,reason:'MANUAL_PREREQUISITE',dispatchState:'not_sent',effectState:'not_checked',checkpointId:null,
+        expected:{code:'READY_SCREEN',description:'Synthetic prerequisite.'},observed:{code:'MANUAL_PREREQUISITE',description:'Synthetic manual step needed.'},evidenceIds:[]});
+    };
+    const previous=configuration;
+    configuration={...configuration,policy:{...configuration.policy,budgets:{...configuration.policy.budgets,interventionTimeoutMs:1000}}};
+    let f:Awaited<ReturnType<typeof service>>;try{f=await service(worker,factory);}finally{configuration=previous;}
+    const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',request)).json());await f.coordinator.idle();
+    const result=(await f.coordinator.read(accepted.runId,'test-operator')).result;
+    expect(result).toMatchObject({kind:'failure',code:'INTERVENTION_TIMEOUT',blocked:{stepId:'step-a',reason:'MANUAL_PREREQUISITE',expected:{code:'READY_SCREEN'}}});
   });
   it('reconciles expired sessions without redispatching interrupted actions', async () => {
     const accepted = await repository.acceptRun(request, { principal: 'test-operator', idempotencyKey: randomUUID() }, configuration); await repository.markRunning(accepted.runId);
@@ -238,14 +322,15 @@ describe('authenticated run API and durable coordinator', () => {
     expect((await pool.query('SELECT 1 FROM automation.capabilities WHERE source_discovery_run_id=$1',[accepted.runId])).rowCount).toBe(0);
   });
 
-  async function handoffFixture(slow=false,timeoutMs?:number) {
+  async function handoffFixture(slow=false,timeoutMs?:number,riskyLabel?:string) {
+    const label=(riskyLabel??'Dismiss servicing review') as 'Dismiss servicing review';
     let location='about:blank',resolved=false,changed=false,dispatches=0,continuations=0,opens=0,closes=0;
     let release=()=>{};let started=false;
     const pending=new Promise<void>(resolve=>{release=resolve;});
-    const target={scope:{kind:'document' as const},within:[],locator:{kind:'role' as const,role:'button' as const,name:'Dismiss servicing review',exact:true as const},expectedMatches:1 as const};
+    const target={scope:{kind:'document' as const},within:[],locator:{kind:'role' as const,role:'button' as const,name:label,exact:true as const},expectedMatches:1 as const};
     const surface={location:async()=>location,navigate:async(url:string)=>{location=url;},
-      observe:async()=>({observationId:randomUUID(),fingerprint:(changed?'c':resolved?'b':'a').repeat(64),ready:true,headings:[],fields:[],controls:[{ref:'c1',kind:'click' as const,label:'Dismiss servicing review' as const,target,enabled:true,filled:false,row:{},matchesInputs:[]}]}),
-      inspect:async(value:unknown)=>({count:JSON.stringify(value).includes('Checkpoint')?(resolved?1:0):1,visible:true,enabled:true,editable:false,text:'',value:'',checked:false,tag:'button',name:'Dismiss servicing review',inputType:''}),
+      observe:async()=>({observationId:randomUUID(),fingerprint:(changed?'c':resolved?'b':'a').repeat(64),ready:true,headings:[],fields:[],controls:[{ref:'c1',kind:'click' as const,label,target,enabled:true,filled:false,row:{},matchesInputs:[]}]}),
+      inspect:async(value:unknown)=>({count:JSON.stringify(value).includes('Checkpoint')?(resolved?1:0):1,visible:true,enabled:true,editable:false,text:'',value:'',checked:false,tag:'button',name:label,inputType:''}),
       dispatch:async()=>{dispatches++;started=true;if(slow)await pending;resolved=true;},
       snapshot:async()=>({schemaVersion:1,kind:'structural-snapshot',redactedValues:true,documents:[],omittedFrames:0})};
     const factory:SessionFactory={reconcile:async()=>true,open:async(_config,created)=>{opens++;const id=randomUUID();await created(id);return{id,surface,close:async()=>{closes++;return true;}};}};
@@ -257,7 +342,7 @@ describe('authenticated run API and durable coordinator', () => {
       return{kind:'business_outcome',code:'MEMBER_NOT_FOUND',summary:'Synthetic coordinator test.',evidenceIds:[]};
     };
     const previous=configuration;
-    configuration={...configuration,policy:{...configuration.policy,manualClickNames:['Dismiss servicing review']}};
+    configuration={...configuration,policy:{...configuration.policy,manualClickNames:['Dismiss servicing review'],...(riskyLabel?{riskyControls:[{name:riskyLabel,effect:'irreversible' as const,treatment:'block' as const}]}:{})}};
     let f:Awaited<ReturnType<typeof service>>;
     try{f=await service(worker,factory);}finally{configuration=previous;}
     const accepted=RunAcceptedSchema.parse(await(await f.call('/v1/runs',request)).json());
@@ -296,6 +381,17 @@ describe('authenticated run API and durable coordinator', () => {
     const result=await f.call(f.path+'/actions',{expectedControlRevision:run.control.revision,observationId:observation.observationId,action:{type:'click',controlRef:'c1'}});
     expect(result.status).toBe(409);expect((await result.json()).error.code).toBe('STALE_OBSERVATION');expect(f.counts().dispatches).toBe(0);expect((await repository.getRun(f.id)).status).toBe('human_controlled');
     await f.call('/v1/runs/'+f.id+'/cancel',{reason:'USER_REQUESTED'});await f.coordinator.idle();
+  });
+  it('blocks a risky control under operator ownership without dispatching and stops the run conservatively',async()=>{
+    const f=await handoffFixture(false,undefined,'Close account');await f.call(f.path+'/claim',{expectedControlRevision:f.run.control.revision});const run=await repository.getRun(f.id);
+    const observation=await(await f.call(f.path+'/observation?revision='+run.control.revision)).json();
+    const result=await f.call(f.path+'/actions',{expectedControlRevision:run.control.revision,observationId:observation.observationId,action:{type:'click',controlRef:'c1'}});
+    expect(result.ok).toBe(false);expect(f.counts().dispatches).toBe(0);
+    const events=(await f.coordinator.repository.events(f.id,'test-operator',0,200)).events;
+    expect(events.find(event=>event.type==='ACTION_FAILED'&&event.actor==='human')?.details).toMatchObject({code:'RISKY_ACTION_BLOCKED',dispatchState:'not_sent'});
+    expect(events.some(event=>event.type==='ACTION_DISPATCHED'&&event.actor==='human')).toBe(false);
+    await f.coordinator.idle();const final=await f.coordinator.read(f.id,'test-operator');
+    expect(final.status).toBe('failed');expect(final.result).toMatchObject({kind:'failure',code:'RISKY_ACTION_BLOCKED'});expect(f.counts().continuations).toBe(0);
   });
   it('blocks resume during a manual dispatch and preserves uncertainty when cancellation wins',async()=>{
     const f=await handoffFixture(true);await f.call(f.path+'/claim',{expectedControlRevision:f.run.control.revision});const run=await repository.getRun(f.id);

@@ -2,11 +2,13 @@ import type { z } from 'zod';
 import type { BlockedContextSchema } from '@interface-ai/contracts';
 export const failureCodes = ['STALE_OBSERVATION','POLICY_BLOCKED', 'CONTROL_CHANGED', 'ACTION_IN_FLIGHT', 'TARGET_NOT_FOUND', 'AMBIGUOUS_TARGET',
   'TARGET_NOT_ACTIONABLE', 'UNSUPPORTED_SURFACE', 'STATE_TIMEOUT', 'BUDGET_EXHAUSTED', 'ACTION_OUTCOME_UNKNOWN',
-  'TARGET_VALIDATION_ERROR','IDENTITY_MISMATCH','CONFLICTING_SIGNALS','RECOVERY_EXHAUSTED','RECOVERY_FAILED','INVALID_OUTPUT_CONTRACT','UNSUPPORTED_GOAL', 'MODEL_UNAVAILABLE', 'MODEL_BUDGET_EXHAUSTED', 'ARTIFACT_INVALID', 'INFERENCE_FORBIDDEN', 'INTERVENTION_TIMEOUT', 'READ_FAILED', 'INVALID_EXTRACTION', 'INVALID_BINDING', 'CANCELLED', 'SESSION_LOST', 'EVIDENCE_UNAVAILABLE'] as const;
+  'TARGET_VALIDATION_ERROR','SESSION_NOT_CREATED','SESSION_START_UNCERTAIN','RISKY_ACTION_BLOCKED','IDENTITY_MISMATCH','CONFLICTING_SIGNALS','RECOVERY_EXHAUSTED','RECOVERY_FAILED','INVALID_OUTPUT_CONTRACT','UNSUPPORTED_GOAL', 'MODEL_UNAVAILABLE', 'MODEL_BUDGET_EXHAUSTED', 'ARTIFACT_INVALID', 'INFERENCE_FORBIDDEN', 'INTERVENTION_TIMEOUT', 'READ_FAILED', 'INVALID_EXTRACTION', 'INVALID_BINDING', 'CANCELLED', 'SESSION_LOST', 'EVIDENCE_UNAVAILABLE'] as const;
 export type FailureCode = typeof failureCodes[number];
 export class ExecutionError extends Error {
   constructor(readonly code: FailureCode, readonly dispatchState: 'not_sent' | 'sent' | 'settled' | 'unknown' = 'not_sent',
-    readonly effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' = 'not_checked') { super(code); }
+    readonly effectState: 'not_checked' | 'confirmed' | 'not_applied' | 'unknown' = 'not_checked',
+    /** Bounded, value-free diagnostic category (for example a provider refusal reason). */
+    readonly category?: string) { super(code); }
 }
 export function safeExecutionError(error: unknown, sent = false) {
   if(error instanceof ExecutionError){

@@ -19,7 +19,7 @@ async function main(){
   const entry=new URL(process.env.BROWSERBASE_PORTAL_URL??'');if(entry.protocol!=='https:'||entry.pathname!=='/')throw Error('HTTPS_PORTAL_ROOT_REQUIRED');
   const health=await fetch(new URL('/healthz',entry),{signal:AbortSignal.timeout(10000)});if(!health.ok||(await health.json()).service!=='demo-target')throw Error('TARGET_UNREACHABLE');
   await mkdir(folder,{recursive:true,mode:0o700});
-  const initial=await loadConfigurations({target:new URL('../apps/automation/config/target.v3.json',import.meta.url),policy:new URL('../apps/automation/config/policy.v4.json',import.meta.url)});
+  const initial=await loadConfigurations({target:new URL('../apps/automation/config/target.v3.json',import.meta.url),policy:new URL('../apps/automation/config/policy.v5.json',import.meta.url)});
   const version=Math.floor(Date.now()/1000),targetFile=resolve(folder,'target.'+version+'.json'),policyFile=resolve(folder,'policy.'+version+'.json');
   await writeFile(targetFile,JSON.stringify({...initial.target,version,entryPoint:entry.toString()}),{mode:0o600});await writeFile(policyFile,JSON.stringify({...initial.policy,version,allowedOrigins:[entry.origin]}),{mode:0o600});
   const setup=async(name:string)=>{const directory=resolve(root,'apps/demo-api/runtime');await mkdir(directory,{recursive:true,mode:0o700});await writeFile(resolve(directory,'scenario.json'),JSON.stringify({name,delayMs:0,failuresBeforeSuccess:1}),{mode:0o600});};

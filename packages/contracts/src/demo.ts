@@ -25,5 +25,5 @@ export const DemoOverviewSchema = z.strictObject({ member: DemoMemberSchema,
 export type DemoOverview = z.infer<typeof DemoOverviewSchema>;
 export const DemoAccountsSchema = z.strictObject({ member: DemoMemberSchema, accounts: z.array(DemoAccountSchema), conflictingSignals: z.boolean().optional() })
   .refine((value) => value.accounts.every((account) => account.memberId === value.member.id));
-export const DemoDetailsSchema = z.strictObject({ member: DemoMemberSchema, account: DemoAccountSchema })
+export const DemoDetailsSchema = z.strictObject({ member: DemoMemberSchema, account: DemoAccountSchema, notice: z.string().max(500).optional() })
   .refine((value) => value.account.memberId === value.member.id);

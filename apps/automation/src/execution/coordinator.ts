@@ -9,9 +9,11 @@ import type { Planner, SessionStatistics } from '../workflows/contracts.js';
 import { RunRequestSchema, outputSchemaFor, validateCapabilityResult, validateOutput } from '@interface-ai/contracts';
 import type { Capability, RunRequest, RunResult, Target, Values } from '@interface-ai/contracts';
 import type { AutomationRepository, loadConfigurations } from '../db/repository.js';
-import { RepositoryError, canonical, targetSchema, policySchema } from '../db/repository.js';
+import { RepositoryError, canonical, riskyControlNames, targetSchema, policySchema } from '../db/repository.js';
 import { RuntimeRepository } from '../db/runtime-repository.js';
 import { DispatchGate } from './gate.js';
+import { describeStepFailure, failureSummary, startCategories } from './diagnostics.js';
+import type { StartCategory } from './diagnostics.js';
 import { Executor } from './executor.js';
 import type { BrowserSurface } from './surface.js';
 import { EvidenceStore } from './evidence.js';
@@ -36,7 +38,7 @@ export interface WorkerContext {
 }
 export type Worker = (request: RunRequest, context: WorkerContext) => Promise<RunResult | void>;
 const terminal = (status: string) => ['completed', 'failed', 'cancelled'].includes(status);
-const failure = (code: string): Extract<RunResult, { kind: 'failure' }> => ({ kind: 'failure', code, summary: 'Execution stopped. Inspect the sanitized run events for context.', blocked: null, evidenceIds: [] });
+const failure = (code: string, category?: string): Extract<RunResult, { kind: 'failure' }> => ({ kind: 'failure', code, summary: failureSummary(code, category), blocked: null, evidenceIds: [] });
 const unavailableWorker: Worker = async request => failure(request.mode === 'discovery' ? 'DISCOVERY_NOT_IMPLEMENTED' : 'REPLAY_NOT_IMPLEMENTED');
 interface Pause { id:string; validate:()=>Promise<boolean>; resolve:(value:{interventionId:string;eventSequences:number[]})=>void; reject:(error:Error)=>void; startedAt:number; accountedMs:number; sequences:number[]; observation?:Observation|undefined }
 interface Job { revision:number; pausedMs:number; controlBusy:boolean; inputs:Values; goal:string|undefined; resource?:SessionResource; pause?:Pause|undefined; validation?:{id:string;principal:string}|undefined; runId: string; gate: DispatchGate; abort: AbortController; task: Promise<void>; executor?: Executor }
@@ -96,7 +98,7 @@ export class Coordinator {
     return { runId: accepted.runId, status: 'pending' as const, statusUrl: `/v1/runs/${accepted.runId}`, operationUrl: `/v1/runs/${accepted.runId}/operations/${accepted.receiptId}` };
   }
   private async run(job: Job, request: RunRequest) {
-    let resource: SessionResource | undefined; let opening: Promise<SessionResource> | undefined;
+    let resource: SessionResource | undefined; let opening: Promise<SessionResource> | undefined; let notCreated: ExecutionError | undefined;
     let result: RunResult | undefined;
     const time = Date.now(); const budgets = this.configuration.policy.budgets;
     const getSession = async () => {
@@ -109,7 +111,9 @@ export class Coordinator {
         resource = session; job.resource=session;
         if (job.abort.signal.aborted || job.gate.snapshot().closed) { await session.close().catch(() => false); throw new ExecutionError('CANCELLED'); }
         return session;
-      })(); }
+      })();
+      // A definitive provider refusal means no session exists, so there is nothing to clean up or hold.
+      opening.catch(error => { if (error instanceof ExecutionError && error.code === 'SESSION_NOT_CREATED') notCreated = error; }); }
       return opening;
     };
     let modelCalls = 0;
@@ -123,7 +127,7 @@ export class Coordinator {
         clearTimeout(timeout);job.gate.close();
         if(!await job.gate.drain(budgets.stepTimeoutMs))throw new ExecutionError('ACTION_OUTCOME_UNKNOWN','unknown','unknown');
         if(job.abort.signal.aborted)throw new ExecutionError('CANCELLED');
-        if(!blocked.evidenceIds.length){try{blocked.evidenceIds.push(await this.evidence.capture(job.runId,blocked.stepId,resource.surface,{...this.configuration.policy,allowedClickNames:this.configuration.policy.allowedClickNames??[],allowedFillNames:this.configuration.policy.allowedFillNames??[]}));}catch{}}
+        if(!blocked.evidenceIds.length){try{blocked.evidenceIds.push(await this.evidence.capture(job.runId,blocked.stepId,resource.surface,this.automatedPolicy()));}catch{}}
         const lifetime=Math.max(1,Math.min(requestedTimeoutMs,budgets.interventionTimeoutMs,budgets.overallTimeoutMs-(Date.now()-time)));
         const id=await this.repository.openIntervention(job.runId,blocked,new Date(Date.now()+lifetime));
         job.revision=(await this.base.getRun(job.runId)).control.revision;
@@ -154,9 +158,8 @@ export class Coordinator {
       executor: async (targets, variables = {}) => {
         if (job.executor) throw new ExecutionError('CONTROL_CHANGED');
         const session = await getSession();
-        const policy = this.configuration.policy;
         job.executor = new Executor({ runId: job.runId, entryPoint: this.configuration.target.entryPoint,
-          policy: { ...policy, allowedClickNames: policy.allowedClickNames ?? [], allowedFillNames: policy.allowedFillNames ?? [] },
+          policy: this.automatedPolicy(),
           surface: session.surface, gate: job.gate, signal: job.abort.signal, revision: job.revision, startedAt: time, targets, inputs: request.inputs, variables, routes: { 'fresh-session': 'about:blank', 'target-entry': this.configuration.target.entryPoint },
           authorize: () => job.validation?this.controls.authorize(job.validation.id,job.validation.principal,job.revision,'validating_resume'):this.repository.assertRunning(job.runId, job.revision),
           record: event => job.validation?this.controls.record(job.validation.id,job.validation.principal,job.revision,{...event,actor:'system'}):this.repository.record(job.runId, job.revision, event), evidence: this.evidence });
@@ -208,7 +211,7 @@ export class Coordinator {
         const previous = job.executor?.lastFailure;
         if (previous) { safe.stepId = previous.stepId; safe.dispatchState = previous.dispatchState; safe.effectState = previous.effectState; safe.evidenceIds = previous.evidenceIds; }
         if (resource && !safe.evidenceIds.length) {
-          try { const id = await this.evidence.capture(job.runId, safe.stepId, resource.surface, { ...this.configuration.policy, allowedClickNames: this.configuration.policy.allowedClickNames ?? [], allowedFillNames: this.configuration.policy.allowedFillNames ?? [] }); safe.evidenceIds.push(id); } catch { /* Suppress unsafe captures. */ }
+          try { const id = await this.evidence.capture(job.runId, safe.stepId, resource.surface, this.automatedPolicy()); safe.evidenceIds.push(id); } catch { /* Suppress unsafe captures. */ }
         }
         result = { ...failure('HUMAN_HELP_REQUIRED'), kind: 'failure', blocked: safe, evidenceIds: safe.evidenceIds };
         if (resource && await job.gate.drain(budgets.stepTimeoutMs)) {
@@ -217,20 +220,24 @@ export class Coordinator {
           await new Promise<void>(resolve => { const done = () => { clearTimeout(timer); job.abort.signal.removeEventListener('abort', done); resolve(); }; const timer = setTimeout(done, lifetime); if (job.abort.signal.aborted) done(); else job.abort.signal.addEventListener('abort', done, { once: true }); });
           if (!job.abort.signal.aborted) result = { ...result, code: 'INTERVENTION_TIMEOUT' };
         }
-      } else result = failure(error instanceof ExecutionError ? error.code : 'WORKER_FAILED');
+      } else result = failure(error instanceof ExecutionError ? error.code : 'WORKER_FAILED', error instanceof ExecutionError ? error.category : undefined);
       const context = job.executor?.lastFailure;
-      if (context && result.kind === 'failure') {
-        const reasons = ['AMBIGUOUS_TARGET','TARGET_NOT_FOUND','STATE_TIMEOUT','ACTION_OUTCOME_UNKNOWN','POLICY_BLOCKED','SESSION_LOST'] as const;
-        const reason = reasons.find(value => value === context.code) ?? 'STATE_TIMEOUT';
-        result.evidenceIds = context.evidenceIds; result.blocked = { stepId: context.stepId, actionIndex: null, reason, dispatchState: context.dispatchState, effectState: context.effectState, checkpointId: null,
-          expected: { code: 'UNIQUE_READY_TARGET', description: 'One permitted actionable target and a satisfied UI condition.' }, observed: { code: context.code, description: 'The required UI condition was not confirmed.' }, evidenceIds: context.evidenceIds };
+      // An intervention already carries its own blocked context (merged with the last failure above); do not replace it.
+      if (context && result.kind === 'failure' && !(error instanceof NeedsIntervention)) {
+        // Describe the condition that actually failed (code and authored rule ID only), not a generic timeout.
+        result.evidenceIds = context.evidenceIds; result.blocked = { stepId: context.stepId, actionIndex: null, ...describeStepFailure(context.code, context.ruleId),
+          dispatchState: context.dispatchState, effectState: context.effectState, checkpointId: null, evidenceIds: context.evidenceIds };
+        if (result.code === context.code) result.summary = (failureSummary(context.code) + ' Step: ' + context.stepId + '.').slice(0, 500);
       }
     } finally {
       clearTimeout(timeout); clearTimeout(overallTimer); if (abortListener) job.abort.signal.removeEventListener('abort', abortListener);
       job.gate.close(); job.abort.abort();
       const drained = await job.gate.drain(budgets.stepTimeoutMs + 1000);
       let closed = !opening;
-      if (opening) {
+      if (opening && notCreated && !resource) {
+        closed = true; await this.repository.sessionState(job.runId, 'closed');
+        await this.base.appendEvent(job.runId, { type: 'SESSION_FINISHED', actor: 'system', stepId: null, details: { code: 'not_created', ...((startCategories as readonly string[]).includes(notCreated.category ?? '') ? { category: notCreated.category as StartCategory } : {}), modelCalls: 0, inferenceAttempts: 0, inputTokens: 0, outputTokens: 0 } });
+      } else if (opening) {
         await this.repository.sessionState(job.runId, 'close_requested');
         if (resource) { try { closed = await resource.close(); } catch { closed = false; } }
         const row = await this.repository.state(job.runId);
@@ -244,7 +251,11 @@ export class Coordinator {
         if (row.status === 'cancelling' || this.stopping) result = { kind: 'cancelled', reason: this.stopping ? 'INTERRUPTED' : 'USER_REQUESTED',
           dispatchState: !drained || row.dispatch_state === 'sent' ? 'unknown' : row.dispatch_state,
           effectState: !drained || row.dispatch_state === 'sent' ? 'unknown' : row.effect_state };
-        if (!closed && result?.kind !== 'cancelled') result = failure('SESSION_CLEANUP_UNCONFIRMED');
+        if (!closed && result?.kind !== 'cancelled') {
+          // Keep a specific failure cause visible; cleanup uncertainty is reported alongside it, never instead of it.
+          if (result?.kind === 'failure' && result.code !== 'WORKER_FAILED') result = { ...result, summary: (result.summary + ' Browser session closure is also unconfirmed; reconcile before retrying.').slice(0, 500) };
+          else result = failure('SESSION_CLEANUP_UNCONFIRMED');
+        }
         await this.repository.finish(job.runId, result ?? failure('WORKER_FAILED'));
       }
     }
@@ -272,7 +283,9 @@ export class Coordinator {
       return receipt;
     });
   }
-  private manualPolicy(){const p=this.configuration.policy;return{...p,allowedClickNames:[...new Set([...(p.allowedClickNames??[]),...(p.manualClickNames??[])])],allowedFillNames:p.allowedFillNames??[]};}
+  // Both automated and human-controlled dispatch carry the risky-control list; operator ownership never lifts it.
+  private automatedPolicy(){const p=this.configuration.policy;return{...p,allowedClickNames:p.allowedClickNames??[],allowedFillNames:p.allowedFillNames??[],riskyControlNames:riskyControlNames(p)};}
+  private manualPolicy(){const p=this.configuration.policy;return{...p,allowedClickNames:[...new Set([...(p.allowedClickNames??[]),...(p.manualClickNames??[])])],allowedFillNames:p.allowedFillNames??[],riskyControlNames:riskyControlNames(p)};}
   async observeManual(id:string,principal:string,revision:number){
     const job=await this.controlJob(id,principal);
     return this.exclusive(job,async()=>{

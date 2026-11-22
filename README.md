@@ -157,6 +157,10 @@ Open http://127.0.0.1:3002. To verify hosted reachability, follow the target-onl
 
 After `pnpm db:migrate`, run `pnpm automation:configure` once, then `pnpm dev:automation`. In a second terminal, `pnpm automation:smoke` checks the initial API without displaying its token. `DISCOVERY_NOT_IMPLEMENTED` was the INT-008 milestone result; the current configured worker performs the balance discovery/replay profile. Stop the API before using `pnpm executor:check` or `pnpm automation:reconcile`, since they acquire the same coordinator lock.
 
+## Safety policy and diagnostics (INT-016)
+
+Policy v5 blocks declared risky controls (such as the portal's Close account button) before dispatch on every path, page text cannot reach the planner, synthetic sensitive markers stay out of storage, events and evidence, and failures name the condition that actually failed. `pnpm safety:demo` reruns the live checks. See the [safety guide](SAFETY.md) and [INT-016 evidence](evidence/int-016/README.md).
+
 ## Requested goal outputs (INT-023)
 
 New discovery bodies include an explicit output contract. See [typed request examples and current/available verification](GOAL_OUTPUTS.md); `pnpm goal:demo` runs both real discoveries and their exact-artifact, changed-input replays. Existing replay request shapes and saved artifacts remain valid. Live current and available balance discoveries and their model-free M1002 replays are verified. [INT-023 evidence](evidence/int-023/README.md).

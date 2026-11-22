@@ -84,13 +84,21 @@ function Workspace() {
     </section>}
     {!view.loading && !view.error && view.route.screen === 'details' && view.account && member && <section aria-label="Account Details">
       <Group justify="space-between" mb="md"><Text fw={600}>{product(view.account)} · {view.account.id}</Text><Button variant="default" size="xs" onClick={() => void portal.navigate({ screen: 'accounts' })}>Back to Accounts</Button></Group>
+      {view.notice && <Alert color="yellow" mb="md" title="Servicing note">{view.notice}</Alert>}
       <Paper withBorder p="lg"><dl className="detail-grid">
         <Field label="Member ID">{member.id}</Field><Field label="Account ID">{view.account.id}</Field><Field label="Account Type">{product(view.account)}</Field><Field label="Designation">{view.account.isPrimary ? 'Primary' : 'Standard'}</Field>
         <Field label="Status"><Status value={view.account.status} /></Field><Field label="Currency">{view.account.currency}</Field>
         <Field label="Current Balance" amount>{money(view.account.currentBalanceMinor)}</Field><Field label="Available Balance" amount>{money(view.account.availableBalanceMinor)}</Field>
       </dl></Paper><Text size="xs" c="dimmed" mt="md">Balances are shown in USD. Available Balance may differ due to pending activity.</Text>
+      <RiskyAccountAction />
     </section>}
   </main>;
+}
+// A representative irreversible control for the risk-policy proof. It changes no data; a click only shows a visible marker.
+function RiskyAccountAction() {
+  const [requested, setRequested] = useState(false);
+  return <Group mt="lg"><Button color="red" variant="outline" size="xs" onClick={() => setRequested(true)}>Close account</Button>
+    {requested && <Text size="xs" role="status" c="red">Account closure requested (synthetic portal; no data changed).</Text>}</Group>;
 }
 function BankMark() { return <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 10 16 3l13 7v3H3zm3 6h4v10H6zm8 0h4v10h-4zm8 0h4v10h-4zM3 28h26v3H3z" fill="currentColor" /></svg>; }
 function StaffShell() {

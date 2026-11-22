@@ -37,7 +37,7 @@ export class RuleEngine {
           if(this.discovery)this.manualContributions.push({handling:'runtime_guard',guardId:guard.id,...contribution});
           continue classify;
         }
-        await this.executor.reject(guard.code as FailureCode,stepId,dispatchState);
+        await this.executor.reject(guard.code as FailureCode,stepId,dispatchState,guard.id);
       }
       const matchedOutcomes=outcomes.filter(()=>states[index++]);const matchedRecovery=recoveries.filter(()=>states[index++]);
       if(matchedOutcomes.length>1 || (matchedOutcomes.length&&matchedRecovery.length))await this.executor.reject('CONFLICTING_SIGNALS',stepId,dispatchState);
@@ -45,14 +45,14 @@ export class RuleEngine {
       if(matchedRecovery.length>1)await this.executor.reject('CONFLICTING_SIGNALS',stepId,dispatchState);
       if(pending){
         if(states[index]){await this.context.record({type:'RECOVERY_COMPLETED',actor:'automation',stepId,details:{code:'verified',ruleId:pending.rule.id,attempt:this.attempts.get(pending.rule.id)!}});pending=undefined;continue;}
-        if(now()>=pending.deadline)await this.executor.reject('RECOVERY_EXHAUSTED',stepId,dispatchState);
+        if(now()>=pending.deadline)await this.executor.reject('RECOVERY_EXHAUSTED',stepId,dispatchState,pending.rule.id);
         if(matchedRecovery.some(rule=>rule.id===pending!.rule.id)){pending=undefined;}else{await delay(policy.pollIntervalMs,undefined,{signal:this.context.signal});continue;}
       }
       const recovery=matchedRecovery[0];
       if(recovery){
         const attempt=(this.attempts.get(recovery.id)??0)+1;
         if(recovery.dispatchState!==dispatchState||attempt>Math.min(recovery.maxAttempts,policy.maxRecoveryAttempts)){
-          await this.context.record({type:'RECOVERY_EXHAUSTED',actor:'automation',stepId,details:{code:'RECOVERY_EXHAUSTED',ruleId:recovery.id,attempt:attempt-1}});await this.executor.reject('RECOVERY_EXHAUSTED',stepId,dispatchState);
+          await this.context.record({type:'RECOVERY_EXHAUSTED',actor:'automation',stepId,details:{code:'RECOVERY_EXHAUSTED',ruleId:recovery.id,attempt:attempt-1}});await this.executor.reject('RECOVERY_EXHAUSTED',stepId,dispatchState,recovery.id);
         }
         this.attempts.set(recovery.id,attempt);await this.context.record({type:'RECOVERY_STARTED',actor:'automation',stepId,details:{code:'declared_recovery',ruleId:recovery.id,attempt}});
         for(const[actionIndex,action]of recovery.actions.entries()){

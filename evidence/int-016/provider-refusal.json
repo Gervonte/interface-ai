@@ -1,0 +1,85 @@
+{
+  "run": {
+    "runId": "4fcec824-66f5-49fd-a579-fc55288b7d2c",
+    "mode": "discovery",
+    "target": {
+      "id": "demo-credit-union",
+      "version": 1795372565
+    },
+    "policy": {
+      "id": "demo-policy",
+      "version": 1795372565
+    },
+    "status": "failed",
+    "control": {
+      "owner": "none",
+      "revision": 3
+    },
+    "capability": null,
+    "currentStepId": null,
+    "activeInterventionId": null,
+    "result": {
+      "kind": "failure",
+      "code": "SESSION_NOT_CREATED",
+      "blocked": null,
+      "summary": "The browser provider refused to create a session (authentication or project permission). No session was created and no model call or UI action ran.",
+      "evidenceIds": []
+    },
+    "createdAt": "2026-11-22T18:36:05.727Z",
+    "updatedAt": "2026-11-22T18:36:06.694Z"
+  },
+  "events": [
+    {
+      "eventId": "2d7eea48-2009-44a7-b5a4-10073e43daaf",
+      "sequence": 1,
+      "type": "RUN_ACCEPTED",
+      "actor": "caller",
+      "stepId": null,
+      "details": {
+        "code": "accepted",
+        "bindingNames": [
+          "memberId"
+        ]
+      },
+      "createdAt": "2026-11-22T18:36:05.727Z"
+    },
+    {
+      "eventId": "9ea0bd8e-7aa4-4043-b98f-5f7267d084ea",
+      "sequence": 2,
+      "type": "RUN_STARTED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "started"
+      },
+      "createdAt": "2026-11-22T18:36:05.753Z"
+    },
+    {
+      "eventId": "269d3354-22d7-403a-bb81-e6d4f68a2bf8",
+      "sequence": 3,
+      "type": "SESSION_FINISHED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "not_created",
+        "category": "provider_auth",
+        "modelCalls": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "inferenceAttempts": 0
+      },
+      "createdAt": "2026-11-22T18:36:06.686Z"
+    },
+    {
+      "eventId": "a5c00717-22dc-471a-9179-d9fd7d37ee12",
+      "sequence": 4,
+      "type": "RUN_FAILED",
+      "actor": "system",
+      "stepId": null,
+      "details": {
+        "code": "failed"
+      },
+      "createdAt": "2026-11-22T18:36:06.694Z"
+    }
+  ]
+}

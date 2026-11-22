@@ -112,7 +112,7 @@ The check uses the actual coordinator, PostgreSQL event recorder, executor, and 
 
 The command writes ignored results/events/evidence and uniquely versioned target/policy binding files under `apps/automation/runtime/int-007-008`. Stop the tunnel/target afterward. [Curated live result](evidence/int-007-008/README.md).
 
-Normal API startup defaults to committed target v3 and policy v4 (built portal on port 3002); previous configuration files remain unchanged. Policy v4 adds explicit human-only resolution controls without extending the automation click allowlist. For a reachable browser binding, `AUTOMATION_TARGET_FILE` and `AUTOMATION_POLICY_FILE` can select absolute paths to a paired, validated versioned configuration. Both are required together. Accepted runs retain the exact snapshots/checksums; never edit retained versions to point at a different tunnel. The hosted verifier creates a fresh version for each ephemeral binding.
+Normal API startup defaults to committed target v3 and policy v5 (built portal on port 3002); previous configuration files remain unchanged. Policy v4 adds explicit human-only resolution controls without extending the automation click allowlist. Policy v5 adds declared risky controls (`Close account`, `Transfer funds`), which are blocked before dispatch on every path; see [risk policy](SAFETY.md). For a reachable browser binding, `AUTOMATION_TARGET_FILE` and `AUTOMATION_POLICY_FILE` can select absolute paths to a paired, validated versioned configuration. Both are required together. Accepted runs retain the exact snapshots/checksums; never edit retained versions to point at a different tunnel. The hosted verifier creates a fresh version for each ephemeral binding.
 
 ## Scenario rules and revisions (INT-012/013)
 
