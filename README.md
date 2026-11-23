@@ -46,7 +46,7 @@ cloudflared tunnel --url http://127.0.0.1:3002 --no-autoupdate
 BROWSERBASE_PORTAL_URL=https://<random>.trycloudflare.com/ pnpm demo:e2e
 ```
 
-`demo:e2e` sends the goal in [examples/discovery-current.json](examples/discovery-current.json) ("Find the current balance… of the member's active primary savings account"). The model operates the live portal for M1001, and the result is saved as a capability. That exact capability is then replayed for M1002 and for M9999. Expected: discovery returns 125034 ($1,250.34), the M1002 replay returns 8765 ($87.65), and the M9999 replay returns `MEMBER_NOT_FOUND`. Both replays make zero model calls. Use `--request examples/discovery-available.json` for a different goal ([how requests work](docs/GOAL_OUTPUTS.md)).
+`demo:e2e` sends the goal in [examples/discovery-current.json](examples/discovery-current.json) ("Find the current balance… of the member's active primary savings account"). The model operates the live portal for M1001, and the result is saved as a capability. That exact capability is then replayed for M1002 and for M9999. Expected: discovery returns 125034 ($1,250.34), the M1002 replay returns 8765 ($87.65), and the M9999 replay returns `MEMBER_NOT_FOUND`. Both replays make zero model calls. To type your own goal, add `--goal "Look up member M1001 and read their current savings balance"` (it keeps the example's typed outputs and member); `pnpm handoff:demo` takes the same option. Use `--request examples/discovery-available.json` for a different set of outputs ([how requests work](docs/GOAL_OUTPUTS.md)).
 
 ## More
 

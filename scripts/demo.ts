@@ -13,6 +13,8 @@ import { loadConfigurations } from '../apps/automation/src/db/repository.js';
 const root = resolve(import.meta.dirname, '..');
 const { values: args } = parseArgs({ options: {
   request: { type: 'string', default: 'examples/discovery-current.json' },
+  // Optional plain-English goal typed on the command line; replaces the request file's goal, keeping its typed outputs and inputs.
+  goal: { type: 'string' },
   'replay-member': { type: 'string', default: 'M1002' },
   'missing-member': { type: 'string', default: 'M9999' },
 } });
@@ -43,7 +45,8 @@ async function main() {
     if (!reachable) await delay(3000);
   }
   check(reachable, 'TARGET_UNREACHABLE');
-  const request = RunRequestSchema.parse(JSON.parse(await readFile(resolve(root, args.request!), 'utf8')));
+  const fromFile = JSON.parse(await readFile(resolve(root, args.request!), 'utf8'));
+  const request = RunRequestSchema.parse(args.goal === undefined ? fromFile : { ...fromFile, goal: args.goal });
   check(request.mode === 'discovery', 'DISCOVERY_REQUEST_REQUIRED');
   await assertPortFree();
   // Always start from the ordinary portal state.
@@ -92,6 +95,7 @@ async function main() {
   };
 
   // 1. Discovery: the model operates the live portal toward the goal and the system saves a capability.
+  console.info(JSON.stringify({ step: 'goal', goal: request.goal, inputs: request.inputs }));
   const discovery = await run('discovery', { ...request, targetId: initial.target.id });
   check(discovery.run.result?.kind === 'success', 'DISCOVERY_DID_NOT_SUCCEED');
   const reference = discovery.run.result.capability;
