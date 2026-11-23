@@ -1,40 +1,18 @@
 # Report
 
-Interface AI discovers a back-office task with an LLM once, saves it as a typed capability, and replays it without the model. The implemented slice is a read-only account inquiry on a synthetic credit-union staff portal. Everything here describes running code; [evidence/](evidence/README.md) holds the real runs.
+Interface AI discovers a back-office task with an LLM once, saves it as a typed capability, and replays it without the model. The slice built is a read-only account inquiry on a synthetic credit-union portal; [evidence/](evidence/README.md) holds the real runs.
 
 ## Architecture
 
-```text
-agent ─▶ Automation API ─▶ Coordinator ─▶ Worker (discovery loop | artifact replay) ─▶ Executor ─▶ BrowserSurface ─▶ browser ─▶ portal
-operator page ─▶ same API (claim, act, resume)             Planner, discovery only: gpt-4.1 via Browserbase Model Gateway
-```
+An agent calls the **Automation API**. A **coordinator** owns one run and browser session at a time; a **worker** drives it, with a planner (`gpt-4.1`) choosing actions in discovery and the saved artifact in replay. Both use the same **executor** (policy, targeting, waits, dispatch-once) and `BrowserSurface` adapter (Stagehand over Browserbase or local Chrome). The operator page uses the same API.
 
-- **One engine, two drivers.** Discovery and replay share the coordinator, executor, rule engine and browser adapter; only the worker differs. Policy, targeting, evidence and handoff behave the same on both paths.
-- **The model chooses, the system records.** The planner sees a sanitized observation: known controls and fields as opaque references, never values, selectors or DOM. Each turn it returns one structured decision, which the log records in plain labels (`click` · `Account Inquiry` · `continue`). The worker dispatches it, confirms the resulting UI condition, and only then records a step citing that event. Artifacts come from confirmed actions, never transcripts.
-- **Durable control, transient data.** PostgreSQL holds runs, events, control revisions, interventions and immutable capability versions. Inputs are kept only as HMAC fingerprints; outputs stay in memory briefly.
-- **Deliberately simple.** One coordinator owns one session at a time (a database constraint), with no queue, so control transfer and cleanup stay provable.
+The model sees only known controls as opaque references, never values or DOM. Each decision is logged in plain labels (`click` · `Account Inquiry` · `continue`) and becomes a step only once its UI condition is confirmed, so artifacts come from confirmed actions, not transcripts.
 
-**Decisions.**
-
-- **TypeScript with Zod:** one set of contracts shared everywhere and validated at every boundary.
-- **Browserbase with Stagehand:** isolated hosted sessions an operator can join, at the cost of a tunnel to the local portal. Stagehand's self-healing is off, so replay never improvises a locator. Replay also runs in local Chrome (`pnpm replay:local`) with no hosted browser or model.
-- **`gpt-4.1`:** replaced `gpt-5`, whose decisions took 30–107 s.
-- **Target:** a legacy-shaped synthetic portal (iframes, tables, no test IDs, injectable errors, no real PII).
-- **Mocked:** the target, the minimal operator page, and the authored rule set. Discovery, replay and handoff are real.
+**Decisions.** TypeScript/Zod for one validated contract set; Browserbase for sessions an operator can join (local replay needs none); Stagehand's self-healing off; `gpt-4.1` over `gpt-5` (30–107 s per decision); a legacy-shaped synthetic portal (iframes, tables, no test IDs, injectable errors). Mocked: the target, the minimal operator page and the authored rules.
 
 ## Artifact schema
 
-A capability ([example](evidence/capability.json), [schema](packages/contracts/src/capability.ts)) is one immutable, versioned JSON document, validated structurally and semantically: references resolve, variables are captured before use, outputs match their types.
-
-| Part | Purpose |
-| --- | --- |
-| `capabilityId`, `version`, `name`, `description` | Identity, plus a description generated from the request contract. Versions never mutate. |
-| `sourceDiscoveryRunId`; each step's `source` | Provenance: the producing run and the event that confirmed each step. |
-| `surfaceRequirements` | Surface kind, application family, compatible target versions. A mismatch is refused (`INCOMPATIBLE_TARGET`). |
-| `inputSchema`, `outputSchema`, `outputDescriptions` | The agent-facing contract: bounded JSON Schema plus what each output means. |
-| `targets`, `steps` | Semantic targets; ordered `navigate`/`fill`/`click`/`wait`/`capture`/`intervene` steps with `before`/`after` predicates and timeouts. |
-| `outputs`, `successCondition` | Typed extractions (`usd-minor` turns "$1,250.34" into 125034); final conditions plus identity bindings. |
-| `outcomeRules`, `recoveryRules`, `runtimeGuards`, `manualContributions` | Declared runtime behavior and recorded human boundaries. |
+A capability ([example](evidence/capability.json), [schema](packages/contracts/src/capability.ts)) is one immutable, versioned JSON document. It holds a generated description, provenance to the discovery run and each confirming event, compatible versions, typed input/output schemas with per-output descriptions, semantic `targets`, steps with `before`/`after` predicates, typed extractions (`usd-minor`: "$1,250.34" → 125034), a success condition with identity bindings, and declared rules.
 
 A target describes what an operator recognizes, not a selector:
 
@@ -45,84 +23,43 @@ A target describes what an operator recognizes, not a selector:
   "locator": { "kind": "role", "role": "button", "name": "Open", "exact": true }, "expectedMatches": 1 }
 ```
 
-Roles, labels and column headers survive restyling and need no test IDs; frame scopes handle legacy iframes. Row predicates bind to inputs, so "the Open button in this member's row" is parameterized, not positional. `expectedMatches: 1` makes ambiguity an error, not a guess, and every `after` predicate is a checkpoint.
+Roles, labels and headers need no test IDs. Row predicates bind to inputs, so "the Open button in this member's row" is parameterized, not positional. `expectedMatches: 1` makes ambiguity an error, and every `after` predicate is a checkpoint.
 
 ## Determinism & error handling
 
-Replay is a model-free interpreter: its planner refuses inference, and every replay reports zero model calls. For each step the executor checks ownership and origin, resolves exactly one visible match, checks policy, records intent, dispatches once, and polls until the `after` condition holds or the step times out. While waiting it classifies the screen against the declared rules, in order:
+Replay is a model-free interpreter (zero model calls). Per step, the executor checks ownership and origin, resolves exactly one match, checks policy, records intent, dispatches once, and polls until the `after` condition holds, classifying the screen against declared rules:
 
 | Class | Examples | Behavior |
 | --- | --- | --- |
-| Runtime guard | wrong member or account; unexpected dialog; session expired | hard failure (`IDENTITY_MISMATCH`) or human intervention |
-| Business outcome | no matching member; no primary savings; access denied | `business_outcome` with a code |
-| Recovery | servicing notice; transient inquiry failure | declared clicks or waits only, bounded; then `RECOVERY_EXHAUSTED` |
-| Conflict | two outcomes, or outcome plus recovery | `CONFLICTING_SIGNALS`; stop rather than guess |
+| Runtime guard | wrong member; unexpected dialog; expired session | hard failure or human intervention |
+| Business outcome | member not found; access denied | `business_outcome` with a code |
+| Recovery | servicing notice; transient failure | declared actions only, bounded |
+| Conflict | two rules match | stop rather than guess |
 
-The result is `success` (outputs) | `business_outcome` (code) | `failure` | `cancelled`. Success and outcomes list any `recoveries` applied. A failure gives the code, step, expected and observed condition, and evidence: [this replay](evidence/int-016/hard-failure.json) reports `IDENTITY_MISMATCH` at `step-006`, expected `RECORD_IDENTITY_MATCH`, rule `member-identity-0`. An action with an unknown effect is never retried. Discovery is capped at 30 model calls, 300 actions and 15 minutes.
-
-The rules are **authored** for this portal and attached at save time: discovery learns the route, not error semantics. Nineteen live conditions run against one capability in [int-012-013](evidence/int-012-013/README.md), and the demo includes a [not-found replay](evidence/replay-not-found.json). **UI drift** fails closed with `TARGET_NOT_FOUND` or `AMBIGUOUS_TARGET` plus evidence; nothing self-heals.
+Results are `success` | `business_outcome` | `failure` | `cancelled`, listing any `recoveries` applied. A failure names the step, expected and observed condition, and evidence, e.g. [`IDENTITY_MISMATCH` at `step-006`](evidence/int-016/hard-failure.json), rule `member-identity-0`. Actions with unknown effect are never retried. Rules are **authored** (discovery learns the route, not error semantics) and exercised by [19 live conditions](evidence/int-012-013/README.md) and a [not-found replay](evidence/replay-not-found.json). Drift fails closed (`TARGET_NOT_FOUND`, `AMBIGUOUS_TARGET`); nothing self-heals.
 
 ## Heterogeneity & multi-tenant
 
-**Surface seam.** Steps, targets and rules know nothing about Stagehand or the DOM. The surface sits behind a small `BrowserSurface` interface (`observe`, `inspect`, `dispatch`, `navigate`, `snapshot`), and target kinds are accessibility concepts (role and name, label, field, column header).
-
-- **Legacy web:** frame and table-row scopes already help; non-semantic markup needs new locator kinds, such as text adjacent to a label, under the same unique-match rule.
-- **Desktop:** a UI Automation or AX adapter behind the same interface, declared as `surfaceRequirements.kind: "desktop"`.
-- **Screenshot plus coordinates:** a last resort, with approval.
-
-The assumption is accessible names that are stable per application version.
+**Surface seam.** Steps, targets and rules never touch Stagehand or the DOM: the surface sits behind `BrowserSurface` (`observe`, `inspect`, `dispatch`, `navigate`), and targets are accessibility concepts. Legacy web adds locator kinds (text beside a label) under the same unique-match rule; desktop is a UI Automation/AX adapter; screenshots are a last resort. It assumes accessible names stable per version.
 
 **Reuse across institutions.** One vendor capability is shared, specialized per tenant, and checked for drift:
 
 ```json
-{ "capability": "corecu-member-balance", "base": { "version": 4, "applicationFamily": "corecu", "compatibleVersions": ["7.2", "7.3"] },
-  "tenant": "first-valley-cu",
-  "binding": { "entryPoint": "https://cu.example/teller", "origins": ["https://cu.example"], "applicationVersion": "7.3", "policy": "fvcu-policy@2" },
-  "override": { "labels": { "Member ID": "Member Number" },
-                "addOutcomeRules": [{ "id": "dormant", "code": "ACCOUNT_DORMANT", "when": { "kind": "visible", "target": "dormantBanner" } }] } }
+{ "capability": "corecu-member-balance@4", "family": "corecu", "compatibleVersions": ["7.2", "7.3"],
+  "tenant": "first-valley-cu", "binding": { "entryPoint": "https://cu.example/teller", "version": "7.3" },
+  "override": { "labels": { "Member ID": "Member Number" }, "addOutcomeRules": ["ACCOUNT_DORMANT"] } }
 ```
 
-- **Precedence:** vendor base → version patch → tenant override → tenant policy.
-- **Override limits:** an override may rename labels, add outcome or recovery rules, narrow versions and tighten policy. It may never add actions, relax success checks or permit risky controls.
-- **Materialization:** the result is a new immutable version with lineage. This exists in miniature: authored revisions carry `base_version` lineage, and the database rejects any revision that changes steps, targets, contract or success condition.
-- **Drift detection:**
-  1. An incompatible application version is refused before a browser opens (implemented).
-  2. A preflight fingerprint checks expected entry-screen labels.
-  3. Runtime target-not-found or ambiguity is recorded with evidence.
-
-  Persistent drift routes to supervised re-discovery in that tenant, producing a candidate override for review.
+Precedence: vendor base → version patch → tenant override → tenant policy. Overrides may rename labels, add rules or tighten policy, but never add actions or relax checks. Each becomes a new immutable version with lineage, as authored revisions already do; the database rejects revisions that change steps, targets or contract. Drift is caught by refusing incompatible versions before a browser opens (implemented), a preflight label check, and runtime target failures; persistent drift triggers supervised re-discovery.
 
 ## Escalation & handoff
 
-**Stuck** means a declared intervention guard matches (unexpected dialog, expired session), a recorded manual boundary is reached, or the discovery planner asks for help. Exhausted recovery, identity mismatch and policy blocks fail instead: they need investigation, not a click-through.
-
-**Taking control.**
-
-- The coordinator closes its dispatch gate, drains the in-flight command, captures a snapshot and opens an intervention: step, reason, expected checkpoint, deadline, plus the goal or capability. The browser and run state stay intact.
-- An operator **claims** it. The control revision increments, stale requests are rejected, and automation cannot dispatch.
-- The operator acts through the same executor and policy (risky controls stay blocked). Each action is recorded as a `human` event.
-
-**Handing back.** Resume re-checks the checkpoint and member/account identity before automation regains control. A failed check returns the run to waiting, and a missed deadline ends it as `INTERVENTION_TIMEOUT`. Completed actions never repeat. Human steps from discovery are saved as manual boundaries, so replay never automates them. [int-014-015](evidence/int-014-015/README.md) shows a real operator doing this in a live discovery and a live replay; the operator page is deliberately minimal (screenshots and mediated buttons).
+A run asks for a person on an intervention guard (unexpected dialog, expired session), a recorded manual boundary, or a planner help request; exhausted recovery, identity mismatch and policy blocks fail instead. The coordinator closes its dispatch gate, drains in-flight work and opens an intervention (step, reason, checkpoint, deadline, snapshot, goal); the browser stays intact. An operator **claims** it (the control revision increments and automation cannot dispatch), acts through the same executor and policy, with each action recorded as a `human` event, then **resumes**: checkpoint and identity are re-checked before automation regains control, and completed actions never repeat. A missed deadline ends the run as `INTERVENTION_TIMEOUT`. A real operator did this in a [live discovery and replay](evidence/int-014-015/README.md) through a deliberately minimal page.
 
 ## Safety
 
-- **Allowlist:** a versioned policy of origins, operation types and control names, checked before dispatch and again in the page. The model only sees allowlisted controls.
-- **Risky actions are blocked.** Risky controls are declared by name and effect (`Close account`: irreversible; `Transfer funds`: financial), not guessed from words like "Submit". They are checked first on every path, including operator control, and no allowlist may name one. Blocking fits a read-only baseline; a write workflow would route its declared commit step to a person for approval. Live, the real Close account button was refused while seven permitted actions worked.
-- **Data:** inputs are never stored, events hold codes not values, outputs expire, and failure evidence keeps structure only. Page text cannot reach the model; a planted instruction had no effect. A synthetic-marker sweep finds no sensitive values in any table, event, evidence file or API response.
-- **Limits:** the hosted browser renders real values, and provider retention can't be verified. Expired evidence is refused, not deleted. Free text in a goal reaches the model. [Details](docs/SAFETY.md).
+A versioned policy allows specific origins, operations and control names, checked before dispatch and in the page. **Risky controls are blocked**: declared by name (`Close account`: irreversible), not guessed from "Submit", checked first on every path including operator control. Blocking suits a read-only baseline (a write workflow would route its commit step to a person); live, the real Close account button was refused. Inputs are never stored, events hold codes not values, page text cannot reach the model, and a synthetic-marker sweep finds no sensitive values in storage. **Limits:** the hosted browser sees real values; expired evidence is refused, not deleted; goal text reaches the model. [Details](docs/SAFETY.md).
 
 ## Cuts
 
-**Cut deliberately:**
-
-- **Writes:** the contact-edit workflow and its duplicate-commit protection; risky-action approval.
-- **Designed, not built:** desktop and legacy-web adapters, and tenant overrides.
-- **Bounded goals:** goals are free text, but outputs use a bounded account-inquiry vocabulary.
-- **Also out:** co-browsing, scale-out, stability scoring, evidence purging.
-
-**Next:**
-1. Local sessions in the coordinator, so local replay also gets persistence and handoff.
-2. Tenant overrides with preflight fingerprints.
-3. The contact-edit workflow, with a confirmation handoff for its commit step.
-4. A capability catalog exposing capabilities as typed agent tools.
-5. Approval gating driven by replay stability.
+**Cut:** writes and risky-action approval; desktop/legacy adapters and tenant overrides (designed only); outputs beyond account inquiry; co-browsing and scale-out. **Next:** local sessions in the coordinator, tenant overrides, a write workflow with a confirmation handoff, a typed capability catalog, and approval gating by replay stability.
