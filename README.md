@@ -1,5 +1,7 @@
 # Interface AI — computer-use automation for legacy back-office apps
 
+**▶ [Watch the 3-minute demo](https://www.loom.com/share/cf5c7d8bd4e14135af6ccb0e99637e98):** a plain-English goal, live discovery, a human taking over the live session and handing back, the saved capability, and model-free replays including a not-found result.
+
 An LLM operates a back-office web app once to reach a goal. The system saves what worked as a typed, versioned **capability**, then **replays** it without the model for any valid input. Replay returns a success, a business outcome (such as "no such member") or a hard failure that names the step that failed. When automation can't safely continue, a person takes over the same live browser session and hands it back. An allowlist and a risky-action block apply throughout.
 
 The target is a synthetic credit-union staff portal in this repo (iframe workspace, table layouts, no test IDs, injectable errors). Discovery runs in a Browserbase browser using `gpt-4.1`.
